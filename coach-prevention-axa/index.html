@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Coach Prévention — AXA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+  <!-- DEVICE SHELL -->
+  <div class="app-stage">
+    <div class="device">
+
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+            <rect x="0" y="3" width="3" height="9" rx="1" fill="white" opacity="0.4"/>
+            <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white" opacity="0.6"/>
+            <rect x="9" y="1" width="3" height="11" rx="1" fill="white" opacity="0.8"/>
+            <rect x="13.5" y="0" width="3" height="12" rx="1" fill="white"/>
+          </svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <path d="M8 3C10.5 3 12.7 4.1 14.2 5.9L15.5 4.4C13.6 2.3 10.9 1 8 1C5.1 1 2.4 2.3 0.5 4.4L1.8 5.9C3.3 4.1 5.5 3 8 3Z" fill="white" opacity="0.4"/>
+            <path d="M8 6C9.7 6 11.2 6.8 12.2 8L13.5 6.5C12.1 4.9 10.2 4 8 4C5.8 4 3.9 4.9 2.5 6.5L3.8 8C4.8 6.8 6.3 6 8 6Z" fill="white" opacity="0.7"/>
+            <circle cx="8" cy="10.5" r="1.5" fill="white"/>
+          </svg>
+          <div class="battery">
+            <div class="battery-fill"></div>
+            <div class="battery-tip"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCREEN CONTAINER -->
+      <div class="screen-container" id="app">
+        <!-- Screens injected by JS -->
+      </div>
+
+    </div>
+
+    <!-- DEVICE SHADOW -->
+    <div class="device-reflection"></div>
+  </div>
+
+  <!-- NAV PILLS (outside device) -->
+  <nav class="step-nav" id="stepNav">
+    <button class="step-pill active" data-step="0" onclick="goTo(0)">
+      <span class="pill-num">1</span>
+      <span class="pill-label">Entrée</span>
+    </button>
+    <div class="step-connector"></div>
+    <button class="step-pill" data-step="1" onclick="goTo(1)">
+      <span class="pill-num">2</span>
+      <span class="pill-label">Situation</span>
+    </button>
+    <div class="step-connector"></div>
+    <button class="step-pill" data-step="2" onclick="goTo(2)">
+      <span class="pill-num">3</span>
+      <span class="pill-label">Score</span>
+    </button>
+    <div class="step-connector"></div>
+    <button class="step-pill" data-step="3" onclick="goTo(3)">
+      <span class="pill-num">4</span>
+      <span class="pill-label">Actions</span>
+    </button>
+    <div class="step-connector"></div>
+    <button class="step-pill" data-step="4" onclick="goTo(4)">
+      <span class="pill-num">5</span>
+      <span class="pill-label">Rewards</span>
+    </button>
+  </nav>
+
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
