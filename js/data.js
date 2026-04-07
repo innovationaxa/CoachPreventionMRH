@@ -1,0 +1,392 @@
+/* ═══════════════════════════════════════════════════════
+   DATA.JS v3 — Coach Prévention MRH
+   Source : PRD v1.0 Avril 2026
+   3 profils · 6 risques · 25 actions · 20 questions
+   6 récompenses · 6 services
+═══════════════════════════════════════════════════════ */
+
+/* ── PROFILS ── */
+const PROFILES = {
+  'profil-a': {
+    id: 'profil-a',
+    firstName: 'Marie',
+    avatar: '👩',
+    propertyType: 'Maison individuelle',
+    occupancyStatus: 'Propriétaire',
+    location: 'Nantes (44)',
+    zone: 'Zone orange inondation — Vents forts',
+    scenario: 'seasonal',
+    scenarioLabel: 'Saisonnalité',
+    scenarioColor: 'warn',
+    exposureScore: 78,
+    preparationScore: 32,
+    mainRisks: ['inondation','tempete','degat-eaux'],
+    condition: 'maison_rdc',
+    hasGarden: true,
+    tagline: 'Automne-hiver · Risques élevés détectés'
+  },
+  'profil-b': {
+    id: 'profil-b',
+    firstName: 'Thomas',
+    avatar: '👨',
+    propertyType: 'Appartement',
+    occupancyStatus: 'Locataire',
+    location: 'Paris 15e (75)',
+    zone: 'Zone urbaine — Risque vol modéré',
+    scenario: 'subscription',
+    scenarioLabel: 'Souscription',
+    scenarioColor: 'info',
+    exposureScore: 55,
+    preparationScore: 48,
+    mainRisks: ['vol','degat-eaux','incendie'],
+    condition: 'all',
+    hasGarden: false,
+    completedActions: ['incendie-detecteur-fumee'],
+    tagline: 'Nouveau contrat · Plan de départ'
+  },
+  'profil-c': {
+    id: 'profil-c',
+    firstName: 'Sophie',
+    avatar: '👩',
+    propertyType: 'Maison individuelle',
+    occupancyStatus: 'Propriétaire',
+    location: 'Lyon 3e (69)',
+    zone: 'Zone risque faible — Sol argileux (RGA)',
+    scenario: 'subscription',
+    scenarioLabel: 'Souscription',
+    scenarioColor: 'info',
+    exposureScore: 42,
+    preparationScore: 61,
+    mainRisks: ['incendie','degat-eaux','rga'],
+    condition: 'maison',
+    hasGarden: true,
+    completedActions: ['incendie-detecteur-fumee','dde-goutieres'],
+    tagline: 'Profil avancé · Risque RGA spécifique'
+  }
+};
+
+/* ── RISQUES ── */
+const RISKS = {
+  'inondation': {
+    id: 'inondation', label: 'Inondation', icon: '🌊',
+    level: 'high', levelLabel: 'Élevé',
+    avoidablePercent: 60, season: 'automne-hiver',
+    explanation: 'Votre zone est classée orange inondation. Les caves et RDC sont particulièrement exposés lors des crues.',
+    damages: ['Cave inondée','Électroménager détruit','Parquet et murs dégradés','Produits chimiques pollués']
+  },
+  'tempete': {
+    id: 'tempete', label: 'Tempête', icon: '🌪️',
+    level: 'high', levelLabel: 'Élevé',
+    avoidablePercent: 70, season: 'automne-hiver',
+    explanation: 'La région nantaise est régulièrement touchée par des vents violents en automne-hiver.',
+    damages: ['Toiture arrachée','Gouttières tordues','Fenêtres brisées','Arbres tombés sur la maison']
+  },
+  'degat-eaux': {
+    id: 'degat-eaux', label: 'Dégât des eaux', icon: '💧',
+    level: 'medium', levelLabel: 'Modéré',
+    avoidablePercent: 75,
+    explanation: 'Premier sinistre MRH en France. Souvent causé par une canalisation qui fuit silencieusement.',
+    damages: ['Plancher gondolé','Plafond effondré','Moisissures','Court-circuit électrique']
+  },
+  'vol': {
+    id: 'vol', label: 'Vol', icon: '🔐',
+    level: 'medium', levelLabel: 'Modéré',
+    avoidablePercent: 65,
+    explanation: 'En zone urbaine dense, 65 % des cambriolages peuvent être évités avec des équipements adaptés.',
+    damages: ['Bijoux et objets de valeur volés','Serrures fracturées','Sentiment d\'insécurité','Franchise non couverte']
+  },
+  'incendie': {
+    id: 'incendie', label: 'Incendie', icon: '🔥',
+    level: 'low', levelLabel: 'Faible',
+    avoidablePercent: 80,
+    explanation: '80 % des incendies domestiques sont évitables. Le détecteur de fumée est obligatoire.',
+    damages: ['Destruction totale du bien','Intoxication au CO','Voisins affectés','Perte de documents']
+  },
+  'rga': {
+    id: 'rga', label: 'Retrait Gonflement des Argiles', icon: '🏚️',
+    level: 'medium', levelLabel: 'Modéré',
+    avoidablePercent: 55,
+    explanation: 'Le sol argileux lyonnais se rétracte en été et gonfle en hiver, fragilisant les fondations.',
+    damages: ['Fissures dans les murs porteurs','Déformation des ouvertures','Tassement différentiel','Fondations fragilisées']
+  }
+};
+
+/* ── QUESTIONS DIAGNOSTIQUES ── */
+/* 3 options : yes (+max) / partial (+mid) / no (+0 ou +inverse) */
+const ALL_QUESTIONS = [
+  /* INONDATION — condition: maison_rdc */
+  { id:'inondation-clapets', riskId:'inondation', condition:'maison_rdc',
+    text:'Des clapets anti-retours sont-ils installés sur le réseau d\'eaux usées ?',
+    options:[{v:'yes',l:'Oui, installés',pts:12},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non',pts:0}] },
+  { id:'inondation-batardeaux', riskId:'inondation', condition:'maison_rdc',
+    text:'Disposez-vous de batardeaux pour calfeutrer vos portes ?',
+    options:[{v:'yes',l:'Oui, prêts à poser',pts:10},{v:'partial',l:'Partiellement',pts:5},{v:'no',l:'Non',pts:0}] },
+  /* TEMPÊTE — condition: maison */
+  { id:'tempete-toiture', riskId:'tempete', condition:'maison',
+    text:'Votre toiture a-t-elle été vérifiée dans les 3 dernières années ?',
+    options:[{v:'yes',l:'Oui, vérifiée',pts:8},{v:'partial',l:'Il y a plus de 3 ans',pts:3},{v:'no',l:'Non / Je ne sais pas',pts:0}] },
+  { id:'tempete-goutieres', riskId:'tempete', condition:'maison',
+    text:'Vos gouttières et chéneaux ont-ils été nettoyés dans les 12 derniers mois ?',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Il y a plus d\'un an',pts:4},{v:'no',l:'Non',pts:0}] },
+  /* DÉGÂT DES EAUX — condition: all */
+  { id:'dde-joints', riskId:'degat-eaux', condition:'all',
+    text:'Vos joints d\'étanchéité ont-ils été refaits dans les 5 dernières années ?',
+    options:[{v:'yes',l:'Oui',pts:6},{v:'partial',l:'Partiellement',pts:3},{v:'no',l:'Non / >5 ans',pts:0}] },
+  { id:'dde-detection-fuite', riskId:'degat-eaux', condition:'all',
+    text:'Disposez-vous d\'un dispositif de détection de fuite (sondes, capteurs) ?',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:0}] },
+  /* INCENDIE — condition: all */
+  { id:'incendie-detecteur-fumee', riskId:'incendie', condition:'all',
+    text:'Avez-vous un détecteur de fumée fonctionnel à chaque étage ?',
+    options:[{v:'yes',l:'Oui, à chaque étage',pts:8},{v:'partial',l:'Dans certaines pièces',pts:4},{v:'no',l:'Non',pts:0}] },
+  { id:'incendie-chaudiere', riskId:'incendie', condition:'all',
+    text:'Votre chaudière est-elle révisée annuellement par un professionnel agréé ?',
+    options:[{v:'yes',l:'Oui / contrat entretien',pts:6},{v:'partial',l:'Pas systématiquement',pts:2},{v:'no',l:'Non / Pas de chaudière',pts:3}] },
+  /* VOL — condition: all */
+  { id:'vol-telesurveillance', riskId:'vol', condition:'all',
+    text:'Disposez-vous d\'une caméra de surveillance ou d\'un système de télésurveillance ?',
+    options:[{v:'yes',l:'Système complet',pts:10},{v:'partial',l:'Caméra simple',pts:5},{v:'no',l:'Non',pts:0}] },
+  { id:'vol-serrure-3pts', riskId:'vol', condition:'all',
+    text:'Avez-vous une serrure 3 points sur votre porte d\'entrée ?',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:0}] },
+  /* RGA — condition: maison */
+  { id:'rga-trottoir', riskId:'rga', condition:'maison',
+    text:'Avez-vous un trottoir périphérique autour de votre maison ?',
+    options:[{v:'yes',l:'Oui, complet',pts:8},{v:'partial',l:'Partiellement',pts:4},{v:'no',l:'Non',pts:0}] },
+  { id:'rga-vegetation', riskId:'rga', condition:'maison',
+    text:'Y a-t-il des végétaux à moins de 5 m des façades de votre maison ?',
+    options:[{v:'yes',l:'Oui, plusieurs',pts:0},{v:'partial',l:'À certains endroits',pts:3},{v:'no',l:'Non',pts:8}] }
+];
+
+/* ── ACTIONS ── */
+const ALL_ACTIONS = [
+  /* INONDATION */
+  { id:'inondation-batardeaux', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
+    title:'Poser les batardeaux sur les portes', effort:'medium', duration:'30 min',
+    benefit:'Réduit de 80 % les infiltrations d\'eau et de boue lors d\'une crue.',
+    pts:8, conseilText:'Installez des batardeaux sur les portes pour limiter les entrées d\'eau et de boue dans l\'habitation.',
+    steps:['Sortir les batardeaux et vérifier l\'état des joints','Poser le batardeau sur la porte d\'entrée en commençant par l\'extérieur','Ajuster la hauteur pour assurer l\'étanchéité','Répéter pour chaque porte exposée aux entrées d\'eau'],
+    tags:['Gratuit (déjà équipé)','30 min'] },
+  { id:'inondation-calfeutrer', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
+    title:'Calfeutrer toutes les ouvertures basses', effort:'low', duration:'20 min',
+    benefit:'Empêche l\'eau de pénétrer par les soupiraux, aérations et petites ouvertures.',
+    pts:6, conseilText:'Calfeutrez les ouvertures (fenêtres, portes, soupiraux, aérations…) à l\'aide de barrières, sacs de sable ou tout moyen de les rendre étanches.',
+    steps:['Identifier toutes les ouvertures basses (soupiraux, aérations, vide-sanitaires)','Préparer des sacs de sable ou des boudins anti-inondation','Bloquer chaque ouverture en commençant par les plus exposées','Vérifier l\'étanchéité en cherchant les courants d\'air'],
+    tags:['Gratuit','20 min'] },
+  { id:'inondation-clapets', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
+    title:'Installer des clapets anti-retour', effort:'high', duration:'Sur RDV',
+    benefit:'Évite le reflux des eaux usées en cas d\'inondation — protège les caves et sous-sols.',
+    pts:12, conseilText:'Installez des clapets anti-retour sur le réseau d\'eaux usées pour éviter le reflux des eaux en cas d\'inondation.',
+    steps:['Repérer l\'emplacement du réseau d\'eaux usées en sous-sol','Contacter un plombier certifié pour l\'installation','Faire vérifier le bon fonctionnement du clapet','Tester le mécanisme une fois par an'],
+    tags:['400–800 €','Plombier requis'] },
+  /* TEMPÊTE */
+  { id:'dde-goutieres', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
+    horizon:'now', momentDeVie:'both', condition:'maison',
+    title:'Nettoyer les gouttières et chéneaux', effort:'low', duration:'30 min',
+    benefit:'Évite les débordements et infiltrations en toiture lors des fortes pluies.',
+    pts:5, conseilText:'Maintenez en bon état vos toitures, chéneaux et gouttières.',
+    steps:['Munir d\'une échelle sécurisée et de gants de travail','Retirer les feuilles et débris à la main ou avec un crochet','Rincer avec un tuyau d\'arrosage de haut en bas','Vérifier l\'état des fixations et remplacer si besoin'],
+    tags:['Gratuit','30 min'] },
+  /* DÉGÂT DES EAUX */
+  { id:'dde-joints', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Réviser les joints d\'étanchéité', effort:'low', duration:'20 min',
+    benefit:'Un joint détérioré = fuite silencieuse pendant des semaines. Coût de réparation x10.',
+    pts:4, conseilText:'Entretenez régulièrement les joints d\'étanchéité des installations sanitaires.',
+    steps:['Inspecter les joints autour de la baignoire, douche, lavabo et WC','Vérifier l\'absence de moisissures noires (signe de joint poreux)','Retirer l\'ancien joint avec un cutter et du dissolvant','Appliquer le nouveau joint avec un pistolet silicone — laisser sécher 24h'],
+    tags:['~10 €','20 min'] },
+  { id:'dde-couper-eau-vacances', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
+    horizon:'now', momentDeVie:'seasonal', condition:'all',
+    title:'Couper l\'arrivée d\'eau avant de partir', effort:'low', duration:'5 min',
+    benefit:'La cause n° 1 de sinistre en vacances. 5 secondes qui évitent des semaines de travaux.',
+    pts:4, conseilText:'Coupez l\'arrivée d\'eau en cas d\'absence prolongée.',
+    steps:['Localiser le robinet d\'arrêt général (souvent sous l\'évier ou en cave)','Tourner le robinet en position fermée','Purger les robinets pour vider les tuyaux','Noter l\'emplacement dans votre carnet de logement'],
+    tags:['Gratuit','5 min'] },
+  /* INCENDIE */
+  { id:'incendie-detecteur-fumee', riskId:'incendie', riskLabel:'Incendie', riskColor:'danger',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Installer un détecteur de fumée', effort:'low', duration:'15 min',
+    benefit:'Obligatoire par la loi. Divise par 3 le risque de décès en cas d\'incendie nocturne.',
+    pts:8, conseilText:'Installez un détecteur de fumée chez vous, et ce, à chaque étage.',
+    steps:['Choisir un détecteur NF EN 14604 (norme européenne)','Fixer au plafond, au centre de la pièce, à 30 cm des murs','Tester le détecteur après installation (bouton test)','Remplacer la pile chaque année et le détecteur tous les 10 ans'],
+    tags:['~20 €','15 min'] },
+  { id:'incendie-chaudiere', riskId:'incendie', riskLabel:'Incendie', riskColor:'danger',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Réviser la chaudière annuellement', effort:'low', duration:'Sur RDV',
+    benefit:'Obligatoire. Prévient les pannes, les fuites de gaz et les intoxications au CO.',
+    pts:6, conseilText:'Faites réviser votre chaudière une fois par an par un plombier-chauffagiste agréé — c\'est obligatoire.',
+    steps:['Contacter votre installateur ou signer un contrat d\'entretien annuel','Préparer les accès à la chaudière (dégager l\'espace)','Demander un compte-rendu d\'intervention écrit','Conserver le rapport dans le carnet d\'entretien du logement'],
+    tags:['100–150 €','Sur RDV'] },
+  { id:'incendie-debrancher', riskId:'incendie', riskLabel:'Incendie', riskColor:'danger',
+    horizon:'now', momentDeVie:'seasonal', condition:'all',
+    title:'Débrancher les appareils en veille', effort:'low', duration:'5 min',
+    benefit:'Un chargeur laissé branché peut déclencher un incendie. Réflexe à adopter avant de partir.',
+    pts:3, conseilText:'Veillez à débrancher vos chargeurs dès que les batteries sont pleines.',
+    steps:['Faire le tour de chaque pièce avant de partir','Débrancher les chargeurs de téléphone, tablette, enceintes','Éteindre la box Internet et les multiprises','Vérifier que le four, les plaques et la cafetière sont éteints'],
+    tags:['Gratuit','5 min'] },
+  /* VOL */
+  { id:'vol-inventaire', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Répertorier vos objets de valeur', effort:'medium', duration:'60 min',
+    benefit:'Indispensable pour le remboursement assurance. Sans inventaire, les preuves manquent.',
+    pts:5, conseilText:'Répertoriez vos objets de valeur, notez leurs numéros de série et photographiez-les.',
+    steps:['Lister tous les objets de valeur (bijoux, électronique, art)','Photographier chaque objet sous plusieurs angles','Relever les numéros de série et conserver les factures','Stocker la liste dans le cloud ou chez un proche (pas au domicile)'],
+    tags:['Gratuit','60 min'] },
+  { id:'vol-serrure-3pts', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Installer une serrure 3 points', effort:'medium', duration:'Sur RDV',
+    benefit:'Multiplie par 4 la résistance à l\'effraction. Norme A2P recommandée par les assureurs.',
+    pts:8, conseilText:'Disposez d\'une serrure 3 points sur votre porte d\'entrée.',
+    steps:['Faire appel à un serrurier certifié A2P (agrément assureur)','Choisir une serrure avec point de verrouillage haut, bas et central','Demander un devis comparatif (150–300 € main d\'œuvre incluse)','Conserver le certificat A2P pour votre dossier assurance'],
+    tags:['150–300 €','Serrurier A2P'] },
+  { id:'vol-securiser-vacances', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
+    horizon:'now', momentDeVie:'seasonal', condition:'all',
+    title:'Sécuriser avant les vacances', effort:'low', duration:'15 min',
+    benefit:'65 % des cambriolages ont lieu en été. Quelques gestes simples font toute la différence.',
+    pts:5, conseilText:'Si vous devez vous absenter, faites suivre votre courrier et demandez à un proche de surveiller.',
+    steps:['S\'inscrire à "Opération Tranquillité Vacances" (police / gendarmerie)','Confier les clés à une personne de confiance','Mettre les objets de valeur en lieu sûr ou en coffre bancaire','Brancher des minuteries sur les lumières pour simuler une présence'],
+    tags:['Gratuit','15 min'] },
+  /* RGA */
+  { id:'rga-trottoir', riskId:'rga', riskLabel:'RGA', riskColor:'warn',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison',
+    title:'Aménager un trottoir périphérique', effort:'high', duration:'Sur RDV',
+    benefit:'Évacue les eaux de pluie loin des fondations et réduit les cycles humidité/sécheresse.',
+    pts:8, conseilText:'Aménagez un trottoir périphérique autour de votre maison pour éloigner l\'eau des fondations.',
+    steps:['Faire réaliser un diagnostic de sol par un géotechnicien','Définir le tracé avec un paysagiste ou maçon','Poser une dalle béton ou gravier stabilisé en pente vers l\'extérieur','Contrôler l\'état chaque printemps et reboucher les fissures'],
+    tags:['500–2000 €','Pro requis'] },
+  { id:'rga-vegetation', riskId:'rga', riskLabel:'RGA', riskColor:'warn',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison',
+    title:'Éloigner la végétation des façades', effort:'medium', duration:'60 min',
+    benefit:'Les racines profondes accentuent les cycles de rétraction du sol argileux.',
+    pts:6, conseilText:'Évitez de planter des végétaux près des façades.',
+    steps:['Identifier les arbres et haies à moins de 5 m des murs','Couper les branches surplombant la toiture','Pour les grands arbres : faire appel à un élagueur certifié','Ne pas replanter à moins de 5 m des fondations'],
+    tags:['Variable','60 min ou Pro'] }
+];
+
+/* ── RÉCOMPENSES ── */
+const ALL_REWARDS = [
+  { id:'lmqc-mois', icon:'🎁', iconBg:'#E6F5ED',
+    title:'1 mois LMQC offert', subtitle:'~46 € offerts',
+    desc:'Un mois de garantie supplémentaire sur votre contrat MRH.',
+    type:'lmqc', priority:1, minActions:3,
+    scenarios:['subscription'], conditions:['all','maison','maison_rdc'],
+    status:'available', disclaimer:'Activé au prochain renouvellement.' },
+  { id:'batardeau-offert', icon:'🛡️', iconBg:'#DBEAFE',
+    title:'Kit batardeaux co-financé AXA', subtitle:'Jusqu\'à 150 €',
+    desc:'AXA co-finance l\'achat de batardeaux pour votre logement exposé.',
+    type:'dispositif', priority:1, minActions:2,
+    scenarios:['subscription','seasonal'], conditions:['maison_rdc'],
+    status:'available', disclaimer:'Sur devis validé par AXA Prévention.' },
+  { id:'detecteur-dde', icon:'💧', iconBg:'#CFFAFE',
+    title:'Détecteur de fuite offert', subtitle:'~50 €',
+    desc:'AXA vous offre un détecteur de fuite d\'eau connecté.',
+    type:'dispositif', priority:1, minActions:2,
+    scenarios:['subscription'], conditions:['all','maison','maison_rdc'],
+    status:'available', disclaimer:'Livraison sous 10 jours ouvrés.' },
+  { id:'diagnostic-offert', icon:'🔍', iconBg:'#EDE9FE',
+    title:'1er diagnostic prévention offert', subtitle:'~120 €',
+    desc:'Un expert AXA se déplace pour un diagnostic complet de votre logement.',
+    type:'service_offert', priority:1, minActions:1,
+    scenarios:['subscription'], conditions:['maison','maison_rdc'],
+    status:'available', disclaimer:'Sur rendez-vous — délai 2 semaines.' },
+  { id:'cheque-leroy-merlin', icon:'🛒', iconBg:'#FEF3C7',
+    title:'Bon d\'achat Leroy Merlin', subtitle:'20 €',
+    desc:'À valoir sur tout équipement de prévention en magasin ou en ligne.',
+    type:'cheque_cadeau', priority:2, minActions:1,
+    scenarios:['subscription','seasonal'], conditions:['all','maison','maison_rdc'],
+    status:'teaser', teaser:'Bientôt disponible' },
+  { id:'taux-bonifie', icon:'🏦', iconBg:'#EDE9FE',
+    title:'Taux bonifié crédit travaux', subtitle:'-0,1 %',
+    desc:'Conditions préférentielles sur votre crédit habitat AXA Banque pour travaux de prévention.',
+    type:'cheque_cadeau', priority:2, minActions:5,
+    scenarios:['subscription'], conditions:['maison','maison_rdc'],
+    status:'teaser', teaser:'En cours d\'étude' }
+];
+
+/* ── HELPERS ── */
+
+function getProfile(id) {
+  return PROFILES[id] || PROFILES['profil-a'];
+}
+
+function getQuestionsForProfile(profile) {
+  const eligible = ['all'];
+  if (profile.condition === 'maison' || profile.condition === 'maison_rdc') {
+    eligible.push('maison');
+    if (profile.condition === 'maison_rdc') eligible.push('maison_rdc');
+  }
+  if (profile.hasGarden) eligible.push('jardin');
+
+  const byRisk = {};
+  profile.mainRisks.forEach(r => { byRisk[r] = []; });
+
+  ALL_QUESTIONS.forEach(q => {
+    if (byRisk[q.riskId] !== undefined && eligible.includes(q.condition)) {
+      byRisk[q.riskId].push(q);
+    }
+  });
+
+  const result = [];
+  profile.mainRisks.forEach(r => {
+    (byRisk[r] || []).slice(0, 2).forEach(q => result.push(q));
+  });
+  return result;
+}
+
+function getActionsForProfile(profile) {
+  const eligible = ['all'];
+  if (profile.condition === 'maison' || profile.condition === 'maison_rdc') {
+    eligible.push('maison');
+    if (profile.condition === 'maison_rdc') eligible.push('maison_rdc');
+  }
+  if (profile.hasGarden) eligible.push('jardin');
+
+  const done = profile.completedActions || [];
+
+  return ALL_ACTIONS.filter(a => {
+    const riskMatch   = profile.mainRisks.includes(a.riskId);
+    const condMatch   = eligible.includes(a.condition);
+    const scenMatch   = a.momentDeVie === profile.scenario || a.momentDeVie === 'both';
+    const notDone     = !done.includes(a.id);
+    return riskMatch && condMatch && scenMatch && notDone;
+  });
+}
+
+function getRewardsForProfile(profile, completedCount) {
+  const eligible = ['all'];
+  if (profile.condition === 'maison' || profile.condition === 'maison_rdc') {
+    eligible.push('maison');
+    if (profile.condition === 'maison_rdc') eligible.push('maison_rdc');
+  }
+
+  return ALL_REWARDS.map(r => {
+    const okScenario  = r.scenarios.includes(profile.scenario);
+    const okCondition = r.conditions.some(c => eligible.includes(c));
+    if (!okScenario || !okCondition) return { ...r, computedStatus: 'locked' };
+    if (r.status === 'teaser') return { ...r, computedStatus: 'teaser' };
+    if (completedCount >= r.minActions) return { ...r, computedStatus: 'unlocked' };
+    return { ...r, computedStatus: 'available' };
+  }).filter(r => {
+    const okScenario  = r.scenarios.includes(profile.scenario);
+    const okCondition = r.conditions.some(c => eligible.includes(c));
+    return okScenario && okCondition;
+  });
+}
+
+function computeScore(profile, completedIds) {
+  const done = profile.completedActions || [];
+  const newlyDone = completedIds.filter(id => !done.includes(id));
+  const gain = ALL_ACTIONS
+    .filter(a => newlyDone.includes(a.id))
+    .reduce((s, a) => s + a.pts, 0);
+  return Math.min(profile.preparationScore + gain, 100);
+}
+
+function scoreLevel(score) {
+  if (score < 45)  return { level: 'weak',    label: 'Faible',   color: 'danger' };
+  if (score < 70)  return { level: 'average',  label: 'Modéré',   color: 'warn' };
+  return               { level: 'good',    label: 'Bon',      color: 'success' };
+}

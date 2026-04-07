@@ -1,0 +1,77 @@
+:root {
+  /* ── AXA BRAND ── */
+  --axa:        #00008F;
+  --axa-dark:   #00006B;
+  --axa-mid:    #1A1AB0;
+  --axa-light:  #E8E8F8;
+  --axa-xlight: #F3F3FC;
+
+  /* ── SEMANTIC ── */
+  --success:      #1A7A4A;
+  --success-mid:  #24A865;
+  --success-light:#E6F5ED;
+  --success-bg:   #F0FAF5;
+
+  --danger:       #B91C1C;
+  --danger-mid:   #DC2626;
+  --danger-light: #FEE2E2;
+  --danger-bg:    #FFF5F5;
+
+  --warn:         #92400E;
+  --warn-mid:     #D97706;
+  --warn-light:   #FEF3C7;
+  --warn-bg:      #FFFBEB;
+
+  --info:         #1E40AF;
+  --info-mid:     #3B82F6;
+  --info-light:   #DBEAFE;
+  --info-bg:      #EFF6FF;
+
+  /* ── NEUTRAL SCALE ── */
+  --n950: #0A0A0F;
+  --n900: #111118;
+  --n800: #1E1E2A;
+  --n700: #2D2D3E;
+  --n600: #4A4A62;
+  --n500: #6B6B85;
+  --n400: #9494AA;
+  --n300: #BCBCCC;
+  --n200: #DCDCE8;
+  --n150: #EAEAF2;
+  --n100: #F2F2F8;
+  --n50:  #F8F8FC;
+  --white: #FFFFFF;
+
+  /* ── RISK COLORS ── */
+  --risk-flood:   #1E40AF;
+  --risk-flood-l: #DBEAFE;
+  --risk-fire:    #B91C1C;
+  --risk-fire-l:  #FEE2E2;
+  --risk-water:   #0E7490;
+  --risk-water-l: #CFFAFE;
+  --risk-theft:   #4C1D95;
+  --risk-theft-l: #EDE9FE;
+  --risk-rga:     #92400E;
+  --risk-rga-l:   #FEF3C7;
+
+  /* ── SPACING ── */
+  --sp1: 4px;  --sp2: 8px;  --sp3: 12px; --sp4: 16px;
+  --sp5: 20px; --sp6: 24px; --sp8: 32px; --sp10: 40px;
+
+  /* ── RADIUS ── */
+  --r-xs: 4px; --r-sm: 8px; --r-md: 12px;
+  --r-lg: 16px; --r-xl: 20px; --r-pill: 999px;
+
+  /* ── TYPE ── */
+  --font: 'DM Sans', -apple-system, sans-serif;
+
+  /* ── SHADOW ── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-device: 0 24px 64px rgba(0,0,143,0.16), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+
+  /* ── DEVICE ── */
+  --device-w: 375px;
+  --device-h: 800px;
+}

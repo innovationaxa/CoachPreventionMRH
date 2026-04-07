@@ -1,0 +1,52 @@
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.90); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ringFill {
+  from { stroke-dashoffset: 352; }
+}
+@keyframes checkPop {
+  0%   { transform: scale(0.4); }
+  65%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@keyframes barGrow {
+  from { width: 0 !important; }
+}
+@keyframes ptsCount {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STAGGERED REVEALS ── */
+.rv { opacity: 0; animation: fadeUp 0.38s cubic-bezier(0.22,1,0.36,1) forwards; }
+.rv1 { animation-delay: 0.04s; }
+.rv2 { animation-delay: 0.10s; }
+.rv3 { animation-delay: 0.16s; }
+.rv4 { animation-delay: 0.22s; }
+.rv5 { animation-delay: 0.28s; }
+.rv6 { animation-delay: 0.34s; }
+.rv7 { animation-delay: 0.40s; }
+
+.rv-scale { opacity: 0; animation: scaleIn 0.42s cubic-bezier(0.34,1.2,0.64,1) forwards; }
+
+/* ── RING ── */
+.ring-arc {
+  stroke-dasharray: 352;
+  animation: ringFill 1.3s cubic-bezier(0.34,1.1,0.64,1) 0.25s forwards;
+}
+.score-num { animation: fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
+
+/* ── BARS ── */
+.risk-fill { animation: barGrow 0.8s cubic-bezier(0.4,0,0.2,1) 0.3s both; }
+
+/* ── CHECK ── */
+.reco-check.pop { animation: checkPop 0.28s ease forwards; }
+
+/* ── PROGRESS ── */
+.progress-fill { transition: width 0.55s cubic-bezier(0.4,0,0.2,1); }
+.pts-fill      { transition: width 0.65s ease; }
