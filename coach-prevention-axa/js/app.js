@@ -1,170 +1,209 @@
-/* ── STATE ── */
-let currentScreen = 0;
-const totalScreens = 5;
-const checked = { r0: false, r1: false, r2: false };
-const pts = { r0: 5, r1: 3, r2: 11 };
-window._earnedPts = 120;
+/* ═══════════════════════════════════════════════
+   APP.JS v3 — Coach Prévention MRH
+   State · Navigation · Interactions
+═══════════════════════════════════════════════ */
+
+/* ── GLOBAL STATE ── */
+window._ST = {
+  profileId:        'profil-a',
+  scenario:         null,
+  diagStep:         0,
+  diagAnswers:      {},
+  questions:        [],
+  completedActions: [],
+  currentScore:     null,
+  scoreBefore:      null,
+  selectedAction:   null,
+  lastCompletedAction: null
+};
 
 /* ── RENDER ── */
 function render(idx) {
-  const app = document.getElementById('app');
+  const app  = document.getElementById('app');
   const html = SCREENS['s' + idx]();
-
-  // Create new screen div
   const next = document.createElement('div');
-  next.className = 'screen';
-  next.innerHTML = html;
+  next.className  = 'screen';
+  next.innerHTML  = html;
   app.appendChild(next);
-
-  // Animate out old screen
   const prev = app.querySelector('.screen.active');
   if (prev) {
     prev.classList.add('exit');
     prev.classList.remove('active');
-    setTimeout(() => prev.remove(), 320);
+    setTimeout(() => prev.remove(), 310);
   }
-
-  // Animate in new screen
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      next.classList.add('active');
-      next.scrollTop = 0;
-    });
-  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    next.classList.add('active');
+    next.scrollTop = 0;
+  }));
 }
 
 /* ── NAVIGATION ── */
 function goTo(idx) {
-  if (idx < 0 || idx >= totalScreens) return;
+  if (idx < 0 || idx > 8) return;
   if (idx === 2) {
-    // Loading interstitial before score
-    showLoading(() => {
-      currentScreen = idx;
-      render(idx);
-      updateNav(idx);
-    });
-    return;
+    // Reset diagnostic on entry
+    window._ST.diagStep = 0;
+    window._ST.diagAnswers = {};
   }
-  currentScreen = idx;
-  render(idx);
-  updateNav(idx);
+  if (idx === 3) showLoadingThen(() => { render(3); updateNav(3); });
+  else { render(idx); updateNav(idx); }
 }
 
 function updateNav(idx) {
-  document.querySelectorAll('.step-pill').forEach((pill, i) => {
-    pill.classList.remove('active', 'done');
-    if (i === idx) pill.classList.add('active');
-    else if (i < idx) pill.classList.add('done');
-    const num = pill.querySelector('.pill-num');
-    if (i < idx) num.textContent = '✓';
-    else num.textContent = i + 1;
+  document.querySelectorAll('.step-btn').forEach((btn, i) => {
+    btn.classList.remove('active','done');
+    if (i === idx) btn.classList.add('active');
+    else if (i < idx) btn.classList.add('done');
+    const num = btn.querySelector('.step-num');
+    if (num) num.textContent = i < idx ? '✓' : i + 1;
   });
 }
 
-/* ── LOADING INTERSTITIAL ── */
-function showLoading(callback) {
+/* ── LOADING SCREEN ── */
+function showLoadingThen(cb) {
   const app = document.getElementById('app');
-
-  const loader = document.createElement('div');
-  loader.className = 'screen active';
-  loader.style.background = 'var(--blue-800)';
-  loader.style.display = 'flex';
-  loader.style.flexDirection = 'column';
-  loader.style.alignItems = 'center';
-  loader.style.justifyContent = 'center';
-  loader.style.gap = '20px';
-
-  loader.innerHTML = `
-    <div style="text-align:center;">
-      <div style="font-size:40px;margin-bottom:16px;">⚡</div>
-      <div style="font-size:17px;font-weight:600;color:white;margin-bottom:6px;">Calcul en cours…</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5;">
-        Analyse de votre exposition<br>aux risques climatiques
+  const l   = document.createElement('div');
+  l.className = 'screen active';
+  l.style.cssText = 'background:var(--axa);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:0 32px';
+  const msgs = ['Données Géorisques…','Analyse des risques…','Calcul du score…','Personnalisation…'];
+  l.innerHTML = `
+    <div style="text-align:center">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg style="width:26px;height:26px;fill:white" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
       </div>
+      <div style="font-size:17px;font-weight:600;color:#fff;margin-bottom:5px;font-family:var(--font)">Calcul en cours…</div>
+      <div id="lmsg" style="font-size:12px;color:rgba(255,255,255,.55);font-family:var(--font)">${msgs[0]}</div>
     </div>
-    <div style="width:200px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;overflow:hidden;">
-      <div id="loaderBar" style="height:100%;width:0%;background:var(--green-300);border-radius:2px;transition:width 0.1s linear;"></div>
+    <div style="width:200px;height:4px;background:rgba(255,255,255,.15);border-radius:var(--r-pill);overflow:hidden">
+      <div id="lbar" style="height:100%;width:0;background:var(--success-mid);border-radius:var(--r-pill);transition:width .08s linear"></div>
     </div>
-    <div style="font-size:12px;color:rgba(255,255,255,0.4)" id="loaderMsg">Chargement des données Géorisques…</div>
+    <div style="display:flex;flex-direction:column;gap:7px;width:200px">
+      ${msgs.map((m,i)=>`<div id="ls${i}" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:.3};transition:opacity .3s"><div style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--success-mid)':'rgba(255,255,255,.25)'};transition:background .3s" id="ld${i}"></div><span style="font-size:11px;color:rgba(255,255,255,.6);font-family:var(--font)">${m}</span></div>`).join('')}
+    </div>
   `;
-
   const prev = app.querySelector('.screen.active');
-  if (prev) { prev.classList.add('exit'); prev.classList.remove('active'); setTimeout(() => prev.remove(), 320); }
-  app.appendChild(loader);
+  if (prev) { prev.classList.add('exit'); prev.classList.remove('active'); setTimeout(() => prev.remove(), 310); }
+  app.appendChild(l);
 
-  const msgs = [
-    'Chargement des données Géorisques…',
-    'Analyse de la zone à risque…',
-    'Calcul du score d\'exposition…',
-    'Personnalisation des recommandations…'
-  ];
-  let w = 0;
-  let msgIdx = 0;
-  const bar = loader.querySelector('#loaderBar');
-  const msgEl = loader.querySelector('#loaderMsg');
+  /* Calculate score from diagnostic answers */
+  let scoreGain = 0;
+  (window._ST.questions || []).forEach(q => {
+    const ans = (window._ST.diagAnswers || {})[q.id];
+    const opt = q.options.find(o => o.v === ans);
+    if (opt) scoreGain += opt.pts;
+  });
+  const p = getProfile(window._ST.profileId);
+  window._ST.currentScore = Math.min(p.preparationScore + Math.round(scoreGain * .35), 100);
 
-  const interval = setInterval(() => {
-    w += 3;
-    if (bar) bar.style.width = Math.min(w, 96) + '%';
-    if (w % 25 === 0 && msgIdx < msgs.length - 1) {
-      msgIdx++;
-      if (msgEl) msgEl.textContent = msgs[msgIdx];
+  let w = 0, step = 0;
+  const iv = setInterval(() => {
+    w += 2.5;
+    const bar = l.querySelector('#lbar');
+    if (bar) bar.style.width = Math.min(w, 97) + '%';
+    const ns = Math.floor(w / 25);
+    if (ns > step && ns < msgs.length) {
+      const prev = l.querySelector(`#ls${step}`), prevD = l.querySelector(`#ld${step}`);
+      const curr = l.querySelector(`#ls${ns}`),  currD = l.querySelector(`#ld${ns}`);
+      const lmsg = l.querySelector('#lmsg');
+      if (prev) prev.style.opacity = '.5';
+      if (prevD) prevD.style.background = 'rgba(255,255,255,.3)';
+      if (curr) curr.style.opacity = '1';
+      if (currD) currD.style.background = 'var(--success-mid)';
+      if (lmsg) lmsg.textContent = msgs[ns];
+      step = ns;
     }
-    if (w >= 100) {
-      clearInterval(interval);
-      setTimeout(callback, 200);
-    }
-  }, 30);
+    if (w >= 100) { clearInterval(iv); setTimeout(cb, 200); }
+  }, 25);
 }
 
-/* ── PILL SELECTION ── */
-function selectPill(el) {
-  const group = el.closest('.options-row');
-  group.querySelectorAll('.opt-pill').forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
+/* ── SELECTION SCREEN ── */
+function selectProfile(id) {
+  window._ST.profileId = id;
+  window._ST.currentScore = null;
+  window._ST.completedActions = [];
+  window._ST.diagAnswers = {};
+  window._ST.diagStep = 0;
+  render(0);
+  updateNav(0);
 }
 
-/* ── RECO TOGGLE ── */
-function toggleReco(id, ptVal) {
-  const card = document.getElementById(id);
-  const chk = card.querySelector('.check-circle');
-  checked[id] = !checked[id];
+function startFromSelection() {
+  if (!window._ST.profileId) return;
+  goTo(1);
+}
 
-  if (checked[id]) {
-    card.classList.add('checked');
-    chk.classList.add('just-checked');
-    setTimeout(() => chk.classList.remove('just-checked'), 400);
-    window._earnedPts += ptVal;
+/* ── DIAGNOSTIC ── */
+function selectDiagOpt(qid, val, el) {
+  if (!window._ST.diagAnswers) window._ST.diagAnswers = {};
+  window._ST.diagAnswers[qid] = val;
+  // Update UI immediately
+  const opts = el.closest('.option-list');
+  if (opts) opts.querySelectorAll('.opt-item').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  const nextBtn = document.getElementById('diagNextBtn');
+  if (nextBtn) { nextBtn.disabled = false; nextBtn.style.opacity = '1'; }
+}
+
+function diagNext() {
+  const qs   = window._ST.questions;
+  const step = window._ST.diagStep;
+  const q    = qs[step];
+  if (!window._ST.diagAnswers[q.id]) return;
+  if (step < qs.length - 1) {
+    window._ST.diagStep++;
+    render(2);
   } else {
-    card.classList.remove('checked');
-    window._earnedPts -= ptVal;
+    goTo(3);
   }
-
-  updateScoreDisplay();
 }
 
-function updateScoreDisplay() {
-  const earnedFromRecos = Object.entries(checked)
-    .filter(([, v]) => v)
-    .reduce((sum, [k]) => sum + pts[k], 0);
-  const newScore = 62 + earnedFromRecos;
-  const remaining = 19 - earnedFromRecos;
-
-  const scoreEl = document.getElementById('currentScore');
-  const headerEl = document.getElementById('ptsHeader');
-
-  if (scoreEl) {
-    scoreEl.textContent = newScore + ' / 100';
-    const su = document.getElementById('scoreUpdate');
-    if (su) {
-      su.style.background = newScore >= 75 ? 'var(--green-50)' : 'var(--blue-50)';
-      su.querySelector('.s4-score-label').style.color = newScore >= 75 ? 'var(--green-800)' : 'var(--blue-800)';
-      su.querySelector('.s4-score-val').style.color = newScore >= 75 ? 'var(--green-600)' : 'var(--blue-800)';
-    }
+function diagBack() {
+  if (window._ST.diagStep > 0) {
+    window._ST.diagStep--;
+    render(2);
+  } else {
+    goTo(1);
   }
-  if (headerEl) {
-    headerEl.textContent = remaining > 0 ? '+' + remaining + ' pts disponibles' : '🎉 Toutes les actions complétées !';
-  }
+}
+
+/* ── ACTIONS ── */
+function openAction(id) {
+  window._ST.selectedAction = id;
+  goTo(6);
+}
+
+function completeAction(id) {
+  if (!window._ST.completedActions) window._ST.completedActions = [];
+  if (window._ST.completedActions.includes(id)) return;
+  const a = ALL_ACTIONS.find(x => x.id === id);
+  if (!a) return;
+  window._ST.scoreBefore = window._ST.currentScore || getProfile(window._ST.profileId).preparationScore;
+  window._ST.completedActions.push(id);
+  window._ST.currentScore = computeScore(getProfile(window._ST.profileId), window._ST.completedActions);
+  window._ST.lastCompletedAction = id;
+  goTo(7);
+}
+
+/* ── SCORE BAR (live) ── */
+function updateScoreBar() {
+  const p   = getProfile(window._ST.profileId);
+  const s   = window._ST.currentScore || p.preparationScore;
+  const done= window._ST.completedActions || [];
+  const actions = getActionsForProfile(p);
+  const rem = actions.filter(a => !done.includes(a.id)).reduce((sum,a)=>sum+a.pts,0);
+  const el  = document.getElementById('currentScore');
+  const hd  = document.getElementById('ptsHeader');
+  const bar = document.getElementById('scoreBar');
+  if (el)  el.textContent  = `${s} / 100`;
+  if (hd)  hd.textContent  = rem > 0 ? `+${rem} pts disponibles` : '🎉 Plan complété !';
+  if (bar) bar.classList.toggle('ok', s >= 70);
+}
+
+/* ── REWARDS ── */
+function activateRewards() {
+  const done = window._ST.completedActions || [];
+  if (!done.length) { alert('Réalisez au moins une action pour activer vos rewards.'); return; }
+  alert(`✓ Vos rewards sont en cours d'activation.\n\n${done.length} action${done.length>1?'s':''} validée${done.length>1?'s':''}.\nVous serez contacté(e) sous 48h par AXA Prévention.`);
 }
 
 /* ── INIT ── */
