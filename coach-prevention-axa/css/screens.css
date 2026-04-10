@@ -356,3 +356,75 @@
   border-radius: var(--r-md); padding: 12px 14px;
   margin-bottom: var(--sp3);
 }
+
+/* ── S6 — SERVICES RECOMMANDÉS ── */
+.services-list { display: flex; flex-direction: column; gap: var(--sp2); }
+.service-card {
+  display: flex; align-items: center; gap: var(--sp3);
+  background: #fff; border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 11px 13px;
+  box-shadow: var(--shadow-xs);
+}
+.service-logo { font-size: 20px; flex-shrink: 0; width: 32px; text-align: center; }
+.service-info { flex: 1; min-width: 0; }
+.service-label { font-size: 13px; font-weight: 600; color: var(--n800); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.service-tag   { font-size: 11px; color: var(--n500); margin-top: 1px; }
+.service-cta {
+  font-size: 11px; font-weight: 600; color: var(--axa);
+  background: var(--axa-xlight); border: 1px solid var(--axa-light);
+  border-radius: var(--r-sm); padding: 5px 10px;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  font-family: var(--font); transition: background .15s;
+}
+.service-cta:hover { background: var(--axa-light); }
+
+.service-card-aide { background: var(--n50); border-color: var(--n200); }
+.service-cta-aide { color: var(--n700); background: #fff; border-color: var(--n200); }
+.service-cta-aide:hover { background: var(--n100); }
+
+/* ── S6 — TUTORIELS ET CONSEILS ── */
+.tutos-list { display: flex; flex-direction: column; gap: var(--sp2); }
+.tuto-card {
+  display: flex; align-items: center; gap: var(--sp3);
+  background: #fff; border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 11px 13px;
+  box-shadow: var(--shadow-xs); cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.tuto-card:hover { border-color: var(--axa-mid); box-shadow: var(--shadow-sm); }
+.tuto-type-pill {
+  font-size: 10px; font-weight: 700; padding: 3px 8px;
+  border-radius: var(--r-sm); white-space: nowrap; flex-shrink: 0;
+}
+.tuto-type-video   { background: #DBEAFE; color: #1D4ED8; }
+.tuto-type-pdf     { background: #FEE2E2; color: #B91C1C; }
+.tuto-type-article { background: #D1FAE5; color: #065F46; }
+.tuto-info { flex: 1; min-width: 0; }
+.tuto-title { font-size: 13px; font-weight: 600; color: var(--n800); line-height: 1.35; }
+.tuto-meta  { font-size: 11px; color: var(--n500); margin-top: 2px; }
+.tuto-arrow { font-size: 18px; color: var(--n300); flex-shrink: 0; line-height: 1; }
+
+/* ── S6 — CONSEILLER AXA ── */
+.conseiller-card {
+  background: linear-gradient(135deg, var(--axa) 0%, #001E96 100%);
+  border-radius: var(--r-lg); padding: 16px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.conseiller-top { display: flex; align-items: center; gap: var(--sp3); margin-bottom: var(--sp4); }
+.conseiller-avatar {
+  font-size: 26px; width: 44px; height: 44px;
+  background: rgba(255,255,255,0.12); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.conseiller-title { font-size: 14px; font-weight: 700; color: #fff; }
+.conseiller-sub   { font-size: 11px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+.conseiller-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp2); }
+.btn-rappel, .btn-chat {
+  padding: 10px; border-radius: var(--r-md); border: none;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); transition: opacity .15s;
+}
+.btn-rappel { background: #fff; color: var(--axa); }
+.btn-chat   { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+.btn-rappel:hover { opacity: 0.9; }
+.btn-chat:hover   { background: rgba(255,255,255,0.22); }

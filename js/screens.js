@@ -505,6 +505,84 @@ function screenActionDetail() {
     </div>
   `).join('');
 
+  /* ── SERVICES ── */
+  const allServices  = (SERVICES_BY_RISK[a.riskId] || []);
+  const mainServices = allServices.filter(s => s.type !== 'aide');
+  const aideServices = allServices.filter(s => s.type === 'aide');
+  const serviceCount = a.effort === 'high' ? 3 : a.effort === 'medium' ? 2 : 0;
+  const shownServices = mainServices.slice(0, serviceCount);
+
+  const tutoTypeIcon = { video:'▶', pdf:'📄', article:'📖' };
+  const tutoTypeLabel = { video:'Vidéo', pdf:'PDF', article:'Article' };
+
+  const servicesHtml = shownServices.length ? `
+    <div class="section-title" style="margin-top:var(--sp5)">Services recommandés</div>
+    <div class="services-list">
+      ${shownServices.map(s => `
+        <div class="service-card rv">
+          <div class="service-logo">${s.logo}</div>
+          <div class="service-info">
+            <div class="service-label">${s.label}</div>
+            <div class="service-tag">${s.tag}</div>
+          </div>
+          <button class="service-cta">${s.cta}</button>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  /* ── TUTORIELS ── */
+  const tutorials = (TUTORIALS_BY_RISK[a.riskId] || []);
+  const tutosHtml = tutorials.length ? `
+    <div class="section-title" style="margin-top:var(--sp5)">Tutoriels et conseils</div>
+    <div class="tutos-list">
+      ${tutorials.map(t => `
+        <div class="tuto-card rv">
+          <div class="tuto-type-pill tuto-type-${t.type}">${tutoTypeIcon[t.type]} ${tutoTypeLabel[t.type]}</div>
+          <div class="tuto-info">
+            <div class="tuto-title">${t.title}</div>
+            <div class="tuto-meta">${t.duration} · ${t.source}</div>
+          </div>
+          <div class="tuto-arrow">›</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  /* ── AIDES & ACCOMPAGNEMENT (uniquement effort high) ── */
+  const aidesHtml = (a.effort === 'high' && aideServices.length) ? `
+    <div class="section-title" style="margin-top:var(--sp5)">Aides et accompagnement</div>
+    <div class="services-list">
+      ${aideServices.map(s => `
+        <div class="service-card service-card-aide rv">
+          <div class="service-logo">${s.logo}</div>
+          <div class="service-info">
+            <div class="service-label">${s.label}</div>
+            <div class="service-tag">${s.tag}</div>
+          </div>
+          <button class="service-cta service-cta-aide">${s.cta}</button>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  /* ── CONSEILLER AXA ── */
+  const conseillerHtml = `
+    <div class="conseiller-card rv" style="margin-top:var(--sp5)">
+      <div class="conseiller-top">
+        <div class="conseiller-avatar">👨‍💼</div>
+        <div class="conseiller-info">
+          <div class="conseiller-title">Parler à un conseiller AXA</div>
+          <div class="conseiller-sub">Disponible lun–ven · 9h à 18h</div>
+        </div>
+      </div>
+      <div class="conseiller-actions">
+        <button class="btn-rappel">📞 Être rappelé</button>
+        <button class="btn-chat">💬 Chat AXA</button>
+      </div>
+    </div>
+  `;
+
   return `
     <div class="detail-header">
       <div class="topbar" style="position:relative;padding:0;background:transparent;margin-bottom:var(--sp3)">
@@ -542,6 +620,10 @@ function screenActionDetail() {
         <span class="pts-gain-label">Points gagnés si réalisé</span>
         <span class="pts-gain-val">+${a.pts} pts</span>
       </div>
+      ${servicesHtml}
+      ${tutosHtml}
+      ${aidesHtml}
+      ${conseillerHtml}
     </div>
     <div class="detail-sticky">
       ${done ? `

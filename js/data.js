@@ -448,6 +448,86 @@ const ALL_REWARDS = [
     status:'available', disclaimer:'Livraison sous 10 jours ouvrés.' }
 ];
 
+/* ── SERVICES PAR RISQUE ── */
+const SERVICES_BY_RISK = {
+  'inondation': [
+    { type:'artisan',      label:'Plombier-chauffagiste certifié', tag:'Réseau eaux usées',          logo:'🔧', cta:'Demander un devis' },
+    { type:'organisme',    label:'Prévenirisk',                    tag:'Diagnostic inondation',       logo:'🌊', cta:'Prendre RDV' },
+    { type:'collectivite', label:'Eaux & Territoires',             tag:'Info PPRI gratuite',          logo:'💧', cta:'Consulter' },
+    { type:'aide',         label:'Fonds Barnier',                  tag:'Jusqu\'à 40 % des travaux',   logo:'🏛️', cta:'Vérifier éligibilité' }
+  ],
+  'tempete': [
+    { type:'artisan',      label:'Couvreur RGE certifié',          tag:'Toiture & charpente',         logo:'🏠', cta:'Demander un devis' },
+    { type:'organisme',    label:'Météo-France Vigilance',         tag:'Alertes météo gratuites',     logo:'🌬️', cta:'Activer les alertes' },
+    { type:'collectivite', label:'ANAH',                           tag:'Aide rénovation toiture',     logo:'🏛️', cta:'Vérifier éligibilité' },
+    { type:'aide',         label:'MaPrimeRénov\'',                 tag:'Jusqu\'à 50 % des travaux',   logo:'💰', cta:'Déposer un dossier' }
+  ],
+  'incendie': [
+    { type:'artisan',      label:'Ramoneur certifié QUALIFEU',     tag:'Conduits & chaudière',        logo:'🔥', cta:'Prendre RDV' },
+    { type:'organisme',    label:'SDIS — Sécurité incendie',       tag:'Conseils prévention gratuits',logo:'🚒', cta:'Consulter' },
+    { type:'collectivite', label:'ADEME',                          tag:'Audit énergie & sécurité',   logo:'🌿', cta:'En savoir plus' },
+    { type:'aide',         label:'Aide débroussaillage DETR',      tag:'Obligatoire zone feux forêts',logo:'🏛️', cta:'Vérifier éligibilité' }
+  ],
+  'degat-eaux': [
+    { type:'artisan',      label:'Plombier qualifié PGN',          tag:'Joints & installations',      logo:'🔧', cta:'Demander un devis' },
+    { type:'organisme',    label:'Promotelec',                     tag:'Contrôle électrique',         logo:'⚡', cta:'Prendre RDV' },
+    { type:'collectivite', label:'CAPEB — Artisans du bâtiment',   tag:'Annuaire artisans certifiés', logo:'🏗️', cta:'Trouver un artisan' },
+    { type:'aide',         label:'Éco-PTZ travaux eau',            tag:'Taux 0 % disponible',         logo:'💶', cta:'Simuler' }
+  ],
+  'vol': [
+    { type:'artisan',      label:'Serrurier A2P certifié',         tag:'Serrures & blindage porte',   logo:'🔐', cta:'Demander un devis' },
+    { type:'organisme',    label:'CNPP — Référentiel A2P',         tag:'Matériels certifiés anti-eff.',logo:'🛡️', cta:'Consulter' },
+    { type:'collectivite', label:'Voisins Vigilants',              tag:'Réseau de voisinage local',   logo:'👮', cta:'Rejoindre' },
+    { type:'aide',         label:'Crédit d\'impôt sécurité',       tag:'Sous conditions de ressources',logo:'🏛️', cta:'Vérifier éligibilité' }
+  ],
+  'rga': [
+    { type:'artisan',      label:'Expert géotechnique G5',         tag:'Diagnostic sol argileux',     logo:'🏗️', cta:'Demander un devis' },
+    { type:'organisme',    label:'BRGM Géorisques',                tag:'Cartographie RGA gratuite',   logo:'🗺️', cta:'Consulter' },
+    { type:'collectivite', label:'ANAH — Habitat dégradé',         tag:'Travaux de confortement',     logo:'🏛️', cta:'Vérifier éligibilité' },
+    { type:'aide',         label:'Indemnisation Cat-Nat AXA',      tag:'Procédure simplifiée',        logo:'📋', cta:'En savoir plus' }
+  ]
+};
+
+/* ── TUTORIELS PAR RISQUE ── */
+const TUTORIALS_BY_RISK = {
+  'inondation': [
+    { type:'video',   title:'Poser un batardeau en 4 étapes',           duration:'4 min',  source:'AXA Prévention' },
+    { type:'video',   title:'Préparer son logement avant une crue',      duration:'7 min',  source:'Vigicrues' },
+    { type:'pdf',     title:'Guide DGPR — Prévention inondations',       duration:'12 min', source:'Ministère Écologie' },
+    { type:'article', title:'Que faire en cas d\'alerte Vigicrues ?',    duration:'3 min',  source:'AXA Prévention' }
+  ],
+  'tempete': [
+    { type:'video',   title:'Sécuriser sa toiture avant une tempête',    duration:'5 min',  source:'AXA Prévention' },
+    { type:'video',   title:'Les bons gestes en vigilance orange',        duration:'6 min',  source:'Météo-France' },
+    { type:'pdf',     title:'Guide ANAH — Entretien de toiture',          duration:'8 min',  source:'ANAH' },
+    { type:'article', title:'Vents violents : protéger son jardin',       duration:'4 min',  source:'AXA Prévention' }
+  ],
+  'incendie': [
+    { type:'video',   title:'Poser un détecteur de fumée correctement',   duration:'3 min',  source:'AXA Prévention' },
+    { type:'video',   title:'Plan d\'évacuation familiale : le préparer', duration:'5 min',  source:'SDIS' },
+    { type:'pdf',     title:'Guide DGSCGC — Sécurité incendie domicile',  duration:'10 min', source:'Ministère Intérieur' },
+    { type:'article', title:'Débroussaillage : obligations PACA & Corse', duration:'4 min',  source:'AXA Prévention' }
+  ],
+  'degat-eaux': [
+    { type:'video',   title:'Couper l\'eau en urgence : mode d\'emploi',  duration:'2 min',  source:'AXA Prévention' },
+    { type:'video',   title:'Repérer une fuite avant qu\'elle s\'aggrave',duration:'4 min',  source:'Promotelec' },
+    { type:'pdf',     title:'Guide entretien plomberie maison',            duration:'8 min',  source:'CAPEB' },
+    { type:'article', title:'Dégât des eaux : les bons réflexes dès J+1', duration:'3 min',  source:'AXA Prévention' }
+  ],
+  'vol': [
+    { type:'video',   title:'Choisir une serrure certifiée A2P',          duration:'4 min',  source:'AXA Prévention' },
+    { type:'video',   title:'Sécuriser portes et fenêtres : les clés',    duration:'6 min',  source:'FFSA' },
+    { type:'pdf',     title:'Référentiel A2P — Produits certifiés',       duration:'5 min',  source:'CNPP' },
+    { type:'article', title:'Simuler une présence : astuces anti-cambriolage', duration:'3 min', source:'AXA Prévention' }
+  ],
+  'rga': [
+    { type:'video',   title:'Comprendre le retrait-gonflement des argiles',duration:'5 min', source:'BRGM' },
+    { type:'video',   title:'Gérer la végétation près des fondations',     duration:'4 min',  source:'AXA Prévention' },
+    { type:'pdf',     title:'Guide BRGM — Prévention RGA',                duration:'15 min', source:'BRGM / Ministère' },
+    { type:'article', title:'Sécheresse et fissures : quand agir ?',      duration:'3 min',  source:'AXA Prévention' }
+  ]
+};
+
 /* ── HELPERS ── */
 
 function getProfile(id) {
