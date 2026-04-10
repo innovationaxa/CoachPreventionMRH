@@ -62,6 +62,44 @@ const PROFILES = {
     hasGarden: true,
     completedActions: ['incendie-detecteur-fumee','dde-goutieres'],
     tagline: 'Profil avancé · Risque RGA spécifique'
+  },
+  'profil-d': {
+    id: 'profil-d',
+    firstName: 'Lucas',
+    avatar: '🧑',
+    propertyType: 'Appartement en copropriété',
+    occupancyStatus: 'Propriétaire',
+    location: 'Bordeaux Centre (33)',
+    zone: 'Copropriété — Risque DDE élevé · Zone urbaine',
+    scenario: 'subscription',
+    scenarioLabel: 'Souscription',
+    scenarioColor: 'info',
+    exposureScore: 58,
+    preparationScore: 35,
+    mainRisks: ['degat-eaux','vol','incendie'],
+    condition: 'all',
+    hasGarden: false,
+    completedActions: [],
+    tagline: 'Nouvel achat · Copropriété · Score faible'
+  },
+  'profil-e': {
+    id: 'profil-e',
+    firstName: 'Camille',
+    avatar: '👩',
+    propertyType: 'Maison individuelle',
+    occupancyStatus: 'Propriétaire',
+    location: 'Marseille 9e (13)',
+    zone: 'Zone incendie PACA — Mistral — Sol argileux',
+    scenario: 'seasonal',
+    scenarioLabel: 'Saisonnalité',
+    scenarioColor: 'warn',
+    exposureScore: 72,
+    preparationScore: 48,
+    mainRisks: ['incendie','rga','tempete'],
+    condition: 'maison',
+    hasGarden: true,
+    completedActions: ['incendie-detecteur-fumee'],
+    tagline: 'Été · Risques feux et sécheresse'
   }
 };
 
@@ -401,7 +439,13 @@ const ALL_REWARDS = [
     desc:'Conditions préférentielles sur votre crédit habitat AXA Banque pour travaux de prévention.',
     type:'cheque_cadeau', priority:2, minActions:5,
     scenarios:['subscription'], conditions:['maison','maison_rdc'],
-    status:'teaser', teaser:'En cours d\'étude' }
+    status:'teaser', teaser:'En cours d\'étude' },
+  { id:'kit-prevention-saisonnier', icon:'🌿', iconBg:'#FEF3C7',
+    title:'Kit prévention saisonnière offert', subtitle:'~80 €',
+    desc:'Bâche de protection, produit ignifuge pour végétation et guide de débroussaillage — co-financé par AXA.',
+    type:'dispositif', priority:1, minActions:2,
+    scenarios:['seasonal'], conditions:['maison','maison_rdc'],
+    status:'available', disclaimer:'Livraison sous 10 jours ouvrés.' }
 ];
 
 /* ── HELPERS ── */
