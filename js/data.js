@@ -183,6 +183,23 @@ const ALL_QUESTIONS = [
     options:[{v:'yes',l:'Oui, plusieurs',pts:0},{v:'partial',l:'À certains endroits',pts:3},{v:'no',l:'Non',pts:8}] }
 ];
 
+/* ── MAPPING QUESTION → ACTION ── */
+/* Si l'utilisateur répond avec la valeur "triggerOnAnswer", l'action est considérée comme déjà réalisée */
+const QUESTION_ACTION_MAP = {
+  'inondation-clapets':       { actionId: 'inondation-clapets',           triggerOnAnswer: 'yes' },
+  'inondation-batardeaux':    { actionId: 'inondation-batardeaux',        triggerOnAnswer: 'yes' },
+  'tempete-goutieres':        { actionId: 'dde-goutieres',                triggerOnAnswer: 'yes' },
+  'dde-joints':               { actionId: 'dde-joints',                   triggerOnAnswer: 'yes' },
+  'incendie-detecteur-fumee': { actionId: 'incendie-detecteur-fumee',     triggerOnAnswer: 'yes' },
+  'incendie-chaudiere':       { actionId: 'incendie-chaudiere',           triggerOnAnswer: 'yes' },
+  'vol-serrure-3pts':         { actionId: 'vol-serrure-3pts',             triggerOnAnswer: 'yes' },
+  'inondation-obturateurs':   { actionId: 'inondation-calfeutrer',        triggerOnAnswer: 'yes' },
+  'inondation-electrique':    { actionId: 'inondation-circuit-electrique',triggerOnAnswer: 'yes' },
+  'incendie-ramonage':        { actionId: 'incendie-ramonage',            triggerOnAnswer: 'yes' },
+  'rga-trottoir':             { actionId: 'rga-trottoir',                 triggerOnAnswer: 'yes' },
+  'rga-vegetation':           { actionId: 'rga-vegetation',               triggerOnAnswer: 'no'  }
+};
+
 /* ── ACTIONS ── */
 const ALL_ACTIONS = [
   /* INONDATION */
@@ -202,6 +219,7 @@ const ALL_ACTIONS = [
     tags:['Gratuit','20 min'] },
   { id:'inondation-clapets', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
     horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
+    requiresOwner: true,
     title:'Installer des clapets anti-retour', effort:'high', duration:'Sur RDV',
     benefit:'Évite le reflux des eaux usées en cas d\'inondation — protège les caves et sous-sols.',
     pts:12, conseilText:'Installez des clapets anti-retour sur le réseau d\'eaux usées pour éviter le reflux des eaux en cas d\'inondation.',
@@ -262,6 +280,7 @@ const ALL_ACTIONS = [
     tags:['Gratuit','60 min'] },
   { id:'vol-serrure-3pts', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    requiresOwner: true,
     title:'Installer une serrure 3 points', effort:'medium', duration:'Sur RDV',
     benefit:'Multiplie par 4 la résistance à l\'effraction. Norme A2P recommandée par les assureurs.',
     pts:8, conseilText:'Disposez d\'une serrure 3 points sur votre porte d\'entrée.',
@@ -277,6 +296,7 @@ const ALL_ACTIONS = [
   /* RGA */
   { id:'rga-trottoir', riskId:'rga', riskLabel:'RGA', riskColor:'warn',
     horizon:'this_month', momentDeVie:'subscription', condition:'maison',
+    requiresOwner: true,
     title:'Aménager un trottoir périphérique', effort:'high', duration:'Sur RDV',
     benefit:'Évacue les eaux de pluie loin des fondations et réduit les cycles humidité/sécheresse.',
     pts:8, conseilText:'Aménagez un trottoir périphérique autour de votre maison pour éloigner l\'eau des fondations.',
@@ -299,6 +319,7 @@ const ALL_ACTIONS = [
   /* INONDATION — actions supplémentaires */
   { id:'inondation-circuit-electrique', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
     horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
+    requiresOwner: true,
     title:'Réhausser le circuit électrique à 1,5 m', effort:'high', duration:'Sur RDV',
     benefit:'Protège le tableau et les prises d\'un court-circuit en cas de montée des eaux.',
     pts:10, conseilText:'Réhaussez le circuit électrique (tableau, prises de courant) et les systèmes de chauffage au-dessus de 1,5 m du sol.',
@@ -346,8 +367,8 @@ const ALL_ACTIONS = [
 /* ── RÉCOMPENSES ── */
 const ALL_REWARDS = [
   { id:'lmqc-mois', icon:'🎁', iconBg:'#E6F5ED',
-    title:'1 mois LMQC offert', subtitle:'~46 € offerts',
-    desc:'Un mois de garantie supplémentaire sur votre contrat MRH.',
+    title:'1 mois d\'assurance complémentaire offert', subtitle:'~46 € offerts',
+    desc:'Un mois de garantie MRH supplémentaire sur votre contrat — offert par AXA en récompense de vos actions de prévention.',
     type:'lmqc', priority:1, minActions:3,
     scenarios:['subscription'], conditions:['all','maison','maison_rdc'],
     status:'available', disclaimer:'Activé au prochain renouvellement.' },
@@ -413,7 +434,9 @@ function getQuestionsForProfile(profile) {
   return result;
 }
 
-function getActionsForProfile(profile) {
+function getActionsForProfile(profile, diagAnswers) {
+  diagAnswers = diagAnswers || {};
+
   const eligible = ['all'];
   if (profile.condition === 'maison' || profile.condition === 'maison_rdc') {
     eligible.push('maison');
@@ -421,16 +444,32 @@ function getActionsForProfile(profile) {
   }
   if (profile.hasGarden) eligible.push('jardin');
 
-  const done = profile.completedActions || [];
+  /* Actions déjà couvertes par les réponses positives au diagnostic */
+  const doneByDiag = [];
+  Object.keys(diagAnswers).forEach(function(qid) {
+    const ans = diagAnswers[qid];
+    const mapping = QUESTION_ACTION_MAP[qid];
+    if (mapping && ans === mapping.triggerOnAnswer) {
+      doneByDiag.push(mapping.actionId);
+    }
+  });
+
+  const done = (profile.completedActions || []).concat(doneByDiag);
+  const isLocataire = profile.occupancyStatus === 'Locataire';
 
   return ALL_ACTIONS.filter(a => {
-    const riskMatch   = profile.mainRisks.includes(a.riskId);
-    const condMatch   = eligible.includes(a.condition);
-    const scenMatch   = a.momentDeVie === profile.scenario || a.momentDeVie === 'both';
-    const notDone     = !done.includes(a.id);
+    const riskMatch = profile.mainRisks.includes(a.riskId);
+    const condMatch = eligible.includes(a.condition);
+    const scenMatch = a.momentDeVie === profile.scenario || a.momentDeVie === 'both';
+    const notDone   = !done.includes(a.id);
     return riskMatch && condMatch && scenMatch && notDone;
   }).sort((a, b) => {
-    // Actions immédiates d'abord, puis tri par pts décroissant
+    /* Pour les locataires : actions propriétaire requises reléguées en fin de liste */
+    if (isLocataire) {
+      if (a.requiresOwner && !b.requiresOwner) return 1;
+      if (!a.requiresOwner && b.requiresOwner) return -1;
+    }
+    /* Actions immédiates d'abord, puis tri par pts décroissant */
     if (a.horizon !== b.horizon) return a.horizon === 'now' ? -1 : 1;
     return b.pts - a.pts;
   });
