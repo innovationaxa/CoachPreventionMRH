@@ -193,7 +193,7 @@ function updateScoreBar() {
   const p   = getProfile(window._ST.profileId);
   const s   = window._ST.currentScore || p.preparationScore;
   const done= window._ST.completedActions || [];
-  const actions = getActionsForProfile(p);
+  const actions = getActionsForProfile(p, window._ST.diagAnswers);
   const rem = actions.filter(a => !done.includes(a.id)).reduce((sum,a)=>sum+a.pts,0);
   const el  = document.getElementById('currentScore');
   const hd  = document.getElementById('ptsHeader');

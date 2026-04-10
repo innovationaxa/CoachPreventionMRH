@@ -310,3 +310,11 @@
   font-family: var(--font); transition: background .15s;
 }
 .suivi-nav-btn:hover { background: var(--axa-xlight); border-color: var(--axa-light); color: var(--axa); }
+
+/* ── V2.1 — LOCATAIRE NOTICE ── */
+.locataire-notice {
+  display: flex; align-items: flex-start; gap: var(--sp3);
+  background: var(--warn-bg); border: 1px solid var(--warn-light);
+  border-radius: var(--r-md); padding: 12px 14px;
+  margin-bottom: var(--sp3);
+}

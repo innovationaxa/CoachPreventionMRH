@@ -243,7 +243,7 @@ function screenScore() {
   const p = getProfile(window._ST.profileId);
   const score = window._ST.currentScore || p.preparationScore;
   const sl = scoreLevel(score);
-  const actions = getActionsForProfile(p);
+  const actions = getActionsForProfile(p, window._ST.diagAnswers);
   const totalGain = actions.reduce((s, a) => s + a.pts, 0);
   const potential = Math.min(score + totalGain, 100);
   const circ = 352;
@@ -394,7 +394,8 @@ function screenProjection() {
 ════════════════════════════ */
 function screenActionPlan() {
   const p = getProfile(window._ST.profileId);
-  const allActions = getActionsForProfile(p);
+  const allActions = getActionsForProfile(p, window._ST.diagAnswers);
+  const isLocataire = p.occupancyStatus === 'Locataire';
   const done = window._ST.completedActions || [];
   const totalPts = allActions.reduce((s, a) => s + a.pts, 0);
   const showAll = window._ST.showAllActions === true;
@@ -404,6 +405,9 @@ function screenActionPlan() {
 
   function actionCard(a, i) {
     const effortDot = a.effort === 'low' ? '🟢' : a.effort === 'medium' ? '🟡' : '🔴';
+    const ownerTag = isLocataire && a.requiresOwner
+      ? `<span class="meta-tag meta-tag-amber" style="font-size:10px">⚠️ Accord propriétaire requis</span>`
+      : '';
     return `
       <div class="reco-card rv rv${i+1}" onclick="openAction('${a.id}')">
         <div class="reco-card-top">
@@ -414,6 +418,7 @@ function screenActionPlan() {
         <div class="reco-tags">
           <span class="meta-tag">${effortDot} ${a.effort === 'low' ? 'Effort faible' : a.effort === 'medium' ? 'Effort moyen' : 'Effort élevé'}</span>
           ${a.tags.map((t, ti) => `<span class="meta-tag ${ti===0&&t.includes('Gratuit')?'meta-tag-green':ti===0&&t.includes('€')?'meta-tag-amber':''}">${t}</span>`).join('')}
+          ${ownerTag}
         </div>
         <div class="reco-benefit">${a.benefit}</div>
       </div>
@@ -490,6 +495,8 @@ function screenActionDetail() {
   const a  = ALL_ACTIONS.find(x => x.id === id);
   if (!a) return `<div class="body"><p style="color:var(--n500)">Sélectionnez une action depuis le plan.</p><button class="btn btn-ghost" onclick="goTo(5)">← Retour</button></div>`;
   const done = (window._ST.completedActions || []).includes(a.id);
+  const p = getProfile(window._ST.profileId);
+  const isLocataire = p.occupancyStatus === 'Locataire';
 
   const stepsHtml = a.steps.map((s, i) => `
     <div class="step-item rv rv${i+2}">
@@ -512,6 +519,15 @@ function screenActionDetail() {
       </div>
     </div>
     <div class="body-sm">
+      ${isLocataire && a.requiresOwner ? `
+        <div class="locataire-notice rv rv1">
+          <span style="font-size:16px">⚠️</span>
+          <div>
+            <div style="font-weight:600;font-size:13px;color:var(--warn)">Accord propriétaire requis</div>
+            <div style="font-size:12px;color:var(--n500);margin-top:2px">Cette action nécessite l'autorisation de votre bailleur avant toute intervention.</div>
+          </div>
+        </div>
+      ` : ''}
       <div class="conseil-axa-box rv rv1">
         <span class="conseil-axa-icon">${sv(IC.shield)}</span>
         <div class="conseil-axa-text">« ${a.conseilText} »</div>
@@ -555,7 +571,7 @@ function screenSuccess() {
   const done   = window._ST.completedActions || [];
   const rewards = getRewardsForProfile(p, done.length);
   const newUnlocked = rewards.filter(r => r.computedStatus === 'unlocked' && r.minActions === done.length);
-  const nextAction  = getActionsForProfile(p).find(x => !done.includes(x.id));
+  const nextAction  = getActionsForProfile(p, window._ST.diagAnswers).find(x => !done.includes(x.id));
 
   return `
     <div class="success-hero">
@@ -709,7 +725,7 @@ function screenMonSuivi() {
   const done    = window._ST.completedActions || [];
   const score   = window._ST.currentScore || p.preparationScore;
   const sl      = scoreLevel(score);
-  const allA    = getActionsForProfile(p);
+  const allA    = getActionsForProfile(p, window._ST.diagAnswers);
   const rewards = getRewardsForProfile(p, done.length);
   const unlocked = rewards.filter(r => r.computedStatus === 'unlocked');
   const available = rewards.filter(r => r.computedStatus === 'available');
