@@ -14,7 +14,8 @@ window._ST = {
   currentScore:     null,
   scoreBefore:      null,
   selectedAction:   null,
-  lastCompletedAction: null
+  lastCompletedAction: null,
+  showAllActions:   false
 };
 
 /* ── RENDER ── */
@@ -39,7 +40,7 @@ function render(idx) {
 
 /* ── NAVIGATION ── */
 function goTo(idx) {
-  if (idx < 0 || idx > 8) return;
+  if (idx < 0 || idx > 9) return;
   if (idx === 2) {
     // Reset diagnostic on entry
     window._ST.diagStep = 0;
@@ -56,6 +57,8 @@ function updateNav(idx) {
     else if (i < idx) btn.classList.add('done');
     const num = btn.querySelector('.step-num');
     if (num) num.textContent = i < idx ? '✓' : i + 1;
+    // S9 (Mon Suivi) accessible depuis n'importe quel état
+    if (i === 9) { btn.classList.remove('done'); if (idx === 9) btn.classList.add('active'); else btn.classList.remove('active'); }
   });
 }
 
@@ -123,6 +126,7 @@ function selectProfile(id) {
   window._ST.completedActions = [];
   window._ST.diagAnswers = {};
   window._ST.diagStep = 0;
+  window._ST.showAllActions = false;
   render(0);
   updateNav(0);
 }

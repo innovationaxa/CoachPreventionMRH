@@ -191,3 +191,122 @@
 .next-action-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--axa); margin-bottom: 3px; }
 .next-action-title { font-size: 13px; font-weight: 600; color: var(--n800); }
 .next-action-arrow { margin-left: auto; font-size: 18px; color: var(--axa); flex-shrink: 0; }
+
+/* ══════════════════════════════════════════
+   V2 — NOUVEAUX COMPOSANTS
+══════════════════════════════════════════ */
+
+/* ── LANDING V2 — Risk preview cards ── */
+.risk-preview-list { display: flex; flex-direction: column; gap: var(--sp2); margin-bottom: var(--sp4); }
+.risk-preview-card {
+  display: flex; align-items: center; gap: var(--sp3);
+  background: #fff; border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 10px 13px;
+  box-shadow: var(--shadow-xs);
+}
+.risk-preview-icon { font-size: 22px; flex-shrink: 0; width: 32px; text-align: center; }
+.risk-preview-info { flex: 1; min-width: 0; }
+.risk-preview-label { font-size: 13px; font-weight: 600; color: var(--n800); }
+.risk-preview-pct { font-size: 11px; color: var(--n500); margin-top: 1px; }
+
+/* ── DIAGNOSTIC V2 — Risk banner ── */
+.q-card-risk-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 12px; border-radius: var(--r-sm);
+  margin-bottom: var(--sp3);
+}
+
+/* ── SCORE V2 — Explanation box ── */
+.score-explain-box {
+  background: var(--n50); border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 13px 14px;
+  margin-bottom: var(--sp4);
+}
+.score-explain-title { font-size: 12px; font-weight: 700; color: var(--n700); margin-bottom: var(--sp2); }
+.score-explain-body { display: flex; flex-direction: column; gap: 6px; }
+.score-explain-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--n600); }
+.score-explain-val { font-weight: 700; color: var(--n800); }
+.score-explain-val.success { color: var(--success); }
+.score-explain-divider { height: 1px; background: var(--n150); margin: 4px 0; }
+
+/* ── ACTIONS V2 — Plan score bar ── */
+.plan-score-bar {
+  background: var(--n50); border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 11px 13px;
+  margin-bottom: var(--sp3);
+}
+.plan-score-info { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.plan-score-label { font-size: 11px; font-weight: 600; color: var(--n600); text-transform: uppercase; letter-spacing: .4px; }
+.plan-score-val { font-size: 13px; font-weight: 700; color: var(--n800); }
+.plan-score-track { height: 6px; background: var(--n150); border-radius: var(--r-pill); overflow: hidden; }
+.plan-score-fill { height: 100%; background: var(--warn-mid); border-radius: var(--r-pill); transition: width .4s ease; }
+.plan-score-fill.ok { background: var(--success-mid); }
+
+/* ── ACTIONS V2 — Card redesign ── */
+.reco-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.reco-benefit { font-size: 11px; color: var(--n500); line-height: 1.4; margin-top: 5px; }
+
+/* ── ACTIONS V2 — Expand button ── */
+.btn-expand-actions {
+  width: 100%; padding: 11px 16px;
+  border: 1.5px dashed var(--n200); border-radius: var(--r-md);
+  background: transparent; color: var(--axa); font-size: 13px; font-weight: 600;
+  cursor: pointer; text-align: center; margin: var(--sp3) 0;
+  transition: background .15s, border-color .15s;
+  font-family: var(--font);
+}
+.btn-expand-actions:hover { background: var(--axa-xlight); border-color: var(--axa-light); }
+
+/* ── REWARDS V2 — Philosophy ── */
+.rewards-philosophy {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--axa-xlight); border: 1px solid var(--axa-light);
+  border-radius: var(--r-md); padding: 11px 13px;
+  margin-bottom: var(--sp4);
+}
+.rewards-philosophy p { font-size: 12px; color: var(--axa-dark); line-height: 1.5; margin: 0; }
+
+/* ── SCREEN 9 — MON SUIVI ── */
+.suivi-hero {
+  background: linear-gradient(145deg, var(--axa) 0%, var(--axa-mid) 100%);
+  padding: var(--sp5) var(--sp5) var(--sp6);
+  text-align: center;
+}
+.suivi-ring-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.suivi-ring-center { position: absolute; text-align: center; }
+.suivi-score-num { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -1px; }
+.suivi-score-denom { font-size: 12px; color: rgba(255,255,255,.55); }
+
+.suivi-done-list { display: flex; flex-direction: column; gap: var(--sp2); margin-bottom: var(--sp4); }
+.suivi-done-item {
+  display: flex; align-items: flex-start; gap: var(--sp3);
+  background: var(--success-bg); border: 1px solid var(--success-light);
+  border-radius: var(--r-md); padding: 10px 12px;
+}
+.suivi-done-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--success-mid); display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.suivi-done-title { font-size: 12px; font-weight: 600; color: var(--n800); }
+.suivi-done-risk { font-size: 11px; color: var(--n500); margin-top: 1px; }
+
+.suivi-reward-item {
+  display: flex; align-items: center; gap: var(--sp3);
+  background: var(--n50); border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: 11px 13px;
+  margin-bottom: var(--sp2);
+}
+
+.suivi-nav-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: var(--sp2); margin-top: var(--sp2);
+}
+.suivi-nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: var(--n50); border: 1px solid var(--n150);
+  border-radius: var(--r-md); padding: var(--sp3) var(--sp2);
+  cursor: pointer; font-size: 11px; font-weight: 600; color: var(--n700);
+  font-family: var(--font); transition: background .15s;
+}
+.suivi-nav-btn:hover { background: var(--axa-xlight); border-color: var(--axa-light); color: var(--axa); }

@@ -149,6 +149,31 @@ const ALL_QUESTIONS = [
   { id:'vol-serrure-3pts', riskId:'vol', condition:'all',
     text:'Avez-vous une serrure 3 points sur votre porte d\'entrée ?',
     options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:0}] },
+  /* INONDATION — questions supplémentaires */
+  { id:'inondation-obturateurs', riskId:'inondation', condition:'maison_rdc',
+    text:'Disposez-vous de systèmes pour calfeutrer vos ouvertures basses (soupiraux, aérations) ?',
+    options:[{v:'yes',l:'Oui, pour toutes',pts:8},{v:'partial',l:'Pour certaines',pts:4},{v:'no',l:'Non',pts:0}] },
+  { id:'inondation-electrique', riskId:'inondation', condition:'maison_rdc',
+    text:'Votre circuit électrique est-il relevé au-dessus de 1,5 m du sol ?',
+    options:[{v:'yes',l:'Oui',pts:10},{v:'partial',l:'En partie',pts:5},{v:'no',l:'Non / Je ne sais pas',pts:0}] },
+  /* DÉGÂT DES EAUX — question supplémentaire */
+  { id:'dde-canalisation-tableau', riskId:'degat-eaux', condition:'all',
+    text:'Y a-t-il des canalisations qui passent à proximité de votre tableau électrique ?',
+    options:[{v:'yes',l:'Oui',pts:0},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:6}] },
+  /* INCENDIE — questions supplémentaires */
+  { id:'incendie-ramonage', riskId:'incendie', condition:'maison',
+    text:'Faites-vous ramoner vos conduits de cheminée ou d\'insert au moins une fois par an ?',
+    options:[{v:'yes',l:'Oui, chaque année',pts:6},{v:'partial',l:'Pas tous les ans',pts:2},{v:'no',l:'Non / Pas de cheminée',pts:4}] },
+  { id:'incendie-extincteur', riskId:'incendie', condition:'all',
+    text:'Disposez-vous d\'un extincteur aux normes et savez-vous vous en servir ?',
+    options:[{v:'yes',l:'Oui, et je sais l\'utiliser',pts:6},{v:'partial',l:'Oui mais pas formé',pts:3},{v:'no',l:'Non',pts:0}] },
+  { id:'incendie-electricite', riskId:'incendie', condition:'all',
+    text:'Votre installation électrique a-t-elle été refaite il y a moins de 15 ans ?',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non',pts:0}] },
+  /* VOL — question supplémentaire */
+  { id:'vol-volets', riskId:'vol', condition:'maison_rdc',
+    text:'Fermez-vous systématiquement vos volets la nuit et lors de vos absences ?',
+    options:[{v:'yes',l:'Oui, systématiquement',pts:6},{v:'partial',l:'Parfois',pts:3},{v:'no',l:'Non / Pas de volets',pts:0}] },
   /* RGA — condition: maison */
   { id:'rga-trottoir', riskId:'rga', condition:'maison',
     text:'Avez-vous un trottoir périphérique autour de votre maison ?',
@@ -263,7 +288,59 @@ const ALL_ACTIONS = [
     benefit:'Les racines profondes accentuent les cycles de rétraction du sol argileux.',
     pts:6, conseilText:'Évitez de planter des végétaux près des façades.',
     steps:['Identifier les arbres et haies à moins de 5 m des murs','Couper les branches surplombant la toiture','Pour les grands arbres : faire appel à un élagueur certifié','Ne pas replanter à moins de 5 m des fondations'],
-    tags:['Variable','60 min ou Pro'] }
+    tags:['Variable','60 min ou Pro'] },
+  { id:'rga-goutieres', riskId:'rga', riskLabel:'RGA', riskColor:'warn',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison',
+    title:'Désencombrer les gouttières (RGA)', effort:'low', duration:'30 min',
+    benefit:'Évite l\'accumulation d\'eau en pied de façade qui aggrave les cycles argile sèche/humide.',
+    pts:4, conseilText:'Désencombrez vos gouttières et raccordez-les au réseau d\'évacuation pour éloigner l\'eau des fondations.',
+    steps:['Vérifier l\'état des gouttières et descentes pluviales','Retirer les feuilles et débris accumulés','Raccorder les descentes vers l\'égout pluvial ou l\'infiltration','Vérifier qu\'aucune eau ne stagne en pied de mur'],
+    tags:['Gratuit','30 min'] },
+  /* INONDATION — actions supplémentaires */
+  { id:'inondation-circuit-electrique', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
+    title:'Réhausser le circuit électrique à 1,5 m', effort:'high', duration:'Sur RDV',
+    benefit:'Protège le tableau et les prises d\'un court-circuit en cas de montée des eaux.',
+    pts:10, conseilText:'Réhaussez le circuit électrique (tableau, prises de courant) et les systèmes de chauffage au-dessus de 1,5 m du sol.',
+    steps:['Faire réaliser un diagnostic électrique par un électricien certifié','Établir un plan de rehaussement du tableau et des prises basses','Réaliser les travaux hors période de risque inondation','Obtenir l\'attestation de conformité Consuel après travaux'],
+    tags:['800–2000 €','Électricien requis'] },
+  { id:'inondation-zone-refuge', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
+    title:'Aménager une zone refuge en hauteur', effort:'medium', duration:'60 min',
+    benefit:'Permet de se mettre en sécurité si la montée des eaux est trop rapide pour évacuer.',
+    pts:6, conseilText:'Aménagez une zone refuge en hauteur, munie d\'un accès vers l\'extérieur (fenêtre de toit, balcon).',
+    steps:['Identifier la pièce en hauteur la plus accessible (étage, grenier)','Y stocker eau, médicaments, lampe et radio à piles','Vérifier qu\'une fenêtre ou trappe permet d\'alerter les secours','Informer tous les occupants de l\'emplacement et du protocole'],
+    tags:['Gratuit','60 min'] },
+  { id:'inondation-produits-sensibles', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
+    title:'Mettre à l\'abri les produits sensibles', effort:'low', duration:'15 min',
+    benefit:'Évite la pollution des eaux de crue par les produits chimiques et la perte de médicaments.',
+    pts:4, conseilText:'Mettez à l\'abri les produits sensibles (médicaments, produits chimiques…) afin d\'éviter un risque de pollution important.',
+    steps:['Rassembler médicaments, produits d\'entretien et chimiques','Les placer dans des sacs hermétiques ou boîtes étanches','Les monter à l\'étage ou dans un meuble en hauteur','Faire de même pour les documents importants et le matériel informatique'],
+    tags:['Gratuit','15 min'] },
+  /* INCENDIE — actions supplémentaires */
+  { id:'incendie-ramonage', riskId:'incendie', riskLabel:'Incendie', riskColor:'danger',
+    horizon:'this_month', momentDeVie:'subscription', condition:'maison',
+    title:'Faire ramoner les conduits de cheminée', effort:'low', duration:'Sur RDV',
+    benefit:'Obligatoire 1 à 2 fois/an. Prévient le feu de cheminée et l\'intoxication au monoxyde de carbone.',
+    pts:6, conseilText:'Faites ramoner vos conduits de cheminée, d\'inserts ou de poêles au moins une fois par an.',
+    steps:['Contacter un ramoneur agréé (vérifier accréditation)','Prévoir la prestation avant l\'hiver (septembre–octobre)','Demander un certificat de ramonage pour votre assurance','Vérifier la ventilation de la pièce après le ramonage'],
+    tags:['80–150 €','Ramoneur agréé'] },
+  { id:'incendie-debroussaillage', riskId:'incendie', riskLabel:'Incendie', riskColor:'danger',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison',
+    title:'Débroussailler le jardin et le terrain', effort:'medium', duration:'120 min',
+    benefit:'Réduit le combustible disponible et ralentit la propagation d\'un feu de végétation.',
+    pts:5, conseilText:'Si vous avez un jardin ou un terrain, débroussaillez-le régulièrement.',
+    steps:['Couper les herbes hautes et végétaux secs dans un rayon de 50 m','Élaguer les branches basses des arbres jusqu\'à 2 m de hauteur','Ramasser et évacuer les déchets végétaux (ne pas brûler en période sèche)','Laisser un espace libre entre les arbres pour ne pas créer de continuité'],
+    tags:['Gratuit ou Pro','120 min'] },
+  /* VOL — actions supplémentaires */
+  { id:'vol-ranger-exterieur', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
+    horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
+    title:'Ranger les équipements extérieurs', effort:'low', duration:'10 min',
+    benefit:'Les échelles et outils laissés dehors facilitent l\'intrusion — 1 cambrioleur sur 3 utilise ce qui est à portée.',
+    pts:4, conseilText:'En extérieur, ne laissez rien qui puisse faciliter une intrusion : échelles, marchepieds ou outils pourraient être utilisés à mauvais escient.',
+    steps:['Rentrer les échelles, escabeaux et marchepieds dans un local fermé','Verrouiller l\'abri de jardin et le garage','Ranger les outils de jardinage (pioches, barres)','Fermer et verrouiller le portail et la clôture'],
+    tags:['Gratuit','10 min'] }
 ];
 
 /* ── RÉCOMPENSES ── */
@@ -352,6 +429,10 @@ function getActionsForProfile(profile) {
     const scenMatch   = a.momentDeVie === profile.scenario || a.momentDeVie === 'both';
     const notDone     = !done.includes(a.id);
     return riskMatch && condMatch && scenMatch && notDone;
+  }).sort((a, b) => {
+    // Actions immédiates d'abord, puis tri par pts décroissant
+    if (a.horizon !== b.horizon) return a.horizon === 'now' ? -1 : 1;
+    return b.pts - a.pts;
   });
 }
 
