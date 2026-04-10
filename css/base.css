@@ -212,3 +212,22 @@ body {
 
 /* ── PAD BOTTOM ── */
 .pb { height: 36px; }
+
+/* ── ACCESSIBILITY — FOCUS ── */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--axa);
+  outline-offset: 2px;
+}
+.btn-primary:focus-visible,
+.btn-success:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.8);
+  outline-offset: 2px;
+}
+
+/* ── DISABLED BUTTONS ── */
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}

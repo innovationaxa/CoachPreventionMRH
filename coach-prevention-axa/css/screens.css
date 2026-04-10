@@ -41,7 +41,10 @@
   background: #fff;
 }
 .profile-card:hover { border-color: var(--axa-mid); }
-.profile-card.selected { border-color: var(--axa); background: var(--axa-xlight); }
+.profile-card.selected {
+  border-color: var(--axa); background: var(--axa-xlight);
+  box-shadow: 0 0 0 3px rgba(0,0,143,0.08);
+}
 .profile-avatar { font-size: 26px; width: 42px; height: 42px; border-radius: 50%; background: var(--n100); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .profile-name { font-size: 13px; font-weight: 700; color: var(--n800); }
 .profile-loc { font-size: 11px; color: var(--n500); margin-top: 1px; }
@@ -66,7 +69,7 @@
   font-size: 11px; font-weight: 600; color: #fff; margin-bottom: var(--sp3);
 }
 .landing-h1 { font-size: 21px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 7px; letter-spacing: -.2px; }
-.landing-sub { font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.5; margin-bottom: var(--sp4); }
+.landing-sub { font-size: 13px; color: rgba(255,255,255,.78); line-height: 1.5; margin-bottom: var(--sp4); }
 .landing-profile-row { display: flex; align-items: center; gap: var(--sp2); background: rgba(255,255,255,.12); border-radius: var(--r-md); padding: 10px 13px; }
 .landing-profile-avatar { font-size: 22px; }
 .landing-profile-name { font-size: 13px; font-weight: 600; color: #fff; }
@@ -97,11 +100,14 @@
 .opt-item {
   display: flex; align-items: center; justify-content: space-between;
   padding: 11px 14px; border-radius: var(--r-md);
-  border: 1.5px solid var(--n150); background: #fff;
+  border: 1.5px solid var(--n200); background: var(--n50);
   cursor: pointer; transition: all .15s; font-size: 13px; color: var(--n700); font-family: var(--font);
 }
-.opt-item:hover { border-color: var(--axa-mid); color: var(--axa); }
-.opt-item.sel { background: var(--axa); border-color: var(--axa); color: #fff; font-weight: 600; }
+.opt-item:hover { border-color: var(--axa-mid); color: var(--axa); background: var(--axa-xlight); }
+.opt-item.sel {
+  background: var(--axa); border-color: var(--axa); color: #fff; font-weight: 600;
+  animation: selectBounce 0.3s ease;
+}
 .opt-item.sel .opt-pts { background: rgba(255,255,255,.2); color: #fff; }
 .opt-pts { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); background: var(--success-light); color: var(--success); transition: all .15s; }
 .opt-pts.zero { background: var(--n150); color: var(--n400); }
@@ -112,7 +118,11 @@
 .diag-nav-next { flex: 1; }
 
 /* ── SCREEN 3 — SCORE ── */
-/* inherits from v2 components.css score-hero */
+.score-potential {
+  display: flex; align-items: center; justify-content: center; gap: var(--sp2);
+  font-size: 12px; color: rgba(255,255,255,0.75); margin-top: var(--sp2);
+}
+.score-potential-arrow { font-weight: 700; color: var(--success-mid); }
 
 /* ── SCREEN 4 — RISK PROJECTION ── */
 .projection-hero { background: var(--axa); padding: var(--sp5) var(--sp5) var(--sp6); }
@@ -135,10 +145,10 @@
 
 /* ── SCREEN 6 — ACTION DETAIL ── */
 .detail-header { background: var(--axa); padding: var(--sp5) var(--sp5) var(--sp6); }
-.detail-risk-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: var(--r-pill); margin-bottom: var(--sp3); }
+.detail-risk-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: var(--r-pill); margin-bottom: var(--sp3); }
 .detail-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: var(--sp3); letter-spacing: -.2px; }
 .detail-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.detail-chip { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18); color: #fff; }
+.detail-chip { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: var(--r-pill); background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18); color: #fff; }
 
 .conseil-axa-box { background: var(--axa-xlight); border: 1px solid var(--axa-light); border-radius: var(--r-md); padding: 12px 14px; margin-bottom: var(--sp4); display: flex; gap: var(--sp2); }
 .conseil-axa-icon svg { width: 16px; height: 16px; fill: var(--axa); flex-shrink: 0; margin-top: 2px; }
@@ -157,7 +167,12 @@
 .pts-gain-label { font-size: 12px; color: var(--axa); }
 .pts-gain-val { font-size: 18px; font-weight: 700; color: var(--axa); }
 
-.detail-sticky { padding: var(--sp3) var(--sp5) var(--sp4); border-top: 1px solid var(--n150); background: #fff; position: sticky; bottom: 0; }
+.detail-sticky {
+  padding: var(--sp3) var(--sp5) var(--sp4);
+  border-top: 1px solid var(--n150);
+  background: #fff; position: sticky; bottom: 0;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+}
 
 /* ── SCREEN 7 — SUCCESS ── */
 .success-hero { background: var(--success); padding: var(--sp6) var(--sp5); text-align: center; }
@@ -219,13 +234,18 @@
 /* ── SCORE V2 — Explanation box ── */
 .score-explain-box {
   background: var(--n50); border: 1px solid var(--n150);
-  border-radius: var(--r-md); padding: 13px 14px;
+  border-radius: var(--r-md); padding: 16px 14px;
   margin-bottom: var(--sp4);
 }
-.score-explain-title { font-size: 12px; font-weight: 700; color: var(--n700); margin-bottom: var(--sp2); }
-.score-explain-body { display: flex; flex-direction: column; gap: 6px; }
-.score-explain-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--n600); }
-.score-explain-val { font-weight: 700; color: var(--n800); }
+.score-explain-title { font-size: 13px; font-weight: 700; color: var(--n700); margin-bottom: var(--sp3); }
+.score-explain-body { display: flex; flex-direction: column; }
+.score-explain-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--n600);
+  padding: 8px 0; border-bottom: 1px solid var(--n100);
+}
+.score-explain-row:last-child { border-bottom: none; }
+.score-explain-val { font-weight: 700; color: var(--n800); font-size: 14px; }
 .score-explain-val.success { color: var(--success); }
 .score-explain-divider { height: 1px; background: var(--n150); margin: 4px 0; }
 
@@ -244,18 +264,22 @@
 
 /* ── ACTIONS V2 — Card redesign ── */
 .reco-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.reco-benefit { font-size: 11px; color: var(--n500); line-height: 1.4; margin-top: 5px; }
+.reco-benefit {
+  font-size: 12px; color: var(--n600); line-height: 1.5;
+  margin-top: var(--sp2); padding-top: var(--sp2);
+  border-top: 1px solid var(--n100);
+}
 
 /* ── ACTIONS V2 — Expand button ── */
 .btn-expand-actions {
-  width: 100%; padding: 11px 16px;
-  border: 1.5px dashed var(--n200); border-radius: var(--r-md);
-  background: transparent; color: var(--axa); font-size: 13px; font-weight: 600;
+  width: 100%; padding: 12px 16px;
+  border: 1.5px dashed var(--axa-mid); border-radius: var(--r-md);
+  background: var(--axa-xlight); color: var(--axa); font-size: 13px; font-weight: 600;
   cursor: pointer; text-align: center; margin: var(--sp3) 0;
-  transition: background .15s, border-color .15s;
+  transition: background .15s, border-color .15s, box-shadow .15s;
   font-family: var(--font);
 }
-.btn-expand-actions:hover { background: var(--axa-xlight); border-color: var(--axa-light); }
+.btn-expand-actions:hover { background: var(--axa-light); border-color: var(--axa); box-shadow: var(--shadow-xs); }
 
 /* ── REWARDS V2 — Philosophy ── */
 .rewards-philosophy {
@@ -264,7 +288,7 @@
   border-radius: var(--r-md); padding: 11px 13px;
   margin-bottom: var(--sp4);
 }
-.rewards-philosophy p { font-size: 12px; color: var(--axa-dark); line-height: 1.5; margin: 0; }
+.rewards-philosophy p { font-size: 13px; font-weight: 500; color: var(--axa-dark); line-height: 1.6; margin: 0; }
 
 /* ── SCREEN 9 — MON SUIVI ── */
 .suivi-hero {

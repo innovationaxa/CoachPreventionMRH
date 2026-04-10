@@ -227,7 +227,7 @@ function screenDiagnostic() {
       </div>
     </div>
     <div class="diag-nav">
-      <button class="diag-nav-back" onclick="diagBack()">${sv(IC.back)}</button>
+      <button class="diag-nav-back" onclick="diagBack()" aria-label="Question précédente">${sv(IC.back)}</button>
       <button class="btn btn-primary diag-nav-next" onclick="diagNext()" ${hasAnswer ? '' : 'disabled style="opacity:.5"'} id="diagNextBtn">
         ${isLast ? 'Voir mon score' : 'Question suivante'}
         <svg class="btn-icon">${sv(IC.arrow)}</svg>
