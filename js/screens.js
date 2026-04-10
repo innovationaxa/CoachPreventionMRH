@@ -85,52 +85,79 @@ function screenLanding() {
   const p = getProfile(window._ST.profileId);
   const isSeasonal = p.scenario === 'seasonal';
 
-  const promisesHtml = [
-    { icon: '🔍', label: 'Diagnostic personnalisé' },
-    { icon: '📋', label: 'Plan d\'action ciblé' },
-    { icon: '🎁', label: 'Rewards à débloquer' },
-  ].map(pr => `
+  const benefitsHtml = [
+    { icon: '🔍', label: 'Comprendre vos risques réels' },
+    { icon: '🎯', label: 'Un plan d\'action priorisé' },
+    { icon: '🛠️', label: 'Savoir quoi faire en premier' },
+    { icon: '🎁', label: 'Des avantages concrets à débloquer' },
+  ].map(b => `
     <div class="promise-item">
-      <div class="promise-icon">${pr.icon}</div>
-      <div class="promise-label">${pr.label}</div>
+      <div class="promise-icon">${b.icon}</div>
+      <div class="promise-label">${b.label}</div>
     </div>
   `).join('');
+
+  const riskPreviewHtml = p.mainRisks.map(rId => {
+    const r = RISKS[rId];
+    if (!r) return '';
+    const tagCls = r.level === 'high' ? 'tag-danger' : r.level === 'medium' ? 'tag-warn' : 'tag-success';
+    return `
+      <div class="risk-preview-card">
+        <div class="risk-preview-icon">${r.icon}</div>
+        <div class="risk-preview-info">
+          <div class="risk-preview-label">${r.label}</div>
+          <div class="risk-preview-pct">${r.avoidablePercent}% des dommages évitables</div>
+        </div>
+        <span class="tag ${tagCls}">${r.levelLabel}</span>
+      </div>
+    `;
+  }).join('');
 
   return `
     <div class="landing-banner ${isSeasonal ? 'seasonal' : 'subscription'}">
       <div class="landing-scenario-badge rv rv1">
-        ${isSeasonal ? '🌧️ Saisonnalité' : '🏠 Souscription'}
+        ${isSeasonal ? '🌧️ Saisonnalité automne-hiver' : '🏠 Nouveau contrat MRH'}
       </div>
       <h1 class="landing-h1 rv rv2">
         ${isSeasonal
-          ? `${p.firstName}, préparez-vous avant l'automne-hiver`
-          : `${p.firstName}, votre plan de prévention commence ici`}
+          ? `${p.firstName}, protégez votre logement avant la saison à risque`
+          : `${p.firstName}, découvrez comment mieux protéger votre logement`}
       </h1>
       <p class="landing-sub rv rv3">
         ${isSeasonal
-          ? `Votre zone ${p.location} est exposée. Quelques gestes simples peuvent éviter l'essentiel des dégâts.`
-          : `Bienvenue chez AXA. En 2 minutes, obtenez votre bilan de protection et vos premières récompenses.`}
+          ? `Diagnostic en 2 min · Actions à réaliser ce week-end · Avantages AXA`
+          : `Diagnostic en 2 min · Plan d'action personnalisé · Avantages AXA`}
       </p>
       <div class="landing-profile-row rv rv4">
         <div class="landing-profile-avatar">${p.avatar}</div>
         <div>
           <div class="landing-profile-name">${p.firstName} · ${p.propertyType}</div>
-          <div class="landing-profile-detail">${p.location} · ${p.zone}</div>
+          <div class="landing-profile-detail">${sv(IC.pin, 'width:11px;height:11px;vertical-align:middle')} ${p.location} · ${p.zone}</div>
         </div>
       </div>
     </div>
     <div class="body">
+      <div class="section-title rv rv1">Vos risques identifiés sur votre zone</div>
+      <div class="risk-preview-list rv rv2">${riskPreviewHtml}</div>
+
       ${isSeasonal ? `
-        <div class="alert-box rv rv1">
+        <div class="alert-box rv rv3">
           <div class="alert-box-icon">⚠️</div>
-          <div class="alert-box-text"><strong>Risques élevés détectés</strong> sur votre zone : ${p.mainRisks.slice(0,2).map(r => RISKS[r]?.label).join(' et ')}. Des actions urgentes sont disponibles.</div>
+          <div class="alert-box-text"><strong>Actions urgentes disponibles</strong> — des gestes simples peuvent éviter l'essentiel des dégâts avant que la saison à risque arrive.</div>
         </div>
       ` : ''}
-      <div class="section-title rv rv2">Ce que vous allez obtenir</div>
-      <div class="promises rv rv2">${promisesHtml}</div>
-      <div class="rv rv3">
+
+      <div class="section-title rv rv3">Ce que vous allez obtenir</div>
+      <div class="promises rv rv3">${benefitsHtml}</div>
+
+      <div class="reassure green rv rv4">
+        <span class="reassure-icon">${sv(IC.check)}</span>
+        <span>Vos réponses personnalisent votre plan. Aucun impact sur votre prime.</span>
+      </div>
+
+      <div class="rv rv4">
         <button class="btn btn-primary" onclick="goTo(2)">
-          Démarrer mon diagnostic
+          Démarrer mon diagnostic — 2 min
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
         </button>
         <button class="btn btn-ghost" onclick="goTo(0)">Changer de profil</button>
@@ -162,15 +189,11 @@ function screenDiagnostic() {
   }).join('');
 
   const risk = RISKS[q.riskId];
-  const optionsHtml = q.options.map((opt, i) => {
+  const optionsHtml = q.options.map((opt) => {
     const sel = window._ST.diagAnswers && window._ST.diagAnswers[q.id] === opt.v;
-    const ptsLabel = opt.pts > 0
-      ? `<span class="opt-pts">+${opt.pts} pts</span>`
-      : `<span class="opt-pts zero">0 pt</span>`;
     return `
       <div class="opt-item ${sel ? 'sel' : ''}" onclick="selectDiagOpt('${q.id}','${opt.v}',this)">
         ${opt.l}
-        ${ptsLabel}
       </div>
     `;
   }).join('');
@@ -192,19 +215,16 @@ function screenDiagnostic() {
       <div class="diag-stepper" style="margin-bottom:var(--sp4)">${stepperHtml}</div>
 
       <div class="q-card rv rv1">
-        <div class="q-card-num">
-          <span style="${riskStyle(q.riskId === 'incendie' ? 'danger' : q.riskId === 'degat-eaux' || q.riskId === 'inondation' ? 'info' : q.riskId === 'vol' ? 'neutral' : 'warn')};padding:2px 8px;border-radius:var(--r-pill)">${risk?.icon} ${risk?.label}</span>
+        <div class="q-card-risk-banner" style="${riskStyle(q.riskId === 'incendie' ? 'danger' : q.riskId === 'degat-eaux' || q.riskId === 'inondation' ? 'info' : q.riskId === 'vol' ? 'neutral' : 'warn')}">
+          <span style="font-size:16px">${risk?.icon}</span>
+          <div>
+            <div style="font-weight:600;font-size:13px">${risk?.label}</div>
+            <div style="font-size:11px;opacity:.75">${risk?.explanation?.substring(0, 60)}…</div>
+          </div>
         </div>
         <div class="q-card-text">${q.text}</div>
         <div class="option-list">${optionsHtml}</div>
       </div>
-
-      ${step === 0 ? `
-        <div class="reassure green rv rv2" style="margin-top:0">
-          <span class="reassure-icon">${sv(IC.check)}</span>
-          <span>Vos réponses personnalisent votre plan. Aucun impact sur votre prime.</span>
-        </div>
-      ` : ''}
     </div>
     <div class="diag-nav">
       <button class="diag-nav-back" onclick="diagBack()">${sv(IC.back)}</button>
@@ -246,6 +266,8 @@ function screenScore() {
     `;
   }).join('');
 
+  const diagGain = score - p.preparationScore;
+
   return `
     <div class="score-hero">
       <div class="score-hero-label rv rv1">Votre score de prévention</div>
@@ -266,20 +288,45 @@ function screenScore() {
       </div>
       <p class="score-tagline rv rv3">${p.mainRisks.length} risques analysés · ${actions.length} actions disponibles</p>
       <div class="score-potential rv rv4">
-        <span>Score potentiel avec les actions recommandées</span>
+        <span>Avec toutes vos actions</span>
         <span class="score-potential-arrow">→ ${potential}/100</span>
       </div>
     </div>
     <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
     <div class="body-sm">
-      <div class="section-title rv rv1">Score par risque</div>
+
+      <div class="score-explain-box rv rv1">
+        <div class="score-explain-title">${sv(IC.info, 'width:13px;height:13px;vertical-align:middle;margin-right:4px')} Comment fonctionne ce score ?</div>
+        <div class="score-explain-body">
+          <div class="score-explain-row">
+            <span>Score de départ (profil)</span>
+            <span class="score-explain-val">${p.preparationScore} pts</span>
+          </div>
+          ${diagGain > 0 ? `
+          <div class="score-explain-row">
+            <span>Gains de votre diagnostic</span>
+            <span class="score-explain-val success">+${diagGain} pts</span>
+          </div>` : ''}
+          <div class="score-explain-row">
+            <span>Potentiel actions disponibles</span>
+            <span class="score-explain-val">+${totalGain} pts</span>
+          </div>
+          <div class="score-explain-divider"></div>
+          <div class="score-explain-row">
+            <span style="font-size:11px;color:var(--n500)">< 45 : Faible · 45–69 : Modéré · 70+ : Bon</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title rv rv2">Exposition par risque</div>
       <div class="risk-bars rv rv2">${riskBarsHtml}</div>
+
       <div class="cta-box rv rv3">
         <p class="cta-text">
-          <strong>+${Math.min(totalGain, potential - score)} pts possibles</strong> avec vos actions personnalisées — débloquez vos premières récompenses AXA.
+          <strong>+${Math.min(totalGain, potential - score)} pts possibles</strong> en réalisant vos actions — débloquez vos avantages AXA prévention.
         </p>
         <button class="btn btn-primary" onclick="goTo(4)">
-          Comprendre mes risques
+          Voir l'impact sur mes risques
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
         </button>
       </div>
@@ -347,56 +394,84 @@ function screenProjection() {
 ════════════════════════════ */
 function screenActionPlan() {
   const p = getProfile(window._ST.profileId);
-  const actions = getActionsForProfile(p);
+  const allActions = getActionsForProfile(p);
   const done = window._ST.completedActions || [];
-  const totalPts = actions.filter(a => !done.includes(a.id)).reduce((s, a) => s + a.pts, 0);
+  const totalPts = allActions.reduce((s, a) => s + a.pts, 0);
+  const showAll = window._ST.showAllActions === true;
+  const TOP_N = 3;
+  const displayedActions = showAll ? allActions : allActions.slice(0, TOP_N);
+  const hidden = allActions.length - TOP_N;
 
-  const horizons = ['now','this_month'];
-  const labels   = { now:'Ce week-end — actions rapides', this_month:'Ce mois-ci — investissements ciblés' };
-
-  const cardsHtml = horizons.map(h => {
-    const items = actions.filter(a => a.horizon === h && !done.includes(a.id));
-    if (!items.length) return '';
-    const cards = items.map((a, i) => `
-      <div class="reco-card rv rv${i+1}" id="ac_${a.id}" onclick="openAction('${a.id}')">
-        <span class="reco-risk-badge" style="${riskStyle(a.riskColor)}">${a.riskLabel}</span>
-        <div class="reco-top">
-          <div class="reco-check" id="chk_${a.id}">
-            <svg viewBox="0 0 24 24" style="width:11px;height:11px;fill:${done.includes(a.id)?'white':'transparent'}">${sv(IC.check).replace('<svg viewBox="0 0 24 24">','')}</svg>
-          </div>
-          <div class="reco-title">${a.title}</div>
-        </div>
-        <div class="reco-tags">
-          ${a.tags.map((t,ti) => `<span class="meta-tag ${ti===0&&t.includes('Gratuit')?'meta-tag-green':ti===0&&t.includes('€')?'meta-tag-amber':''}">${t}</span>`).join('')}
+  function actionCard(a, i) {
+    const effortDot = a.effort === 'low' ? '🟢' : a.effort === 'medium' ? '🟡' : '🔴';
+    return `
+      <div class="reco-card rv rv${i+1}" onclick="openAction('${a.id}')">
+        <div class="reco-card-top">
+          <span class="reco-risk-badge" style="${riskStyle(a.riskColor)}">${a.riskLabel}</span>
           <span class="meta-tag meta-tag-blue">+${a.pts} pts</span>
         </div>
+        <div class="reco-title">${a.title}</div>
+        <div class="reco-tags">
+          <span class="meta-tag">${effortDot} ${a.effort === 'low' ? 'Effort faible' : a.effort === 'medium' ? 'Effort moyen' : 'Effort élevé'}</span>
+          ${a.tags.map((t, ti) => `<span class="meta-tag ${ti===0&&t.includes('Gratuit')?'meta-tag-green':ti===0&&t.includes('€')?'meta-tag-amber':''}">${t}</span>`).join('')}
+        </div>
+        <div class="reco-benefit">${a.benefit}</div>
       </div>
-    `).join('');
-    return `<div class="horizon-label">${labels[h]}</div>${cards}`;
-  }).join('');
+    `;
+  }
 
   const rewards = getRewardsForProfile(p, done.length);
   const nextReward = rewards.find(r => r.computedStatus === 'available');
+  const score = window._ST.currentScore || p.preparationScore;
 
   return `
     <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
     <div class="actions-header">
       <div class="actions-title">Mon plan d'action</div>
-      <div class="actions-sub">${actions.length} actions · <span class="actions-pts" id="ptsHeader">+${totalPts} pts disponibles</span></div>
+      <div class="actions-sub"><span id="ptsHeader">+${totalPts} pts disponibles · ${allActions.length} actions</span></div>
     </div>
     <div class="body-sm">
+
+      <div class="plan-score-bar rv rv1">
+        <div class="plan-score-info">
+          <span class="plan-score-label">Score actuel</span>
+          <span class="plan-score-val" id="currentScore">${score}/100</span>
+        </div>
+        <div class="plan-score-track" id="scoreBar">
+          <div class="plan-score-fill ${score >= 70 ? 'ok' : ''}" style="width:${score}%"></div>
+        </div>
+      </div>
+
       ${nextReward ? `
         <div class="reward-unlock-cta rv rv1">
-          <svg>${sv(IC.star).replace('<svg','<svg')}</svg>
+          ${sv(IC.star, 'width:14px;height:14px;fill:var(--warn-mid);flex-shrink:0')}
           <span>Réalisez <strong>${nextReward.minActions - done.length} action${nextReward.minActions - done.length > 1 ? 's' : ''}</strong> pour débloquer : <strong>${nextReward.title}</strong></span>
         </div>
       ` : ''}
-      ${cardsHtml}
-      <div class="score-bar rv rv5" id="scoreBar">
-        <span class="score-bar-label">Score de préparation</span>
-        <span class="score-bar-val" id="currentScore">${window._ST.currentScore || p.preparationScore} / 100</span>
+
+      <div class="section-title" style="margin-top:var(--sp4)">
+        ${allActions[0]?.horizon === 'now' ? '⚡ Actions prioritaires' : '📋 Actions recommandées'}
       </div>
-      <div style="margin-top:var(--sp4)" class="rv rv6">
+      ${displayedActions.map((a, i) => actionCard(a, i)).join('')}
+
+      ${!showAll && hidden > 0 ? `
+        <button class="btn-expand-actions rv rv4" onclick="window._ST.showAllActions=true;render(5);updateNav(5)">
+          Voir ${hidden} autre${hidden > 1 ? 's' : ''} action${hidden > 1 ? 's' : ''} disponible${hidden > 1 ? 's' : ''} →
+        </button>
+      ` : ''}
+      ${showAll && allActions.length > TOP_N ? `
+        <button class="btn-expand-actions" onclick="window._ST.showAllActions=false;render(5);updateNav(5)">
+          Réduire ↑
+        </button>
+      ` : ''}
+
+      <div style="margin-top:var(--sp5)" class="rv rv5">
+        <button class="btn btn-ghost" onclick="goTo(9)" style="width:100%;justify-content:center">
+          ${sv(IC.home, 'width:16px;height:16px')} Mon suivi de progression
+        </button>
+      </div>
+
+      <div style="margin-top:var(--sp3)" class="rv rv6">
         <button class="btn btn-primary" onclick="goTo(8)">
           Voir mes rewards
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
@@ -592,20 +667,167 @@ function screenRewards() {
       </div>
     </div>
     <div class="body-sm">
-      <div class="reward-section-title">Priorité 1 — Disponibles dès maintenant</div>
-      ${p1.map((r, i) => rewardCard(r, i)).join('')}
-      ${p2.length ? `<div class="reward-section-title">En cours d'étude — Bientôt</div>` : ''}
-      ${p2.map((r, i) => rewardCard(r, i + p1.length)).join('')}
-      <div style="margin-top:var(--sp4)" class="rv rv5">
-        <button class="btn btn-success" onclick="activateRewards()">
-          Activer mes rewards
-          <svg class="btn-icon">${sv(IC.check)}</svg>
-        </button>
+
+      <div class="rewards-philosophy rv rv1">
+        ${sv(IC.shield, 'width:14px;height:14px;fill:var(--axa);flex-shrink:0')}
+        <p>Ces avantages récompensent votre engagement en prévention. <strong>Ils ne modifient pas votre prime.</strong></p>
       </div>
-      <p class="footer-fine">Rewards activés au prochain renouvellement de votre contrat MRH.</p>
+
+      <div class="reward-section-title">Avantages disponibles dès maintenant</div>
+      ${p1.map((r, i) => rewardCard(r, i)).join('')}
+      ${p2.length ? `<div class="reward-section-title">En cours d'étude — Bientôt disponibles</div>` : ''}
+      ${p2.map((r, i) => rewardCard(r, i + p1.length)).join('')}
+
+      <div style="margin-top:var(--sp4)" class="rv rv5">
+        ${done.length > 0 ? `
+          <button class="btn btn-success" onclick="activateRewards()">
+            Recevoir mes avantages
+            <svg class="btn-icon">${sv(IC.check)}</svg>
+          </button>
+        ` : `
+          <div class="reassure blue" style="margin-bottom:var(--sp3)">
+            <span class="reassure-icon">${sv(IC.info)}</span>
+            <span>Réalisez au moins une action de prévention pour débloquer vos avantages.</span>
+          </div>
+          <button class="btn btn-primary" onclick="goTo(5)">
+            Voir mon plan d'action
+            <svg class="btn-icon">${sv(IC.arrow)}</svg>
+          </button>
+        `}
+      </div>
+      <p class="footer-fine">Avantages activés au prochain renouvellement de votre contrat MRH. Sans engagement. Aucun impact tarifaire.</p>
     </div>
     <div class="bottom-safe"></div>
   `;
 }
 
-const SCREENS = { s0:screenSelection, s1:screenLanding, s2:screenDiagnostic, s3:screenScore, s4:screenProjection, s5:screenActionPlan, s6:screenActionDetail, s7:screenSuccess, s8:screenRewards };
+/* ════════════════════════════
+   S9 — MON SUIVI
+════════════════════════════ */
+function screenMonSuivi() {
+  const p       = getProfile(window._ST.profileId);
+  const done    = window._ST.completedActions || [];
+  const score   = window._ST.currentScore || p.preparationScore;
+  const sl      = scoreLevel(score);
+  const allA    = getActionsForProfile(p);
+  const rewards = getRewardsForProfile(p, done.length);
+  const unlocked = rewards.filter(r => r.computedStatus === 'unlocked');
+  const available = rewards.filter(r => r.computedStatus === 'available');
+  const nextAction = allA[0];
+
+  const circ   = 220;
+  const offset = Math.round(circ * (1 - score / 100));
+
+  const completedCardsHtml = done.length > 0
+    ? done.map(id => {
+        const a = ALL_ACTIONS.find(x => x.id === id);
+        if (!a) return '';
+        return `
+          <div class="suivi-done-item">
+            <div class="suivi-done-check">${sv(IC.check, 'width:10px;height:10px;fill:white')}</div>
+            <div class="suivi-done-text">
+              <div class="suivi-done-title">${a.title}</div>
+              <div class="suivi-done-risk">${a.riskLabel} · +${a.pts} pts</div>
+            </div>
+          </div>
+        `;
+      }).join('')
+    : `<div style="color:var(--n400);font-size:13px;padding:var(--sp3) 0">Aucune action réalisée pour l'instant.</div>`;
+
+  return `
+    <div class="suivi-hero">
+      <div class="topbar" style="position:relative;padding:0;background:transparent;margin-bottom:var(--sp4)">
+        <button class="topbar-back" style="background:rgba(255,255,255,.15)" onclick="goTo(5)" aria-label="Retour">${sv(IC.back)}</button>
+        <div class="topbar-info">
+          <div class="topbar-title" style="color:#fff">Mon suivi</div>
+          <div class="topbar-sub">${p.firstName} · ${p.propertyType}</div>
+        </div>
+      </div>
+      <div class="suivi-ring-wrap rv-scale">
+        <svg viewBox="0 0 90 90" width="90" height="90">
+          <circle cx="45" cy="45" r="35" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="7"/>
+          <circle cx="45" cy="45" r="35" fill="none" stroke="var(--success-mid)" stroke-width="7"
+            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" class="ring-arc"/>
+        </svg>
+        <div class="suivi-ring-center">
+          <div class="suivi-score-num">${score}</div>
+          <div class="suivi-score-denom">/100</div>
+        </div>
+      </div>
+      <div class="score-badge rv rv2" style="margin-top:var(--sp2)">
+        ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
+        Niveau ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'} · ${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}
+      </div>
+    </div>
+
+    <div class="body-sm">
+
+      ${nextAction ? `
+        <div class="section-title rv rv1">Prochaine action recommandée</div>
+        <div class="next-action-card rv rv1" onclick="openAction('${nextAction.id}')">
+          <span style="font-size:20px">${RISKS[nextAction.riskId]?.icon || '📋'}</span>
+          <div>
+            <div class="next-action-label">${nextAction.riskLabel} · ${nextAction.effort === 'low' ? '🟢 Effort faible' : nextAction.effort === 'medium' ? '🟡 Effort moyen' : '🔴 Effort élevé'}</div>
+            <div class="next-action-title">${nextAction.title}</div>
+            <div style="font-size:11px;color:var(--n400);margin-top:2px">⏱ ${nextAction.duration} · +${nextAction.pts} pts</div>
+          </div>
+          <span class="next-action-arrow">→</span>
+        </div>
+      ` : `
+        <div class="reassure green rv rv1">
+          <span class="reassure-icon">🎉</span>
+          <span>Toutes les actions de votre plan sont réalisées !</span>
+        </div>
+      `}
+
+      ${unlocked.length > 0 ? `
+        <div class="section-title rv rv2" style="margin-top:var(--sp4)">Avantages débloqués</div>
+        ${unlocked.map(r => `
+          <div class="suivi-reward-item rv rv2">
+            <div class="reward-icon" style="background:${r.iconBg};width:36px;height:36px;border-radius:var(--r-md)">${r.icon}</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">${r.title}</div>
+              <div style="font-size:11px;color:var(--n500)">${r.subtitle}</div>
+            </div>
+            <span class="tag tag-success" style="flex-shrink:0">Actif</span>
+          </div>
+        `).join('')}
+      ` : available.length > 0 ? `
+        <div class="section-title rv rv2" style="margin-top:var(--sp4)">Prochain avantage à débloquer</div>
+        <div class="suivi-reward-item rv rv2">
+          <div class="reward-icon" style="background:${available[0].iconBg};width:36px;height:36px;border-radius:var(--r-md)">${available[0].icon}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${available[0].title}</div>
+            <div style="font-size:11px;color:var(--n500)">${available[0].minActions - done.length} action${available[0].minActions - done.length > 1 ? 's' : ''} de plus à réaliser</div>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="section-title rv rv3" style="margin-top:var(--sp4)">Actions réalisées</div>
+      <div class="suivi-done-list rv rv3">${completedCardsHtml}</div>
+
+      <div class="suivi-nav-grid rv rv4">
+        <button class="suivi-nav-btn" onclick="goTo(5)">
+          <span style="font-size:18px">📋</span>
+          <span>Plan d'action</span>
+        </button>
+        <button class="suivi-nav-btn" onclick="goTo(3)">
+          <span style="font-size:18px">📊</span>
+          <span>Mon score</span>
+        </button>
+        <button class="suivi-nav-btn" onclick="goTo(8)">
+          <span style="font-size:18px">🎁</span>
+          <span>Avantages</span>
+        </button>
+        <button class="suivi-nav-btn" onclick="goTo(4)">
+          <span style="font-size:18px">⚠️</span>
+          <span>Mes risques</span>
+        </button>
+      </div>
+
+    </div>
+    <div class="bottom-safe"></div>
+  `;
+}
+
+const SCREENS = { s0:screenSelection, s1:screenLanding, s2:screenDiagnostic, s3:screenScore, s4:screenProjection, s5:screenActionPlan, s6:screenActionDetail, s7:screenSuccess, s8:screenRewards, s9:screenMonSuivi };
