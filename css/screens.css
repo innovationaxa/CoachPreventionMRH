@@ -309,7 +309,14 @@
   background: linear-gradient(145deg, var(--axa) 0%, var(--axa-mid) 100%);
   padding: var(--sp5) var(--sp5) var(--sp6);
   text-align: center;
-  border-radius: 0 0 50% 50% / 0 0 40px 40px;
+}
+.suivi-hero-arch {
+  height: 48px;
+  background: var(--white);
+  border-radius: 50% 50% 0 0 / 48px 48px 0 0;
+  margin-top: -48px;
+  position: relative;
+  z-index: 5;
 }
 .suivi-ring-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
 .suivi-ring-center { position: absolute; text-align: center; }

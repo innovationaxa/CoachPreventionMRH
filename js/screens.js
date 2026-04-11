@@ -856,8 +856,9 @@ function screenMonSuivi() {
         ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
         Niveau ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'} · ${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}
       </div>
-      <div style="height:64px"></div>
+      <div style="height:56px"></div>
     </div>
+    <div class="suivi-hero-arch"></div>
 
     <div class="suivi-quick-grid">
       <button class="suivi-quick-card rv rv1" onclick="goTo(4)">
