@@ -874,6 +874,18 @@ function screenMonSuivi() {
       </button>
     </div>
 
+    <div class="suivi-diag-cta-wrap rv rv4">
+      <button class="suivi-diag-cta" onclick="goTo(2)">
+        <div class="suivi-diag-cta-text">
+          <div class="suivi-diag-cta-label">Faire un nouveau diagnostic</div>
+          <div class="suivi-diag-cta-sub">Réévaluer votre exposition aux risques</div>
+        </div>
+        <div class="suivi-diag-cta-visual">
+          <div class="suivi-diag-cta-card">🔍</div>
+        </div>
+      </button>
+    </div>
+
     <div class="body-sm">
 
       ${nextAction ? `
