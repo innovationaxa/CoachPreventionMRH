@@ -309,6 +309,8 @@
   background: linear-gradient(145deg, var(--axa) 0%, var(--axa-mid) 100%);
   padding: var(--sp5) var(--sp5) var(--sp6);
   text-align: center;
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
 }
 .suivi-ring-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
 .suivi-ring-center { position: absolute; text-align: center; }
