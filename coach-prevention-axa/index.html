@@ -35,7 +35,7 @@
       </div>
       <div class="screen-wrap" id="app"></div>
 
-      <!-- TAB BAR — hidden on S0/S1/S2, shown on S3+ -->
+      <!-- TAB BAR — hidden on S0/S1, shown on S2+ -->
       <nav class="tab-bar" id="tabBar" aria-label="Navigation principale">
         <div class="tab-main">
           <button class="tab-item" data-tab="accueil" onclick="goTo(9)" aria-label="Accueil">
@@ -46,9 +46,9 @@
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
             <span class="tab-label">Contacts</span>
           </button>
-          <button class="tab-item" data-tab="prevention" onclick="goTo(9)" aria-label="Ma Prévention">
+          <button class="tab-item" data-tab="prevention" onclick="goTo(9)" aria-label="Prévention">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-            <span class="tab-label">Ma Prévention</span>
+            <span class="tab-label">Prévention</span>
           </button>
           <button class="tab-item" data-tab="compte" onclick="tabMock('Mon Compte')" aria-label="Mon Compte">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -57,9 +57,10 @@
         </div>
         <button class="tab-angel" onclick="tabMock('Angel — IA AXA')" aria-label="Angel, assistant IA">
           <div class="tab-angel-circle">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+            <span class="tab-angel-sparkle">✨</span>
+            <span class="tab-angel-name">Angel</span>
           </div>
-          <span class="tab-angel-label">Angel</span>
+          <div class="tab-angel-notif"></div>
         </button>
       </nav>
     </div>

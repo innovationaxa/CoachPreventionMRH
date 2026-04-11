@@ -51,12 +51,12 @@ function goTo(idx) {
 }
 
 /* ── TAB BAR ── */
-const TAB_MAP = { 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'prevention' };
+const TAB_MAP = { 2:null, 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'prevention' };
 
 function updateTabBar(idx) {
   const bar = document.getElementById('tabBar');
   if (!bar) return;
-  if (idx <= 2) { bar.style.display = 'none'; return; }
+  if (idx <= 1) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   const activeTab = TAB_MAP[idx] || null;
   bar.querySelectorAll('.tab-item').forEach(btn => {
