@@ -46,8 +46,33 @@ function goTo(idx) {
     window._ST.diagStep = 0;
     window._ST.diagAnswers = {};
   }
-  if (idx === 3) showLoadingThen(() => { render(3); updateNav(3); });
-  else { render(idx); updateNav(idx); }
+  if (idx === 3) showLoadingThen(() => { render(3); updateNav(3); updateTabBar(3); });
+  else { render(idx); updateNav(idx); updateTabBar(idx); }
+}
+
+/* ── TAB BAR ── */
+const TAB_MAP = { 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'accueil' };
+
+function updateTabBar(idx) {
+  const bar = document.getElementById('tabBar');
+  if (!bar) return;
+  if (idx <= 2) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  const activeTab = TAB_MAP[idx] || null;
+  bar.querySelectorAll('.tab-item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === activeTab);
+  });
+}
+
+function tabMock(name) {
+  const existing = document.getElementById('tab-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'tab-toast';
+  t.textContent = name + ' — bientôt disponible';
+  t.style.cssText = 'position:absolute;bottom:82px;left:50%;transform:translateX(-50%);background:rgba(10,10,30,0.82);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;font-family:var(--font);z-index:500;white-space:nowrap;pointer-events:none';
+  document.querySelector('.device').appendChild(t);
+  setTimeout(() => t.remove(), 2200);
 }
 
 function updateNav(idx) {
@@ -214,4 +239,5 @@ function activateRewards() {
 document.addEventListener('DOMContentLoaded', () => {
   render(0);
   updateNav(0);
+  updateTabBar(0);
 });

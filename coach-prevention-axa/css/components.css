@@ -668,3 +668,101 @@
    BOTTOM SAFE
 ═══════════════════════════ */
 .bottom-safe { height: 36px; }
+
+/* ═══════════════════════════
+   TAB BAR
+═══════════════════════════ */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 14px;
+  background: var(--n50);
+  border-top: 1px solid var(--n100);
+  flex-shrink: 0;
+}
+.tab-bar[style*="none"] + * { /* when hidden, next sibling unaffected */ }
+
+/* Main pill — 4 items */
+.tab-main {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-radius: 16px;
+  padding: 4px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08), 0 0 0 1px var(--n150);
+  min-width: 0;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 2px 6px;
+  border: none;
+  background: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.15s;
+  min-width: 0;
+}
+.tab-item:hover { background: var(--n50); }
+.tab-item.active { background: var(--axa-xlight); }
+.tab-icon {
+  width: 20px; height: 20px;
+  fill: var(--n400);
+  flex-shrink: 0;
+}
+.tab-item.active .tab-icon { fill: var(--axa); }
+.tab-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--n500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1;
+}
+.tab-item.active .tab-label {
+  color: var(--axa);
+  font-weight: 700;
+}
+
+/* Angel — detached circle */
+.tab-angel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  flex-shrink: 0;
+  padding: 0;
+}
+.tab-angel-circle {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5B4FE8 0%, var(--axa) 100%);
+  border: 2.5px solid #fff;
+  box-shadow: 0 3px 10px rgba(0,0,143,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tab-angel:hover .tab-angel-circle {
+  transform: scale(1.06);
+  box-shadow: 0 5px 14px rgba(0,0,143,0.45);
+}
+.tab-angel-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--axa);
+}
