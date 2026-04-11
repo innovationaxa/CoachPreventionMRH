@@ -837,7 +837,7 @@ function screenMonSuivi() {
       <div class="topbar" style="position:relative;padding:0;background:transparent;margin-bottom:var(--sp4)">
         <button class="topbar-back" style="background:rgba(255,255,255,.15)" onclick="goTo(5)" aria-label="Retour">${sv(IC.back)}</button>
         <div class="topbar-info">
-          <div class="topbar-title" style="color:#fff">Ma Prévention</div>
+          <div class="topbar-title" style="color:#fff">Coach Prévention</div>
           <div class="topbar-sub">${p.firstName} · ${p.propertyType}</div>
         </div>
       </div>

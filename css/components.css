@@ -677,19 +677,26 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px 14px;
-  background: var(--n50);
-  border-top: 1px solid var(--n100);
-  flex-shrink: 0;
+  background: transparent;
+  border-top: none;
+  /* floats over screen content */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
 }
-.tab-bar[style*="none"] + * { /* when hidden, next sibling unaffected */ }
 
-/* Main pill — 4 items */
+/* Screen padding when tab bar visible */
+.device.has-tabbar .screen { padding-bottom: 76px; }
+
+/* Main pill — fully rounded like Angel circle */
 .tab-main {
   flex: 1;
   display: flex;
   align-items: stretch;
-  background: #fff;
-  border-radius: 16px;
+  background: var(--axa);
+  border-radius: 100px;
   padding: 4px;
   box-shadow: 0 1px 6px rgba(0,0,0,0.08), 0 0 0 1px var(--n150);
   min-width: 0;
@@ -710,18 +717,18 @@
   transition: background 0.15s;
   min-width: 0;
 }
-.tab-item:hover { background: var(--n50); }
-.tab-item.active { background: var(--axa-xlight); }
+.tab-item:hover { background: rgba(255,255,255,0.12); }
+.tab-item.active { background: rgba(255,255,255,0.15); border-radius: 100px; }
 .tab-icon {
   width: 20px; height: 20px;
-  fill: var(--n400);
+  fill: rgba(255,255,255,0.65);
   flex-shrink: 0;
 }
-.tab-item.active .tab-icon { fill: var(--axa); }
+.tab-item.active .tab-icon { fill: #fff; }
 .tab-label {
   font-size: 9px;
   font-weight: 500;
-  color: var(--n500);
+  color: rgba(255,255,255,0.65);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -729,7 +736,7 @@
   line-height: 1;
 }
 .tab-item.active .tab-label {
-  color: var(--axa);
+  color: #fff;
   font-weight: 700;
 }
 

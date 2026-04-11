@@ -54,10 +54,16 @@ function goTo(idx) {
 const TAB_MAP = { 2:null, 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'prevention' };
 
 function updateTabBar(idx) {
-  const bar = document.getElementById('tabBar');
+  const bar    = document.getElementById('tabBar');
+  const device = document.querySelector('.device');
   if (!bar) return;
-  if (idx <= 1) { bar.style.display = 'none'; return; }
+  if (idx <= 1) {
+    bar.style.display = 'none';
+    device && device.classList.remove('has-tabbar');
+    return;
+  }
   bar.style.display = 'flex';
+  device && device.classList.add('has-tabbar');
   const activeTab = TAB_MAP[idx] || null;
   bar.querySelectorAll('.tab-item').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === activeTab);
