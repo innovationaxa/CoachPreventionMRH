@@ -51,7 +51,7 @@ function goTo(idx) {
 }
 
 /* ── TAB BAR ── */
-const TAB_MAP = { 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'accueil' };
+const TAB_MAP = { 3:'prevention', 4:'prevention', 5:'prevention', 6:'prevention', 7:'prevention', 8:'compte', 9:'prevention' };
 
 function updateTabBar(idx) {
   const bar = document.getElementById('tabBar');
