@@ -856,6 +856,22 @@ function screenMonSuivi() {
         ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
         Niveau ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'} · ${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}
       </div>
+      <div style="height:64px"></div>
+    </div>
+
+    <div class="suivi-quick-grid">
+      <button class="suivi-quick-card rv rv1" onclick="goTo(4)">
+        <div class="suivi-quick-icon" style="background:#FEF3C7">⚠️</div>
+        <div class="suivi-quick-label">Consulter mes risques</div>
+      </button>
+      <button class="suivi-quick-card rv rv2" onclick="goTo(5)">
+        <div class="suivi-quick-icon" style="background:#DBEAFE">📋</div>
+        <div class="suivi-quick-label">Mes actions recommandées</div>
+      </button>
+      <button class="suivi-quick-card rv rv3" onclick="goTo(3)">
+        <div class="suivi-quick-icon" style="background:#EDE9FE">🛡️</div>
+        <div class="suivi-quick-label">Voir mon score Prévention</div>
+      </button>
     </div>
 
     <div class="body-sm">
@@ -903,25 +919,6 @@ function screenMonSuivi() {
 
       <div class="section-title rv rv3" style="margin-top:var(--sp4)">Actions réalisées</div>
       <div class="suivi-done-list rv rv3">${completedCardsHtml}</div>
-
-      <div class="suivi-nav-grid rv rv4">
-        <button class="suivi-nav-btn" onclick="goTo(5)">
-          <span style="font-size:18px">📋</span>
-          <span>Plan d'action</span>
-        </button>
-        <button class="suivi-nav-btn" onclick="goTo(3)">
-          <span style="font-size:18px">📊</span>
-          <span>Mon score</span>
-        </button>
-        <button class="suivi-nav-btn" onclick="goTo(8)">
-          <span style="font-size:18px">🎁</span>
-          <span>Avantages</span>
-        </button>
-        <button class="suivi-nav-btn" onclick="goTo(4)">
-          <span style="font-size:18px">⚠️</span>
-          <span>Mes risques</span>
-        </button>
-      </div>
 
     </div>
     <div class="bottom-safe"></div>
