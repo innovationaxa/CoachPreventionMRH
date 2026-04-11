@@ -255,6 +255,11 @@ function screenScore() {
     const barScore = r.level === 'high' ? 35 : r.level === 'medium' ? 55 : 78;
     const fillClass = r.level === 'high' ? 'risk-fill-danger' : r.level === 'medium' ? 'risk-fill-warn' : 'risk-fill-success';
     const tagClass  = r.level === 'high' ? 'tag-danger' : r.level === 'medium' ? 'tag-warn' : 'tag-success';
+    const comment   = r.level === 'high'
+      ? 'Préparation insuffisante — des actions urgentes sont recommandées.'
+      : r.level === 'medium'
+      ? 'Quelques actions simples réduiraient significativement votre exposition.'
+      : 'Bonne maîtrise de ce risque. Maintenez vos équipements à jour.';
     return `
       <div class="risk-bar-row">
         <div class="risk-bar-header">
@@ -262,6 +267,10 @@ function screenScore() {
           <span class="tag ${tagClass}">${r.levelLabel}</span>
         </div>
         <div class="risk-track"><div class="risk-fill ${fillClass}" style="width:${barScore}%"></div></div>
+        <div class="risk-score-meta">
+          <span class="risk-score-pts">${barScore}/100</span>
+          <span class="risk-score-comment">${comment}</span>
+        </div>
       </div>
     `;
   }).join('');
@@ -295,7 +304,10 @@ function screenScore() {
     <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
     <div class="body-sm">
 
-      <div class="score-explain-box rv rv1">
+      <div class="section-title rv rv1">Exposition par risque</div>
+      <div class="risk-bars rv rv1">${riskBarsHtml}</div>
+
+      <div class="score-explain-box rv rv2">
         <div class="score-explain-title">${sv(IC.info, 'width:13px;height:13px;vertical-align:middle;margin-right:4px')} Comment fonctionne ce score ?</div>
         <div class="score-explain-body">
           <div class="score-explain-row">
@@ -317,9 +329,6 @@ function screenScore() {
           </div>
         </div>
       </div>
-
-      <div class="section-title rv rv2">Exposition par risque</div>
-      <div class="risk-bars rv rv2">${riskBarsHtml}</div>
 
       <div class="cta-box rv rv3">
         <p class="cta-text">
@@ -731,7 +740,13 @@ function screenMonSuivi() {
   const available = rewards.filter(r => r.computedStatus === 'available');
   const nextAction = allA[0];
 
-  const circ   = 220;
+  const totalGain = allA.reduce((s, a) => s + a.pts, 0);
+  const potential = Math.min(score + totalGain, 100);
+  const remaining = allA.filter(a => !done.includes(a.id));
+  const actionsText = done.length > 0
+    ? `${done.length} réalisée${done.length > 1 ? 's' : ''} · ${remaining.length} disponible${remaining.length !== 1 ? 's' : ''}`
+    : `${allA.length} action${allA.length !== 1 ? 's' : ''} disponibles`;
+  const circ   = 352;
   const offset = Math.round(circ * (1 - score / 100));
 
   const completedCardsHtml = done.length > 0
@@ -759,20 +774,26 @@ function screenMonSuivi() {
           <div class="topbar-sub">${p.firstName} · ${p.propertyType}</div>
         </div>
       </div>
-      <div class="suivi-ring-wrap rv-scale">
-        <svg viewBox="0 0 90 90" width="90" height="90">
-          <circle cx="45" cy="45" r="35" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="7"/>
-          <circle cx="45" cy="45" r="35" fill="none" stroke="var(--success-mid)" stroke-width="7"
+      <div class="score-hero-label rv rv1">Votre score de prévention</div>
+      <div class="score-ring-wrap rv-scale">
+        <svg viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="56" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="10"/>
+          <circle cx="70" cy="70" r="56" fill="none" stroke="var(--success-mid)" stroke-width="10"
             stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" class="ring-arc"/>
         </svg>
-        <div class="suivi-ring-center">
-          <div class="suivi-score-num">${score}</div>
-          <div class="suivi-score-denom">/100</div>
+        <div class="score-ring-center">
+          <div class="score-num">${score}</div>
+          <div class="score-denom">/100</div>
         </div>
       </div>
-      <div class="score-badge rv rv2" style="margin-top:var(--sp2)">
+      <div class="score-badge rv rv2">
         ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
-        Niveau ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'} · ${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}
+        ${sl.label} · ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
+      </div>
+      <p class="score-tagline rv rv3">${actionsText}</p>
+      <div class="score-potential rv rv4">
+        <span>Avec toutes vos actions</span>
+        <span class="score-potential-arrow">→ ${potential}/100</span>
       </div>
     </div>
 
