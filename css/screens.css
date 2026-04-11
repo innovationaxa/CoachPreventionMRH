@@ -443,7 +443,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   padding: 0 var(--sp4);
-  margin-top: -60px;
+  margin-top: -76px;
   position: relative;
   z-index: 10;
   margin-bottom: var(--sp5);
