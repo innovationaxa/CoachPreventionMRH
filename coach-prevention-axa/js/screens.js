@@ -869,9 +869,9 @@ function screenMonSuivi() {
         <div class="suivi-quick-icon" style="background:#DBEAFE">📋</div>
         <div class="suivi-quick-label">Mes actions recommandées</div>
       </button>
-      <button class="suivi-quick-card rv rv3" onclick="goTo(3)">
-        <div class="suivi-quick-icon" style="background:#EDE9FE">🛡️</div>
-        <div class="suivi-quick-label">Voir mon score Prévention</div>
+      <button class="suivi-quick-card rv rv3" onclick="goTo(8)">
+        <div class="suivi-quick-icon" style="background:#EDE9FE">🎁</div>
+        <div class="suivi-quick-label">Voir mes récompenses</div>
       </button>
     </div>
 
