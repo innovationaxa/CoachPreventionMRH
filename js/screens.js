@@ -284,7 +284,7 @@ function screenScore() {
         <svg viewBox="0 0 140 140">
           <circle cx="70" cy="70" r="56" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="10"/>
           <circle cx="70" cy="70" r="56" fill="none" stroke="var(--success-mid)" stroke-width="10"
-            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" class="ring-arc"/>
+            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" class="ring-arc"/>
         </svg>
         <div class="score-ring-center">
           <div class="score-num">${score}</div>
@@ -360,7 +360,7 @@ function screenProjection() {
     <div class="projection-hero">
       <div class="progress-bar" style="position:relative;margin-bottom:var(--sp4)"><div class="progress-fill" style="width:67%"></div></div>
       <div class="topbar" style="position:relative;padding-left:0;background:transparent">
-        <button class="topbar-back" onclick="goTo(3)" style="background:rgba(255,255,255,.15)" aria-label="Retour">${sv(IC.back)}</button>
+        <button class="topbar-back" onclick="goTo(9)" style="background:rgba(255,255,255,.15)" aria-label="Retour">${sv(IC.back)}</button>
         <div class="topbar-info">
           <div class="topbar-title" style="color:#fff">Projection de risque</div>
           <div class="topbar-sub">Impact potentiel sur votre logement</div>
@@ -390,7 +390,7 @@ function screenProjection() {
         <span>Avec les bons gestes, <strong>${mainRisk.avoidablePercent} % des dégâts</strong> peuvent être évités avant même qu'un sinistre survienne.</span>
       </div>
       <button class="btn btn-primary rv rv4" onclick="goTo(5)">
-        Voir mon plan d'action
+        Voir les actions recommandées
         <svg class="btn-icon">${sv(IC.arrow)}</svg>
       </button>
     </div>
@@ -439,9 +439,12 @@ function screenActionPlan() {
   const score = window._ST.currentScore || p.preparationScore;
 
   return `
-    <div class="progress-bar"><div class="progress-fill" style="width:84%"></div></div>
     <div class="actions-header">
-      <div class="actions-title">Mon plan d'action</div>
+      <div class="topbar" style="position:relative;padding:0 0 var(--sp2);background:transparent">
+        <button class="topbar-back" style="background:rgba(255,255,255,.15)" onclick="goTo(9)" aria-label="Retour">${sv(IC.back)}</button>
+      </div>
+      <div class="progress-bar" style="position:relative;margin-bottom:var(--sp3)"><div class="progress-fill" style="width:84%"></div></div>
+      <div class="actions-title">Actions recommandées</div>
       <div class="actions-sub"><span id="ptsHeader">+${totalPts} pts disponibles · ${allActions.length} actions</span></div>
     </div>
     <div class="body-sm">
@@ -849,34 +852,29 @@ function screenMonSuivi() {
 
   return `
     <div class="suivi-hero">
-      <div class="topbar" style="position:relative;padding:0;background:transparent;margin-bottom:var(--sp4)">
-        <button class="topbar-back" style="background:rgba(255,255,255,.15)" onclick="goTo(5)" aria-label="Retour">${sv(IC.back)}</button>
-        <div class="topbar-info">
-          <div class="topbar-title" style="color:#fff">Coach Prévention</div>
-          <div class="topbar-sub">${p.firstName} · ${p.propertyType}</div>
-        </div>
-      </div>
+      <div class="suivi-hero-profile-line rv rv1">${p.firstName} · ${p.propertyType}</div>
       <div class="score-hero-label rv rv1">Votre score de prévention</div>
       <div class="score-ring-wrap rv-scale">
         <svg viewBox="0 0 140 140">
           <circle cx="70" cy="70" r="56" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="10"/>
           <circle cx="70" cy="70" r="56" fill="none" stroke="var(--success-mid)" stroke-width="10"
-            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ}" class="ring-arc"/>
+            stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" class="ring-arc"/>
         </svg>
         <div class="score-ring-center">
           <div class="score-num">${score}</div>
           <div class="score-denom">/100</div>
         </div>
       </div>
-      <div class="score-badge rv rv2">
-        ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
-        ${sl.label} · ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
+      <div class="suivi-hero-badges rv rv2">
+        <div class="score-badge">
+          ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
+          Risque ${sl.label}
+        </div>
+        <div class="score-badge score-badge-tier">
+          🏅 ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
+        </div>
       </div>
       <p class="score-tagline rv rv3">${actionsText}</p>
-      <div class="score-potential rv rv4">
-        <span>Avec toutes vos actions</span>
-        <span class="score-potential-arrow">→ ${potential}/100</span>
-      </div>
       <div style="height:56px"></div>
     </div>
     <div class="suivi-hero-arch"></div>
@@ -911,7 +909,11 @@ function screenMonSuivi() {
     <div class="body-sm">
 
       ${nextAction ? `
-        <div class="section-title rv rv1">Prochaine action recommandée</div>
+        <div class="suivi-potential-banner rv rv1">
+          <span>Avec toutes vos actions</span>
+          <span class="score-potential-arrow">→ ${potential}/100</span>
+        </div>
+        <div class="section-title rv rv1" style="margin-top:var(--sp3)">Prochaine action recommandée</div>
         <div class="next-action-card rv rv1" onclick="openAction('${nextAction.id}')">
           <span style="font-size:20px">${RISKS[nextAction.riskId]?.icon || '📋'}</span>
           <div>
