@@ -115,6 +115,12 @@ function showLoadingThen(cb) {
       ${msgs.map((m,i)=>`<div id="ls${i}" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:.3};transition:opacity .3s"><div style="width:6px;height:6px;border-radius:50%;background:${i===0?'var(--success-mid)':'rgba(255,255,255,.25)'};transition:background .3s" id="ld${i}"></div><span style="font-size:11px;color:rgba(255,255,255,.6);font-family:var(--font)">${m}</span></div>`).join('')}
     </div>
   `;
+  /* Hide tab bar during loading */
+  const tabBar = document.getElementById('tabBar');
+  const device = document.querySelector('.device');
+  if (tabBar) tabBar.style.display = 'none';
+  if (device) device.classList.remove('has-tabbar');
+
   const prev = app.querySelector('.screen.active');
   if (prev) { prev.classList.add('exit'); prev.classList.remove('active'); setTimeout(() => prev.remove(), 310); }
   app.appendChild(l);
