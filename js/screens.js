@@ -486,36 +486,36 @@ function screenActionPlan() {
   const rewards = getRewardsForProfile(p, done.length);
   const nextReward = rewards.find(r => r.computedStatus === 'available');
   const score = window._ST.currentScore || p.preparationScore;
+  const sl = scoreLevel(score);
+  const remaining = allActions.filter(a => !done.includes(a.id)).length;
 
   return `
     <div class="actions-header">
-      <div class="topbar" style="position:relative;padding:0 0 var(--sp2);background:transparent">
-        <button class="topbar-back" style="background:rgba(255,255,255,.15)" onclick="goTo(9)" aria-label="Retour">${sv(IC.back)}</button>
+      <div class="ah-toprow">
+        <button class="topbar-back" style="background:rgba(255,255,255,.12);flex-shrink:0" onclick="goTo(9)" aria-label="Retour">${sv(IC.back)}</button>
+        <div class="ah-eyebrow">COACH PRÉVENTION · ${p.firstName.toUpperCase()}</div>
+        <div class="score-badge" style="font-size:11px;padding:5px 13px;flex-shrink:0">
+          ${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')}
+          ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
+        </div>
       </div>
-      <div class="progress-bar" style="position:relative;margin-bottom:var(--sp3)"><div class="progress-fill" style="width:84%"></div></div>
-      <div class="actions-title">Actions recommandées</div>
-      <div class="actions-sub"><span id="ptsHeader">+${totalPts} pts disponibles · ${allActions.length} actions</span></div>
+      <div class="ah-score-row">
+        <span class="ah-score-num">${score}</span><span class="ah-score-denom">/100</span>
+      </div>
+      <div class="ah-subtitle">${done.length} action${done.length !== 1 ? 's' : ''} réalisée${done.length !== 1 ? 's' : ''} · ${remaining} restante${remaining !== 1 ? 's' : ''} · ${p.propertyType}</div>
+      <div class="ah-progress-wrap">
+        <div class="ah-progress-track">
+          <div class="ah-progress-fill" style="width:${Math.min(Math.round(score / 70 * 100), 100)}%"></div>
+        </div>
+        <div class="ah-progress-labels">
+          <span>Bronze · 0</span>
+          <span>Or · 70+</span>
+        </div>
+      </div>
     </div>
     <div class="body-sm">
 
-      <div class="plan-score-bar rv rv1">
-        <div class="plan-score-info">
-          <span class="plan-score-label">Score actuel</span>
-          <span class="plan-score-val" id="currentScore">${score}/100</span>
-        </div>
-        <div class="plan-score-track" id="scoreBar">
-          <div class="plan-score-fill ${score >= 70 ? 'ok' : ''}" style="width:${score}%"></div>
-        </div>
-      </div>
-
-      ${nextReward ? `
-        <div class="reward-unlock-cta rv rv1">
-          ${sv(IC.star, 'width:14px;height:14px;fill:var(--warn-mid);flex-shrink:0')}
-          <span>Réalisez <strong>${nextReward.minActions - done.length} action${nextReward.minActions - done.length > 1 ? 's' : ''}</strong> pour débloquer : <strong>${nextReward.title}</strong></span>
-        </div>
-      ` : ''}
-
-      <div class="section-title" style="margin-top:var(--sp4)">
+      <div class="section-title" style="margin-top:var(--sp3)">
         ${allActions[0]?.horizon === 'now' ? '⚡ Actions prioritaires' : '📋 Actions recommandées'}
       </div>
       ${displayedActions.map((a, i) => actionCard(a, i)).join('')}
