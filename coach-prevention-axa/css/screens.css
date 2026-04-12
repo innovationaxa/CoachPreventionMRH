@@ -117,6 +117,61 @@
 .diag-nav-back svg { width: 18px; height: 18px; fill: currentColor; }
 .diag-nav-next { flex: 1; }
 
+/* ── SCREEN 1 — LANDING VALUE CARD ── */
+.diag-value-card {
+  background: #F8F5EF; border-radius: 20px;
+  padding: var(--sp4) var(--sp4) var(--sp5); margin-bottom: var(--sp2);
+}
+.diag-value-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--axa); margin-bottom: var(--sp3);
+}
+.diag-value-title {
+  font-size: 24px; font-weight: 700; color: var(--n900);
+  line-height: 1.15; margin-bottom: var(--sp3); letter-spacing: -0.5px;
+}
+.diag-value-body { font-size: 13px; color: var(--n600); line-height: 1.6; margin-bottom: var(--sp3); }
+.diag-value-checklist { display: flex; flex-direction: column; gap: 8px; }
+.diag-value-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--n700); line-height: 1.4; }
+.diag-check-icon { color: var(--success); font-weight: 800; flex-shrink: 0; }
+.diag-skip-wrap { text-align: center; margin-bottom: var(--sp2); }
+.diag-skip-btn {
+  background: none; border: none; cursor: pointer; font-family: var(--font);
+  font-size: 13px; color: var(--n400); display: inline-flex; flex-direction: column;
+  align-items: center; gap: 2px; padding: var(--sp2) var(--sp3);
+  border-radius: var(--r-pill); transition: background .15s;
+}
+.diag-skip-btn:hover { background: var(--n100); color: var(--n600); }
+.diag-skip-note { font-size: 10px; color: var(--n300); }
+
+/* ── SCREEN 3 — RISK MAP ── */
+.risk-map-card { border-radius: var(--r-lg); border: 1.5px solid var(--n150); overflow: hidden; margin-bottom: var(--sp4); }
+.risk-map-wrap { position: relative; }
+.risk-map-bg {
+  height: 190px;
+  background-color: #EDF3EE;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.82) 7px, transparent 7px),
+    linear-gradient(90deg, rgba(255,255,255,0.82) 7px, transparent 7px);
+  background-size: 66px 50px;
+}
+.risk-map-overlay-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.risk-map-location {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(255,255,255,0.92); border-radius: var(--r-pill);
+  padding: 3px 10px; font-size: 10px; font-weight: 700; color: var(--n700);
+  font-family: var(--font); backdrop-filter: blur(4px);
+}
+.risk-map-source {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,143,0.88); color: rgba(255,255,255,0.9);
+  border-radius: 4px; padding: 2px 7px; font-size: 9px; font-weight: 700;
+  font-family: var(--font); letter-spacing: 0.3px;
+}
+.risk-map-legend { padding: 10px 13px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--n150); background: var(--n50); }
+.risk-map-legend-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--n700); }
+.risk-map-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
 /* ── SCREEN 3 — SCORE ── */
 .score-potential {
   display: flex; align-items: center; justify-content: center; gap: var(--sp2);

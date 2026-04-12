@@ -147,20 +147,28 @@ function screenLanding() {
         </div>
       ` : ''}
 
-      <div class="section-title rv rv3">Ce que vous allez obtenir</div>
-      <div class="promises rv rv3">${benefitsHtml}</div>
-
-      <div class="reassure green rv rv4">
-        <span class="reassure-icon">${sv(IC.check)}</span>
-        <span>Vos réponses personnalisent votre plan. Aucun impact sur votre prime.</span>
-      </div>
-
-      <div class="rv rv4">
-        <button class="btn btn-primary" onclick="goTo(2)">
-          Démarrer mon diagnostic — 2 min
+      <div class="diag-value-card rv rv3">
+        <div class="diag-value-eyebrow">Diagnostic express · 2 min</div>
+        <div class="diag-value-title">Votre score,<br>vraiment<br>personnalisé.</div>
+        <p class="diag-value-body">Votre zone de risque est déjà connue. Ce diagnostic affine votre score selon l'état réel de votre logement — pour des recommandations qui vous correspondent vraiment, pas un profil générique.</p>
+        <div class="diag-value-checklist">
+          <div class="diag-value-check"><span class="diag-check-icon">✓</span>Un score adapté à votre logement, pas votre adresse seule</div>
+          <div class="diag-value-check"><span class="diag-check-icon">✓</span>Actions priorisées selon votre situation réelle</div>
+          <div class="diag-value-check"><span class="diag-check-icon">✓</span>Avantages AXA à débloquer dès la 1ère action</div>
+        </div>
+        <button class="btn btn-primary" onclick="goTo(2)" style="margin-top:var(--sp4);width:100%">
+          Démarrer mon diagnostic
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
         </button>
-        <button class="btn btn-ghost" onclick="goTo(0)">Changer de profil</button>
+      </div>
+      <div class="diag-skip-wrap rv rv4">
+        <button class="diag-skip-btn" onclick="goTo(9)">
+          Passer le diagnostic pour l'instant
+          <span class="diag-skip-note">Accéder au suivi · score moins précis</span>
+        </button>
+      </div>
+      <div style="text-align:center;padding-bottom:var(--sp3)">
+        <button class="btn btn-ghost" style="font-size:11px;color:var(--n300)" onclick="goTo(0)">Changer de profil</button>
       </div>
     </div>
     <div class="bottom-safe"></div>
@@ -275,6 +283,44 @@ function screenScore() {
     `;
   }).join('');
 
+  /* ── Risk map ── */
+  const RISK_ZONE_POS = [[160,96],[184,70],[134,114],[196,106]];
+  const RISK_ZONE_RGB = {'inondation':'59,130,246','tempete':'245,158,11','incendie':'239,68,68','degat-eaux':'20,184,166','vol':'139,92,246','rga':'217,119,6'};
+  const RISK_DOT_COL  = {'inondation':'#3B82F6','tempete':'#F59E0B','incendie':'#EF4444','degat-eaux':'#14B8A6','vol':'#8B5CF6','rga':'#D97706'};
+  const riskZoneSvg = p.mainRisks.map((rId, i) => {
+    const [cx,cy] = RISK_ZONE_POS[i] || [160,96];
+    const rgb = RISK_ZONE_RGB[rId] || '100,100,100';
+    const r = 54 - i * 8;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="rgba(${rgb},0.18)" stroke="rgba(${rgb},0.4)" stroke-width="1.2" stroke-dasharray="5 3"/>`;
+  }).join('');
+  const riskLegendHtml = p.mainRisks.map(rId => {
+    const r = RISKS[rId];
+    if (!r) return '';
+    const dot = RISK_DOT_COL[rId] || '#888';
+    const tc  = r.level === 'high' ? 'tag-danger' : r.level === 'medium' ? 'tag-warn' : 'tag-success';
+    return `<div class="risk-map-legend-row"><div class="risk-map-legend-dot" style="background:${dot}"></div><span>${r.icon} ${r.label}</span><span class="tag ${tc}" style="font-size:9px;padding:2px 6px;margin-left:auto">${r.levelLabel}</span></div>`;
+  }).join('');
+  const mapPinSvg = sv(IC.pin, 'width:10px;height:10px;vertical-align:middle');
+  const riskMapHtml = `
+    <div class="risk-map-card rv rv1">
+      <div class="risk-map-wrap">
+        <div class="risk-map-bg"></div>
+        <svg class="risk-map-overlay-svg" viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          ${riskZoneSvg}
+          <circle cx="160" cy="96" r="17" fill="rgba(0,0,143,0.15)">
+            <animate attributeName="r" values="17;27;17" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.55;0;0.55" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="160" cy="96" r="8" fill="#00008F" stroke="white" stroke-width="2.5"/>
+          <circle cx="160" cy="96" r="3" fill="white"/>
+        </svg>
+        <div class="risk-map-location">${mapPinSvg} ${p.location}</div>
+        <div class="risk-map-source">AXA × Géorisques</div>
+      </div>
+      <div class="risk-map-legend">${riskLegendHtml}</div>
+    </div>
+  `;
+
   const diagGain = score - p.preparationScore;
 
   return `
@@ -304,8 +350,11 @@ function screenScore() {
     <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
     <div class="body-sm">
 
-      <div class="section-title rv rv1">Exposition par risque</div>
-      <div class="risk-bars rv rv1">${riskBarsHtml}</div>
+      <div class="section-title rv rv1">Exposition géographique</div>
+      ${riskMapHtml}
+
+      <div class="section-title rv rv2">Exposition par risque</div>
+      <div class="risk-bars rv rv2">${riskBarsHtml}</div>
 
       <div class="score-explain-box rv rv2">
         <div class="score-explain-title">${sv(IC.info, 'width:13px;height:13px;vertical-align:middle;margin-right:4px')} Comment fonctionne ce score ?</div>
