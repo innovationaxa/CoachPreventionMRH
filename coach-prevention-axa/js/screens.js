@@ -161,7 +161,32 @@ function screenLanding() {
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
         </button>
       </div>
-      <div class="diag-skip-wrap rv rv4">
+      <div class="angel-or-sep rv rv4">
+        <div class="angel-or-line"></div>
+        <span class="angel-or-label">ou</span>
+        <div class="angel-or-line"></div>
+      </div>
+
+      <div class="angel-entry-card rv rv4" onclick="tabMock('Angel — IA AXA')" role="button" tabindex="0">
+        <div class="angel-entry-head">
+          <div class="angel-entry-circle">
+            <img src="assets/Vector.svg" alt="" class="angel-entry-icon">
+          </div>
+          <div class="angel-entry-text">
+            <div class="angel-entry-eyebrow">ANGEL · IA AXA</div>
+            <div class="angel-entry-title">Parcours guidé par IA</div>
+          </div>
+          <svg class="angel-entry-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <p class="angel-entry-desc">Diagnostic conversationnel, analyse de vos risques et plan personnalisé — en mode chat ou vocal.</p>
+        <div class="angel-entry-chips">
+          <span class="angel-mode-chip">💬 Chat</span>
+          <span class="angel-mode-chip">🎙️ Vocal</span>
+          <span class="angel-mode-chip">✦ IA générative</span>
+        </div>
+      </div>
+
+      <div class="diag-skip-wrap rv rv5">
         <button class="diag-skip-btn" onclick="goTo(9)">
           Passer le diagnostic pour l'instant
           <span class="diag-skip-note">Accéder au suivi · score moins précis</span>

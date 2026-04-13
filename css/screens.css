@@ -134,6 +134,52 @@
 .diag-value-checklist { display: flex; flex-direction: column; gap: 8px; }
 .diag-value-check { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--n700); line-height: 1.4; }
 .diag-check-icon { color: var(--success); font-weight: 800; flex-shrink: 0; }
+/* Angel entry card — S1 */
+.angel-or-sep {
+  display: flex; align-items: center; gap: 10px;
+  margin: var(--sp3) 0;
+}
+.angel-or-line { flex: 1; height: 1px; background: var(--n150); }
+.angel-or-label { font-size: 11px; color: var(--n300); font-weight: 500; flex-shrink: 0; }
+
+.angel-entry-card {
+  background: rgba(101,116,248,.05);
+  border: 1.5px solid rgba(101,116,248,.18);
+  border-radius: 20px;
+  padding: var(--sp4);
+  margin-bottom: var(--sp3);
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+.angel-entry-card:hover { background: rgba(101,116,248,.09); border-color: rgba(101,116,248,.35); }
+.angel-entry-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: var(--sp3);
+}
+.angel-entry-circle {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #6574F8;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 14px rgba(101,116,248,.4), 0 0 0 2px rgba(255,255,255,.7);
+}
+.angel-entry-icon { width: 22px; height: 22px; display: block; }
+.angel-entry-text { flex: 1; }
+.angel-entry-eyebrow {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #6574F8; margin-bottom: 2px;
+}
+.angel-entry-title { font-size: 15px; font-weight: 700; color: var(--n800); }
+.angel-entry-arrow { width: 18px; height: 18px; color: #6574F8; flex-shrink: 0; }
+.angel-entry-desc {
+  font-size: 12px; color: var(--n500); line-height: 1.5; margin-bottom: var(--sp3);
+}
+.angel-entry-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.angel-mode-chip {
+  font-size: 10px; font-weight: 600; color: #6574F8;
+  background: rgba(101,116,248,.1); border-radius: var(--r-pill);
+  padding: 3px 10px;
+}
+
 .diag-skip-wrap { text-align: center; margin-bottom: var(--sp2); }
 .diag-skip-btn {
   background: none; border: none; cursor: pointer; font-family: var(--font);
