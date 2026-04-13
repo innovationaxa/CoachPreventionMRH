@@ -455,35 +455,35 @@
 }
 .suivi-potential-card {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--axa); border-radius: var(--r-lg); padding: 16px 14px 16px 16px;
+  background: #F8F5EF; border-radius: var(--r-lg); padding: 16px 14px 16px 16px;
   cursor: pointer; margin-bottom: 2px;
   transition: filter .18s;
 }
-.suivi-potential-card:hover { filter: brightness(1.08); }
+.suivi-potential-card:hover { filter: brightness(.97); }
 .suivi-potential-card-body { flex: 1; }
 .suivi-potential-eyebrow {
   font-size: 9px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase;
-  color: rgba(255,255,255,.55); margin-bottom: 4px;
+  color: var(--n400); margin-bottom: 4px;
 }
 .suivi-potential-main { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-.suivi-potential-num { font-size: 30px; font-weight: 700; color: #fff; letter-spacing: -1px; line-height: 1; }
-.suivi-potential-denom { font-size: 14px; color: rgba(255,255,255,.55); font-weight: 500; }
+.suivi-potential-num { font-size: 30px; font-weight: 700; color: var(--axa); letter-spacing: -1px; line-height: 1; }
+.suivi-potential-denom { font-size: 14px; color: var(--n400); font-weight: 500; }
 .suivi-potential-gain {
-  font-size: 13px; font-weight: 700; color: var(--success-mid);
-  background: rgba(255,255,255,.1); border-radius: var(--r-pill); padding: 2px 9px;
+  font-size: 12px; font-weight: 700; color: var(--success);
+  background: var(--success-light); border-radius: var(--r-pill); padding: 2px 9px;
 }
-.suivi-potential-hint { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.4; }
-.suivi-potential-card .next-action-arrow { color: rgba(255,255,255,.6); width: 20px; height: 20px; flex-shrink: 0; }
+.suivi-potential-hint { font-size: 11px; color: var(--n500); line-height: 1.4; }
+.suivi-potential-card .next-action-arrow { color: var(--axa); width: 20px; height: 20px; flex-shrink: 0; }
 .suivi-hero {
   background: linear-gradient(145deg, var(--axa) 0%, var(--axa-mid) 100%);
   padding: var(--sp5) var(--sp5) var(--sp6);
   text-align: center;
 }
 .suivi-hero-arch {
-  height: 48px;
+  height: 32px;
   background: var(--white);
-  border-radius: 50% 50% 0 0 / 48px 48px 0 0;
-  margin-top: -48px;
+  border-radius: 28px 28px 0 0;
+  margin-top: -32px;
   position: relative;
   z-index: 5;
 }

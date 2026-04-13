@@ -984,7 +984,6 @@ function screenMonSuivi() {
           🏅 ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
         </div>
       </div>
-      <p class="score-tagline rv rv3">${done.length > 0 ? `${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}` : sl.label}</p>
       <div style="height:56px"></div>
     </div>
     <div class="suivi-hero-arch"></div>
