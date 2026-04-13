@@ -784,6 +784,45 @@ function screenActionDetail() {
         <span class="pts-gain-label">Points gagnés si réalisé</span>
         <span class="pts-gain-val">+${a.pts} pts</span>
       </div>
+      ${(() => {
+        if (!a.proof) return '';
+        const proofUploaded = !!(window._ST.proofUploaded || {})[a.id];
+        const typeConfig = {
+          certificate: { icon: '📜', label: 'Certificat ou attestation' },
+          invoice:     { icon: '🧾', label: 'Facture ou bon d\'intervention' },
+          photo:       { icon: '📷', label: 'Photo de l\'installation' }
+        };
+        const tc = typeConfig[a.proof.type] || typeConfig.photo;
+        if (proofUploaded) {
+          return `
+            <div class="proof-section proof-section-done rv">
+              <div class="proof-section-row">
+                <div class="proof-done-icon">${sv(IC.check, 'width:13px;height:13px;fill:var(--success)')}</div>
+                <div class="proof-done-info">
+                  <div class="proof-done-label">Preuve déposée</div>
+                  <div class="proof-done-sub">${a.proof.label}</div>
+                </div>
+                <span class="proof-done-badge">Dossier renforcé</span>
+              </div>
+            </div>`;
+        }
+        const uploadSection = done ? `
+          <button class="proof-upload-btn" onclick="mockUploadProof('${a.id}', 6)">
+            ${sv(IC.check, 'width:13px;height:13px')} Ajouter ma preuve
+          </button>` : `
+          <div class="proof-pending-hint">Conservez ce document — vous pourrez l'ajouter une fois l'action réalisée.</div>`;
+        return `
+          <div class="proof-section rv">
+            <div class="proof-section-row">
+              <div class="proof-type-icon">${tc.icon}</div>
+              <div class="proof-section-info">
+                <div class="proof-section-title">Preuve recommandée <span class="proof-optional-tag">Optionnel</span></div>
+                <div class="proof-section-sub">${a.proof.label}</div>
+              </div>
+            </div>
+            ${uploadSection}
+          </div>`;
+      })()}
       ${servicesHtml}
       ${tutosHtml}
       ${aidesHtml}
@@ -865,6 +904,22 @@ function screenSuccess() {
             <div class="action-done-title">${a.title}</div>
           </div>
           <div class="action-done-conseil">${a.conseilText}</div>
+        </div>
+      ` : ''}
+      ${a && a.proof && !(window._ST.proofUploaded || {})[a.id] ? `
+        <div class="proof-nudge-card rv rv3">
+          <div class="proof-nudge-row">
+            <div class="proof-nudge-icon-wrap">📎</div>
+            <div class="proof-nudge-content">
+              <div class="proof-nudge-title">Renforcez votre dossier</div>
+              <div class="proof-nudge-desc">Ajoutez votre ${a.proof.type === 'certificate' ? 'certificat' : a.proof.type === 'invoice' ? 'facture' : 'photo'} pour attester cette action auprès d'AXA.</div>
+              <div class="proof-nudge-label">${a.proof.label}</div>
+            </div>
+          </div>
+          <div class="proof-nudge-actions">
+            <button class="proof-nudge-cta" onclick="mockUploadProof('${a.id}', 7)">Ajouter maintenant</button>
+            <button class="proof-nudge-skip" onclick="this.closest('.proof-nudge-card').style.display='none'">Plus tard</button>
+          </div>
         </div>
       ` : ''}
       ${newUnlocked.length > 0 ? newUnlocked.map(r => `

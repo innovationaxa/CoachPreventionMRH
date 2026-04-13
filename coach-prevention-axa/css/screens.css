@@ -708,6 +708,187 @@
 .tuto-meta  { font-size: 11px; color: var(--n500); margin-top: 2px; }
 .tuto-arrow { font-size: 18px; color: var(--n300); flex-shrink: 0; line-height: 1; }
 
+/* ── S6/S7 — PROOF OF ACTION ── */
+.proof-section {
+  border: 1.5px solid var(--n150);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+  background: #fff;
+  margin-bottom: var(--sp3);
+}
+.proof-section-done {
+  border-color: rgba(52,168,83,.25);
+  background: #F0FAF2;
+}
+.proof-section-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.proof-type-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: var(--n100);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.proof-done-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E6F4EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.proof-section-info { flex: 1; min-width: 0; }
+.proof-done-info { flex: 1; min-width: 0; }
+.proof-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--n800);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.proof-done-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1E7E34;
+  margin-bottom: 2px;
+}
+.proof-section-sub,
+.proof-done-sub {
+  font-size: 11px;
+  color: var(--n500);
+  line-height: 1.35;
+}
+.proof-optional-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  background: var(--n100);
+  color: var(--n500);
+  padding: 2px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.proof-done-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  background: #E6F4EA;
+  color: #1E7E34;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+.proof-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1.5px dashed var(--axa-mid);
+  border-radius: var(--r-md);
+  background: var(--axa-xlight);
+  color: var(--axa);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background .15s;
+}
+.proof-upload-btn:hover { background: rgba(0,0,143,.08); }
+.proof-pending-hint {
+  margin-top: 9px;
+  font-size: 11px;
+  color: var(--n400);
+  line-height: 1.4;
+  padding: 7px 10px;
+  background: var(--n50);
+  border-radius: var(--r-sm);
+}
+
+/* S7 — Proof nudge card */
+.proof-nudge-card {
+  border: 1.5px solid rgba(0,0,143,.15);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  background: var(--axa-xlight);
+  margin-bottom: var(--sp3);
+}
+.proof-nudge-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.proof-nudge-icon-wrap {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  background: rgba(0,0,143,.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.proof-nudge-content { flex: 1; min-width: 0; }
+.proof-nudge-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--axa);
+  margin-bottom: 3px;
+}
+.proof-nudge-desc {
+  font-size: 11px;
+  color: var(--axa-mid);
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.proof-nudge-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--axa);
+  opacity: .65;
+}
+.proof-nudge-actions {
+  display: flex;
+  gap: 8px;
+}
+.proof-nudge-cta {
+  flex: 1;
+  padding: 9px;
+  background: var(--axa);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.proof-nudge-skip {
+  padding: 9px 14px;
+  background: transparent;
+  color: var(--n500);
+  border: 1.5px solid var(--n150);
+  border-radius: var(--r-md);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
 /* ── S6 — CONSEILLER AXA ── */
 .conseiller-card {
   background: linear-gradient(135deg, var(--axa) 0%, #001E96 100%);

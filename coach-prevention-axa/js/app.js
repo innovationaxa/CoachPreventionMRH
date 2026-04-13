@@ -15,7 +15,8 @@ window._ST = {
   scoreBefore:      null,
   selectedAction:   null,
   lastCompletedAction: null,
-  showAllActions:   false
+  showAllActions:   false,
+  proofUploaded:    {}
 };
 
 /* ── RENDER ── */
@@ -165,6 +166,7 @@ function selectProfile(id) {
   window._ST.diagAnswers = {};
   window._ST.diagStep = 0;
   window._ST.showAllActions = false;
+  window._ST.proofUploaded = {};
   render(0);
   updateNav(0);
 }
@@ -239,6 +241,21 @@ function updateScoreBar() {
   if (el)  el.textContent  = `${s} / 100`;
   if (hd)  hd.textContent  = rem > 0 ? `+${rem} pts disponibles` : '🎉 Plan complété !';
   if (bar) bar.classList.toggle('ok', s >= 70);
+}
+
+/* ── PROOF UPLOAD (mocked) ── */
+function mockUploadProof(actionId, fromScreen) {
+  if (!window._ST.proofUploaded) window._ST.proofUploaded = {};
+  window._ST.proofUploaded[actionId] = true;
+  const device = document.querySelector('.device');
+  if (device) {
+    const t = document.createElement('div');
+    t.textContent = '📎 Preuve ajoutée à votre dossier';
+    t.style.cssText = 'position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:var(--success);color:#fff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--font);z-index:500;white-space:nowrap;pointer-events:none';
+    device.appendChild(t);
+    setTimeout(() => t.remove(), 2400);
+  }
+  if (fromScreen !== undefined) { render(fromScreen); updateNav(fromScreen); }
 }
 
 /* ── REWARDS ── */
