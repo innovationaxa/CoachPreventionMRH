@@ -480,10 +480,10 @@
   text-align: center;
 }
 .suivi-hero-arch {
-  height: 32px;
+  height: 28px;
   background: var(--white);
-  border-radius: 28px 28px 0 0;
-  margin-top: -32px;
+  border-radius: 50% 50% 0 0 / 28px 28px 0 0;
+  margin-top: -28px;
   position: relative;
   z-index: 5;
 }
