@@ -174,12 +174,12 @@ function screenLanding() {
           </div>
           <div class="angel-entry-text">
             <div class="angel-entry-eyebrow">ANGEL · VOTRE ASSISTANT IA</div>
-            <div class="angel-entry-title">Parcours guidé par IA</div>
+            <div class="angel-entry-title">Besoin d'un diagnostic plus personnalisé ?</div>
           </div>
         </div>
-        <p class="angel-entry-desc">Diagnostic conversationnel, analyse de vos risques et plan personnalisé — en mode chat ou vocal.</p>
+        <p class="angel-entry-desc">Angel échange avec vous pour affiner votre niveau de risque et vous proposer des recommandations adaptées à votre situation.</p>
         <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
-          Demander à Angel
+          Obtenir un diagnostic guidé
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -719,12 +719,12 @@ function screenActionDetail() {
           </div>
           <div class="angel-entry-text">
             <div class="angel-entry-eyebrow">ANGEL · VOTRE ASSISTANT IA</div>
-            <div class="angel-entry-title">Besoin d'aide pour réaliser cette action ?</div>
+            <div class="angel-entry-title">Je vous aide à passer à l'action ?</div>
           </div>
         </div>
-        <p class="angel-entry-desc">Angel vous guide pas à pas — questions, conseils personnalisés et mise en relation avec les bons artisans.</p>
+        <p class="angel-entry-desc">Angel vous guide étape par étape, vous aide à choisir la bonne solution et peut vous orienter vers le bon interlocuteur si besoin.</p>
         <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
-          Demander à Angel
+          Être guidé pas à pas
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
