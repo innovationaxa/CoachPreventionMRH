@@ -179,6 +179,15 @@
 }
 .score-potential-arrow { font-weight: 700; color: var(--success-mid); }
 .risk-score-meta { display: flex; align-items: baseline; gap: var(--sp2); margin-top: 4px; }
+/* Score CTA card (unified explain + CTA) */
+.score-cta-card { background: #F8F5EF; border-radius: 18px; padding: var(--sp4); margin-bottom: var(--sp2); }
+.score-cta-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--axa); margin-bottom: var(--sp2); }
+.score-cta-title { font-size: 22px; font-weight: 700; color: var(--n900); line-height: 1.2; letter-spacing: -0.4px; margin-bottom: var(--sp3); }
+.score-cta-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--sp2); }
+.score-cta-chip { font-size: 12px; color: var(--n600); background: rgba(0,0,0,0.07); border-radius: var(--r-pill); padding: 4px 11px; }
+.score-cta-chip.scc-green strong { color: var(--success); }
+.score-cta-chip.scc-blue strong { color: var(--axa); }
+.score-cta-scale { font-size: 10px; color: var(--n400); }
 .risk-score-pts { font-size: 11px; font-weight: 700; color: var(--n600); flex-shrink: 0; }
 .risk-score-comment { font-size: 11px; color: var(--n400); line-height: 1.4; }
 

@@ -227,7 +227,7 @@ function screenDiagnostic() {
           <span style="font-size:16px">${risk?.icon}</span>
           <div>
             <div style="font-weight:600;font-size:13px">${risk?.label}</div>
-            <div style="font-size:11px;opacity:.75">${risk?.explanation?.substring(0, 60)}…</div>
+            <div style="font-size:11px;opacity:.75">${risk?.explanation}</div>
           </div>
         </div>
         <div class="q-card-text">${q.text}</div>
@@ -356,36 +356,24 @@ function screenScore() {
       <div class="section-title rv rv2">Exposition par risque</div>
       <div class="risk-bars rv rv2">${riskBarsHtml}</div>
 
-      <div class="score-explain-box rv rv2">
-        <div class="score-explain-title">${sv(IC.info, 'width:13px;height:13px;vertical-align:middle;margin-right:4px')} Comment fonctionne ce score ?</div>
-        <div class="score-explain-body">
-          <div class="score-explain-row">
-            <span>Score de départ (profil)</span>
-            <span class="score-explain-val">${p.preparationScore} pts</span>
-          </div>
-          ${diagGain > 0 ? `
-          <div class="score-explain-row">
-            <span>Gains de votre diagnostic</span>
-            <span class="score-explain-val success">+${diagGain} pts</span>
-          </div>` : ''}
-          <div class="score-explain-row">
-            <span>Potentiel actions disponibles</span>
-            <span class="score-explain-val">+${totalGain} pts</span>
-          </div>
-          <div class="score-explain-divider"></div>
-          <div class="score-explain-row">
-            <span style="font-size:11px;color:var(--n500)">< 45 : Faible · 45–69 : Modéré · 70+ : Bon</span>
-          </div>
+      <div class="score-cta-card rv rv3">
+        <div class="score-cta-eyebrow">Votre potentiel d'amélioration</div>
+        <div class="score-cta-title">+${Math.min(totalGain, 100 - score)} pts<br>vous attendent.</div>
+        <div class="score-cta-chips">
+          <span class="score-cta-chip">Score actuel <strong>${score}</strong></span>
+          ${diagGain > 0 ? `<span class="score-cta-chip scc-green">Diagnostic <strong>+${diagGain}</strong></span>` : ''}
+          <span class="score-cta-chip scc-blue">Actions <strong>+${totalGain}</strong></span>
         </div>
-      </div>
-
-      <div class="cta-box rv rv3">
-        <p class="cta-text">
-          <strong>+${Math.min(totalGain, potential - score)} pts possibles</strong> en réalisant vos actions — débloquez vos avantages AXA prévention.
-        </p>
-        <button class="btn btn-primary" onclick="goTo(4)">
+        <div class="score-cta-scale">Faible &lt; 45 · Modéré 45–69 · Bon 70+</div>
+        <button class="btn btn-primary" onclick="goTo(4)" style="width:100%;margin-top:var(--sp4)">
           Voir l'impact sur mes risques
           <svg class="btn-icon">${sv(IC.arrow)}</svg>
+        </button>
+      </div>
+      <div style="text-align:center;padding-bottom:var(--sp4)">
+        <button class="diag-skip-btn" onclick="goTo(9)">
+          Accéder à mon tableau de bord prévention
+          <span class="diag-skip-note">Suivi · actions réalisées · récompenses</span>
         </button>
       </div>
     </div>
