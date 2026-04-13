@@ -1237,6 +1237,32 @@ function screenMonSuivi() {
       <div class="section-title rv rv3" style="margin-top:var(--sp4)">Actions réalisées</div>
       <div class="suivi-done-list rv rv3">${completedCardsHtml}</div>
 
+      <div class="section-title rv rv4" style="margin-top:var(--sp4)">Bilan de prévention</div>
+      <div class="bilan-export-card rv rv4">
+        <div class="bilan-export-header">
+          <div class="bilan-export-doc-icon">📄</div>
+          <div class="bilan-export-info">
+            <div class="bilan-export-title">Synthèse personnalisée</div>
+            <div class="bilan-export-sub">Risques · Actions prioritaires · Couverture contractuelle</div>
+          </div>
+        </div>
+        <div class="bilan-export-chips">
+          <span class="bilan-chip">${p.mainRisks.length} risques analysés</span>
+          <span class="bilan-chip">${done.length} action${done.length !== 1 ? 's' : ''} réalisée${done.length !== 1 ? 's' : ''}</span>
+          <span class="bilan-chip">Score ${score}/100</span>
+        </div>
+        <div class="bilan-export-actions">
+          <button class="bilan-btn-primary" onclick="generateBilan()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Télécharger en PDF
+          </button>
+          <button class="bilan-btn-secondary" onclick="mockSendBilan()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Envoyer par email
+          </button>
+        </div>
+      </div>
+
     </div>
     <div class="bottom-safe"></div>
   `;

@@ -258,6 +258,134 @@ function mockUploadProof(actionId, fromScreen) {
   if (fromScreen !== undefined) { render(fromScreen); updateNav(fromScreen); }
 }
 
+/* ── BILAN EXPORT ── */
+function generateBilan() {
+  const p     = getProfile(window._ST.profileId);
+  const done  = window._ST.completedActions || [];
+  const score = window._ST.currentScore || p.preparationScore;
+  const sl    = scoreLevel(score);
+  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
+  const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const tierLabel = sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or';
+
+  const risksHtml = p.mainRisks.map(rId => {
+    const r   = RISKS[rId];
+    const cov = (p.coverage || {})[rId] || {};
+    const levelColor = r.level === 'high' ? '#dc2626' : r.level === 'medium' ? '#d97706' : '#16a34a';
+    const levelLabel = r.level === 'high' ? 'Risque ÉLEVÉ' : r.level === 'medium' ? 'Risque MODÉRÉ' : 'Risque FAIBLE';
+    const covIcon  = cov.status === 'covered' ? '✓' : cov.status === 'partial' ? '◑' : '✗';
+    const covLabel = cov.status === 'covered' ? 'Couvert' : cov.status === 'partial' ? 'Couverture partielle' : 'Non couvert';
+    const covDetail = [cov.limit ? `Plafond ${cov.limit}` : null, cov.franchise ? `Franchise ${cov.franchise}` : null, cov.cgRef && cov.cgRef !== '—' ? cov.cgRef : null].filter(Boolean).join(' · ');
+    return `
+      <tr>
+        <td style="padding:9px 10px 9px 0;border-bottom:1px solid #f0f2f5;width:26px;font-size:18px;vertical-align:top">${r.icon}</td>
+        <td style="padding:9px 0;border-bottom:1px solid #f0f2f5;vertical-align:top">
+          <div style="font-size:12.5px;font-weight:700;color:${levelColor}">${r.label} — ${levelLabel}</div>
+          <div style="font-size:11px;color:#555;margin-top:2px;line-height:1.4">${r.explanation}</div>
+          ${cov.status ? `<div style="margin-top:5px;font-size:10.5px;background:#f0f3ff;border-left:3px solid #00008F;padding:4px 8px;border-radius:0 4px 4px 0">
+            <strong style="color:#00008F">${covIcon} ${covLabel}</strong>${covDetail ? ' · ' + covDetail : ''}
+            ${cov.note ? `<div style="color:#555;margin-top:2px;line-height:1.4">${cov.note}</div>` : ''}
+          </div>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+
+  const actionsHtml = allA.slice(0, 8).map(a => {
+    const isDone = done.includes(a.id);
+    const effortLabel = a.effort === 'low' ? 'Effort faible' : a.effort === 'medium' ? 'Effort moyen' : 'Effort élevé';
+    return `
+      <tr>
+        <td style="padding:7px 8px 7px 0;border-bottom:1px solid #f0f2f5;width:20px;vertical-align:top">
+          <div style="width:16px;height:16px;border-radius:50%;background:${isDone ? '#16a34a' : '#e5e7eb'};display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${isDone ? 'white' : '#9ca3af'}">${isDone ? '✓' : '○'}</div>
+        </td>
+        <td style="padding:7px 8px 7px 0;border-bottom:1px solid #f0f2f5;vertical-align:top">
+          <div style="font-size:12px;font-weight:600;color:${isDone ? '#16a34a' : '#1a1a2e'}">${a.title}</div>
+          <div style="font-size:10px;color:#888;margin-top:1px">${a.riskLabel} · ${a.duration} · ${effortLabel}</div>
+        </td>
+        <td style="padding:7px 0 7px 8px;border-bottom:1px solid #f0f2f5;text-align:right;white-space:nowrap;font-size:10px;font-weight:700;color:#00008F;vertical-align:top">${isDone ? '✓' : '+'} ${a.pts} pts</td>
+      </tr>`;
+  }).join('');
+
+  const moreActions = allA.length > 8
+    ? `<tr><td colspan="3" style="text-align:center;font-size:10.5px;color:#888;padding:8px 0">+ ${allA.length - 8} action${allA.length - 8 > 1 ? 's' : ''} supplémentaire${allA.length - 8 > 1 ? 's' : ''} dans l'application</td></tr>`
+    : '';
+
+  const html = `<!DOCTYPE html><html lang="fr"><head>
+    <meta charset="UTF-8">
+    <title>Bilan de Prévention MRH — ${p.firstName}</title>
+    <style>
+      @page { size: A4; margin: 18mm 16mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a2e; font-size: 12px; line-height: 1.5; }
+      .header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 3px solid #00008F; padding-bottom: 12px; margin-bottom: 18px; }
+      .logo { font-size: 24px; font-weight: 900; color: #00008F; letter-spacing: -0.5px; font-style: italic; }
+      .doc-title { font-size: 16px; font-weight: 700; color: #00008F; margin-top: 2px; }
+      .doc-meta { font-size: 10px; color: #888; text-align: right; line-height: 1.6; }
+      .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f0f2ff; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; }
+      .label { font-size: 10px; color: #666; font-weight: 500; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+      .value { font-size: 12.5px; font-weight: 700; }
+      .score-pill { display: inline-block; background: #00008F; color: white; border-radius: 20px; padding: 3px 11px; font-size: 11px; font-weight: 700; }
+      .section { margin-bottom: 20px; page-break-inside: avoid; }
+      .section-title { font-size: 10.5px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: #00008F; border-bottom: 1.5px solid #e0e4f0; padding-bottom: 5px; margin-bottom: 10px; }
+      table { width: 100%; border-collapse: collapse; }
+      .footer { border-top: 1px solid #e0e4f0; margin-top: 20px; padding-top: 8px; display: flex; justify-content: space-between; color: #aaa; font-size: 9.5px; }
+      .disclaimer { font-size: 9px; color: #bbb; margin-top: 5px; text-align: center; }
+      @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style>
+  </head><body>
+    <div class="header">
+      <div>
+        <div class="logo">AXA</div>
+        <div class="doc-title">Bilan de Prévention MRH</div>
+      </div>
+      <div class="doc-meta">
+        <div>Généré le ${today}</div>
+        <div>${p.contract.ref}</div>
+        <div style="margin-top:3px">${p.zone}</div>
+      </div>
+    </div>
+    <div class="profile-grid">
+      <div><div class="label">Assuré(e)</div><div class="value">${p.firstName} · ${p.propertyType} · ${p.occupancyStatus}</div></div>
+      <div><div class="label">Localisation</div><div class="value">${p.location}</div></div>
+      <div><div class="label">Contrat</div><div class="value">${p.contract.name} — ${p.contract.ref}</div></div>
+      <div><div class="label">Score de prévention</div><div class="value"><span class="score-pill">⚡ ${score} / 100 — Niveau ${tierLabel}</span></div></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Exposition aux risques &amp; couverture contractuelle</div>
+      <table>${risksHtml}</table>
+    </div>
+    <div class="section">
+      <div class="section-title">Plan d'actions prioritaires</div>
+      <table>${actionsHtml}${moreActions}</table>
+    </div>
+    <div class="footer">
+      <div>AXA Prévention — Coach MRH</div>
+      <div>${p.contract.ref} · ${today}</div>
+      <div>confidentiel · usage personnel</div>
+    </div>
+    <div class="disclaimer">Ce bilan est généré à titre informatif à partir de vos données de profil. Il ne constitue pas un document contractuel.</div>
+  </body></html>`;
+
+  const w = window.open('', '_blank', 'width=820,height=960');
+  if (!w) { alert('Veuillez autoriser les pop-ups pour télécharger votre bilan.'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => { w.focus(); w.print(); }, 450);
+}
+
+function mockSendBilan() {
+  const device = document.querySelector('.device');
+  if (!device) return;
+  const prev = device.querySelector('#bilan-toast');
+  if (prev) prev.remove();
+  const t = document.createElement('div');
+  t.id = 'bilan-toast';
+  t.innerHTML = '✉️ <strong>Bilan envoyé !</strong> Vérifiez votre messagerie sous quelques minutes.';
+  t.style.cssText = 'position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#00008F;color:#fff;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:500;font-family:var(--font);z-index:500;white-space:nowrap;pointer-events:none;text-align:center;max-width:80%';
+  device.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
 /* ── REWARDS ── */
 function activateRewards() {
   const done = window._ST.completedActions || [];
