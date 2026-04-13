@@ -279,6 +279,7 @@ function screenScore() {
   const potential = Math.min(score + totalGain, 100);
   const circ = 352;
   const offset = Math.round(circ * (1 - score / 100));
+  const lc = p.localContext || null;
 
   const riskBarsHtml = p.mainRisks.map(rId => {
     const r = RISKS[rId];
@@ -291,6 +292,10 @@ function screenScore() {
       : r.level === 'medium'
       ? 'Quelques actions simples réduiraient significativement votre exposition.'
       : 'Bonne maîtrise de ce risque. Maintenez vos équipements à jour.';
+    const localStat = lc && lc.sinistresStats && lc.sinistresStats[rId];
+    const localStatHtml = localStat
+      ? `<div class="local-stat-line"><span class="local-stat-icon">📍</span><span class="local-stat-text">${localStat.stat}</span><span class="local-stat-source">${localStat.source}</span></div>`
+      : '';
     return `
       <div class="risk-bar-row">
         <div class="risk-bar-header">
@@ -302,6 +307,7 @@ function screenScore() {
           <span class="risk-score-pts">${barScore}/100</span>
           <span class="risk-score-comment">${comment}</span>
         </div>
+        ${localStatHtml}
       </div>
     `;
   }).join('');
@@ -324,6 +330,13 @@ function screenScore() {
     return `<div class="risk-map-legend-row"><div class="risk-map-legend-dot" style="background:${dot}"></div><span>${r.icon} ${r.label}</span><span class="tag ${tc}" style="font-size:9px;padding:2px 6px;margin-left:auto">${r.levelLabel}</span></div>`;
   }).join('');
   const mapPinSvg = sv(IC.pin, 'width:10px;height:10px;vertical-align:middle');
+  /* ── Local context zone + PCS badge ── */
+  const geoZoneHtml = lc && lc.georisquesZone
+    ? `<div class="geo-zone-row"><span class="geo-zone-icon">🗺️</span><span class="geo-zone-label">${lc.georisquesZone}</span></div>`
+    : '';
+  const pcsBadgeHtml = lc && lc.pcs
+    ? `<div class="pcs-badge">✔ Plan Communal de Sauvegarde actif</div>`
+    : '';
   const riskMapHtml = `
     <div class="risk-map-card rv rv1">
       <div class="risk-map-wrap">
@@ -341,8 +354,31 @@ function screenScore() {
         <div class="risk-map-source">AXA × Géorisques</div>
       </div>
       <div class="risk-map-legend">${riskLegendHtml}</div>
+      ${geoZoneHtml}
+      ${pcsBadgeHtml}
     </div>
   `;
+
+  /* ── Recent event banner ── */
+  const recentEventHtml = lc && lc.recentEvent ? `
+    <div class="local-event-banner rv rv2">
+      <div class="local-event-year">${lc.recentEvent.year}</div>
+      <div class="local-event-body">
+        <div class="local-event-label">${lc.recentEvent.label}</div>
+        <div class="local-event-detail">${lc.recentEvent.detail}</div>
+      </div>
+    </div>
+  ` : '';
+
+  /* ── Testimonial card ── */
+  const testimonialHtml = lc && lc.testimonial ? `
+    <div class="testimonial-card rv rv3">
+      <div class="testimonial-eyebrow">Situation similaire à la vôtre</div>
+      <div class="testimonial-situation">${lc.testimonial.situation}</div>
+      <div class="testimonial-text">"${lc.testimonial.text}"</div>
+      <div class="testimonial-source">${lc.testimonial.source}</div>
+    </div>
+  ` : '';
 
   const diagGain = score - p.preparationScore;
 
@@ -375,9 +411,12 @@ function screenScore() {
 
       <div class="section-title rv rv1">Exposition géographique</div>
       ${riskMapHtml}
+      ${recentEventHtml}
 
       <div class="section-title rv rv2">Exposition par risque</div>
       <div class="risk-bars rv rv2">${riskBarsHtml}</div>
+
+      ${testimonialHtml}
 
       <div class="score-cta-card rv rv3">
         <div class="score-cta-eyebrow">Votre potentiel d'amélioration</div>

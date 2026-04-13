@@ -1023,3 +1023,136 @@
   transform: rotate(8deg);
   box-shadow: 0 4px 12px rgba(0,0,143,0.25);
 }
+
+/* ── S3 — LOCAL CONTEXT ── */
+
+/* Geo zone row (inside map card) */
+.geo-zone-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 14px 4px;
+  border-top: 1px solid var(--n100);
+  margin-top: 2px;
+}
+.geo-zone-icon { font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+.geo-zone-label {
+  font-size: 11px;
+  color: var(--n600);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* PCS badge (inside map card) */
+.pcs-badge {
+  margin: 2px 14px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  width: fit-content;
+  letter-spacing: 0.01em;
+}
+
+/* Recent event banner */
+.local-event-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.28);
+  border-radius: var(--r-lg);
+  padding: 11px 14px;
+  margin-bottom: var(--sp3);
+}
+.local-event-year {
+  font-size: 11px;
+  font-weight: 800;
+  color: #92400e;
+  background: rgba(245,158,11,0.18);
+  border-radius: var(--r-pill);
+  padding: 2px 8px;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+.local-event-body { flex: 1; min-width: 0; }
+.local-event-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--n800);
+  margin-bottom: 2px;
+}
+.local-event-detail {
+  font-size: 11px;
+  color: var(--n600);
+  line-height: 1.4;
+}
+
+/* Local stat line (inside risk bar row) */
+.local-stat-line {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 5px 8px;
+  background: rgba(0,0,143,0.04);
+  border-radius: var(--r-sm);
+  border-left: 2.5px solid rgba(0,0,143,0.25);
+}
+.local-stat-icon { font-size: 10px; flex-shrink: 0; }
+.local-stat-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--n700);
+  flex: 1;
+  line-height: 1.35;
+}
+.local-stat-source {
+  font-size: 9.5px;
+  color: var(--n400);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* Testimonial card */
+.testimonial-card {
+  background: #fff;
+  border: 1px solid var(--n150);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: var(--sp3);
+  box-shadow: var(--shadow-sm);
+}
+.testimonial-eyebrow {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--axa);
+  margin-bottom: 6px;
+}
+.testimonial-situation {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--n600);
+  margin-bottom: 6px;
+}
+.testimonial-text {
+  font-size: 12px;
+  color: var(--n800);
+  line-height: 1.5;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.testimonial-source {
+  font-size: 10px;
+  color: var(--n400);
+  font-style: normal;
+}

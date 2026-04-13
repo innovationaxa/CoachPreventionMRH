@@ -25,6 +25,21 @@ const PROFILES = {
     hasGarden: true,
     tagline: 'Automne-hiver · Risques élevés détectés',
     contract: { name: 'MRH AXA Confort', ref: 'MRH-2024-78432' },
+    localContext: {
+      georisquesZone: 'Zone orange inondation (PPRI Loire-Atlantique)',
+      pcs: true,
+      recentEvent: { year: '2023', label: 'Tempête Domingos', detail: '47 communes sinistrées · rafales > 110 km/h enregistrées à Nantes' },
+      sinistresStats: {
+        'inondation': { stat: '3 300 sinistres inondation/an en Loire-Atlantique', source: 'CCR 2023' },
+        'tempete':    { stat: '18 000 sinistres tempête dans les Pays de la Loire en 2023', source: 'FFA 2023' },
+        'degat-eaux': { stat: '1 logement sur 4 touché par un DDE chaque année en France', source: 'FFA 2023' }
+      },
+      testimonial: {
+        situation: 'Maison individuelle · Nantes · octobre 2023',
+        text: 'Suite aux crues de l\'Erdre, la cave a été inondée sur 60 cm. Parquet et électroménager détruits — 18 000 € de dégâts, 8 semaines de travaux.',
+        source: 'Données sinistres AXA Loire-Atlantique'
+      }
+    },
     coverage: {
       'inondation': { status: 'covered', limit: '150 000 €', franchise: '380 €',   cgRef: 'Art. 3.6.3 + 3.4', note: 'Couvert — eaux de ruissellement et débordements (art. 3.6.3) et régime CatNat si arrêté publié (art. 3.4) — franchise légale 380 €' },
       'tempete':    { status: 'covered', limit: '150 000 €', franchise: '380 €',   cgRef: 'Art. 3.6.1',       note: 'Action directe du vent, grêle et neige couverts (art. 3.6.1) — condition : vent > 90 km/h ou dommages sur la commune — franchise légale 380 €' },
@@ -53,6 +68,21 @@ const PROFILES = {
     completedActions: ['incendie-detecteur-fumee'],
     tagline: 'Nouveau contrat · Plan de départ',
     contract: { name: 'MRH AXA Essentiel', ref: 'MRH-2025-12089' },
+    localContext: {
+      georisquesZone: 'Zone urbaine dense — risque vol et DDE',
+      pcs: false,
+      recentEvent: { year: '2023', label: 'Vague de cambriolages Paris 15e', detail: '+14 % de cambriolages dans l\'arrondissement · pic sur octobre–décembre 2023' },
+      sinistresStats: {
+        'vol':        { stat: '1 cambriolage toutes les 45 min en Île-de-France', source: 'Ministère de l\'Intérieur 2023' },
+        'degat-eaux': { stat: '1 logement sur 4 touché par un DDE chaque année en France', source: 'FFA 2023' },
+        'incendie':   { stat: '70 000 incendies domestiques déclarés chaque année en France', source: 'DGSCGC 2023' }
+      },
+      testimonial: {
+        situation: 'Appartement · Paris 15e · mars 2023',
+        text: 'Une fuite sur une canalisation de cuisine, non détectée pendant 3 semaines. Parquet gonflé dans 2 pièces et plafond du voisin du dessous effondré — 6 000 € de dégâts, recours entre copropriétaires.',
+        source: 'Données sinistres AXA Île-de-France'
+      }
+    },
     coverage: {
       'vol':        { status: 'partial',     limit: '3 000 €',   franchise: '300 €',   cgRef: 'Art. 4.1',         note: 'Option souscrite — vol par effraction garanti (art. 4.1) — objets de valeur couverts jusqu\'à 1 500 € (coffre-fort requis au-delà) — vols par locataires ou colocataires exclus' },
       'degat-eaux': { status: 'covered',     limit: '50 000 €',  franchise: '150 €',   cgRef: 'Art. 3.5',         note: 'Garantie de base — fuites, ruptures, infiltrations (art. 3.5) — recherche de fuite incluse — exclusion : humidité et condensation' },
@@ -81,6 +111,21 @@ const PROFILES = {
     completedActions: ['incendie-detecteur-fumee','dde-goutieres'],
     tagline: 'Profil avancé · Risque RGA spécifique',
     contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2023-55214' },
+    localContext: {
+      georisquesZone: 'Zone argileuse (aléa fort à très fort) — secteur Lyon 3e',
+      pcs: false,
+      recentEvent: { year: '2022', label: 'Sécheresse Rhône-Alpes', detail: 'Vague de chaleur record · sol argileux desséché · +186 % de dossiers RGA ouverts en Auvergne-Rhône-Alpes' },
+      sinistresStats: {
+        'rga':        { stat: '+186 % de dossiers RGA en Auvergne-Rhône-Alpes après la sécheresse 2022', source: 'CCR 2023' },
+        'incendie':   { stat: '70 000 incendies domestiques déclarés chaque année en France', source: 'DGSCGC 2023' },
+        'degat-eaux': { stat: '1 logement sur 4 touché par un DDE chaque année en France', source: 'FFA 2023' }
+      },
+      testimonial: {
+        situation: 'Maison individuelle · Lyon 3e · automne 2022',
+        text: 'Après la sécheresse de l\'été, les fondations ont bougé. Fissures dans 3 murs porteurs, portes et fenêtres coincées — 23 000 € de travaux de reprise en sous-œuvre, instruction CatNat de 14 mois.',
+        source: 'Données sinistres AXA Auvergne-Rhône-Alpes'
+      }
+    },
     coverage: {
       'incendie':   { status: 'covered', limit: '200 000 €', franchise: '380 €',   cgRef: 'Art. 3.1',         note: 'Garantie de base — incendie, explosion, implosion, enfumage et foudre (art. 3.1) — préconisation : ramoner cheminées 1x/an, entretenir chaudière annuellement' },
       'degat-eaux': { status: 'covered', limit: '100 000 €', franchise: '150 €',   cgRef: 'Art. 3.5',         note: 'Garantie de base — fuites, ruptures, infiltrations, recherche de fuite incluse (art. 3.5) — exclusion : humidité, condensation, moisissures' },
@@ -109,6 +154,21 @@ const PROFILES = {
     completedActions: [],
     tagline: 'Nouvel achat · Copropriété · Score faible',
     contract: { name: 'MRH AXA Confort', ref: 'MRH-2025-33871' },
+    localContext: {
+      georisquesZone: 'Zone urbaine — copropriété ancienne · faible risque naturel',
+      pcs: false,
+      recentEvent: { year: '2023', label: 'Tempête Domingos · Bordeaux', detail: '8 000 interventions pompiers Gironde · nombreux dégâts sur toitures en copropriété ancienne' },
+      sinistresStats: {
+        'degat-eaux': { stat: '1 appartement sur 5 en copropriété ancienne subit un DDE chaque année à Bordeaux', source: 'FFA 2023' },
+        'vol':        { stat: '1 cambriolage toutes les 90 min en Nouvelle-Aquitaine', source: 'Ministère de l\'Intérieur 2023' },
+        'incendie':   { stat: '70 000 incendies domestiques déclarés chaque année en France', source: 'DGSCGC 2023' }
+      },
+      testimonial: {
+        situation: 'Appartement en copropriété · Bordeaux Centre · janvier 2023',
+        text: 'Rupture de canalisation dans l\'appartement du dessus : dégâts d\'eau sur 2 étages. Trois appartements touchés, procédure amiable entre copropriétaires pendant 6 mois — 12 000 € de dégâts côté sinistré.',
+        source: 'Données sinistres AXA Nouvelle-Aquitaine'
+      }
+    },
     coverage: {
       'degat-eaux': { status: 'covered', limit: '80 000 €',  franchise: '150 €',  cgRef: 'Art. 3.5',         note: 'Garantie de base — fuites et ruptures de canalisations intérieures privatives (art. 3.5) — recherche de fuite incluse — copropriété couverte par son propre contrat' },
       'vol':        { status: 'covered', limit: '5 000 €',   franchise: '300 €',  cgRef: 'Art. 4.1',         note: 'Option souscrite — vol par effraction dans les parties privatives (art. 4.1) — vols dans parties communes exclus — conditions de protection (serrure + volets) obligatoires' },
@@ -137,6 +197,21 @@ const PROFILES = {
     completedActions: ['incendie-detecteur-fumee'],
     tagline: 'Été · Risques feux et sécheresse',
     contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2024-90123' },
+    localContext: {
+      georisquesZone: 'Zone incendie PACA — feux de forêt · sol argileux (aléa fort)',
+      pcs: true,
+      recentEvent: { year: '2023', label: 'Incendies Marseille août 2023', detail: '1 200 ha brûlés dans les Bouches-du-Rhône · quartiers du 9e et 11e évacués · Mistral 80–100 km/h' },
+      sinistresStats: {
+        'incendie':   { stat: '5 000 ha brûlés en moyenne chaque année en PACA — 40 % des feux de forêt nationaux', source: 'SDIS 13 · 2023' },
+        'rga':        { stat: '+230 % de dossiers RGA en PACA après les sécheresses 2022–2023', source: 'CCR 2023' },
+        'tempete':    { stat: 'Le Mistral dépasse 100 km/h plus de 30 jours/an à Marseille', source: 'Météo-France 2023' }
+      },
+      testimonial: {
+        situation: 'Maison individuelle · Marseille 9e · août 2023',
+        text: 'Le feu s\'est approché à moins de 300 m. Garage détruit par propagation via la végétation du talus. Façade et fenêtres endommagées par la chaleur — 31 000 € de dégâts, relogement 6 semaines.',
+        source: 'Données sinistres AXA PACA'
+      }
+    },
     coverage: {
       'incendie':   { status: 'covered', limit: '200 000 €', franchise: '380 €',   cgRef: 'Art. 3.1',         note: 'Garantie de base — incendie, explosion, implosion, enfumage et foudre (art. 3.1) — inclut les feux de végétation atteignant l\'habitation — débroussaillage recommandé' },
       'rga':        { status: 'partial', limit: null,        franchise: '1 520 €', cgRef: 'Art. 3.4',         note: 'Couvert uniquement via Catastrophes Naturelles (art. 3.4) — franchise spécifique 1 520 € — commune sans PPR : franchise modulée si récidive — nécessite arrêté interministériel' },
