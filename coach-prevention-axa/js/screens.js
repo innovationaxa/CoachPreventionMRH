@@ -179,7 +179,7 @@ function screenLanding() {
         </div>
         <p class="angel-entry-desc">Angel échange avec vous pour affiner votre niveau de risque et vous proposer des recommandations adaptées à votre situation.</p>
         <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
-          Obtenir un diagnostic guidé
+          Commencer avec Angel
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -724,7 +724,7 @@ function screenActionDetail() {
         </div>
         <p class="angel-entry-desc">Angel vous guide étape par étape, vous aide à choisir la bonne solution et peut vous orienter vers le bon interlocuteur si besoin.</p>
         <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
-          Être guidé pas à pas
+          Être guidé par Angel
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
