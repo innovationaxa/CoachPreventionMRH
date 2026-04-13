@@ -665,8 +665,10 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px 14px;
-  background: transparent;
-  border-top: none;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0,0,0,0.06);
   /* floats over screen content */
   position: absolute;
   bottom: 0;
@@ -678,15 +680,14 @@
 /* Screen padding when tab bar visible */
 .device.has-tabbar .screen { padding-bottom: 76px; }
 
-/* Main pill — fully rounded like Angel circle */
+/* Main pill container */
 .tab-main {
   flex: 1;
   display: flex;
   align-items: stretch;
-  background: var(--axa);
+  background: #F2F2F5;
   border-radius: 100px;
   padding: 4px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.08), 0 0 0 1px var(--n150);
   min-width: 0;
 }
 .tab-item {
@@ -699,24 +700,24 @@
   padding: 7px 2px 6px;
   border: none;
   background: none;
-  border-radius: 12px;
+  border-radius: 100px;
   cursor: pointer;
   font-family: var(--font);
   transition: background 0.15s;
   min-width: 0;
 }
-.tab-item:hover { background: rgba(255,255,255,0.12); }
-.tab-item.active { background: rgba(255,255,255,0.15); border-radius: 100px; }
+.tab-item:hover { background: rgba(0,0,0,0.05); }
+.tab-item.active { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.10); }
 .tab-icon {
   width: 20px; height: 20px;
-  fill: rgba(255,255,255,0.65);
+  fill: #8E8E93;
   flex-shrink: 0;
 }
-.tab-item.active .tab-icon { fill: #fff; }
+.tab-item.active .tab-icon { fill: var(--axa); }
 .tab-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
-  color: rgba(255,255,255,0.65);
+  color: #8E8E93;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -724,7 +725,7 @@
   line-height: 1;
 }
 .tab-item.active .tab-label {
-  color: #fff;
+  color: var(--axa);
   font-weight: 700;
 }
 
@@ -744,9 +745,9 @@
 .tab-angel-circle {
   width: 54px; height: 54px;
   border-radius: 50%;
-  background: #6C7FF0;
-  border: 2.5px solid #fff;
-  box-shadow: 0 3px 10px rgba(108,127,240,0.45);
+  background: #fff;
+  border: 1.5px solid #E8E8EC;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -756,7 +757,7 @@
 }
 .tab-angel:hover .tab-angel-circle {
   transform: scale(1.06);
-  box-shadow: 0 5px 14px rgba(108,127,240,0.6);
+  box-shadow: 0 4px 12px rgba(0,0,143,0.18);
 }
 .tab-angel-sparkle {
   font-size: 20px;
@@ -765,7 +766,7 @@
 .tab-angel-name {
   font-size: 8px;
   font-weight: 700;
-  color: #fff;
+  color: #6E6E73;
   font-family: var(--font);
   line-height: 1;
   letter-spacing: 0.2px;
