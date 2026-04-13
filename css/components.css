@@ -566,13 +566,14 @@
 ═══════════════════════════ */
 .rewards-hero {
   background: var(--axa);
-  padding: var(--sp5) var(--sp5) var(--sp5);
+  padding: var(--sp5) var(--sp5) var(--sp6);
 }
-.rewards-hero-top {
+.rewards-hero-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--sp3);
+  gap: var(--sp2);
+  margin-bottom: var(--sp5);
 }
 .rewards-hero-label {
   font-size: 10px;
@@ -580,46 +581,33 @@
   letter-spacing: 1.2px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.5);
+  flex: 1;
+  text-align: center;
 }
-.pts-big {
-  font-size: 44px;
-  font-weight: 700;
-  color: var(--white);
-  line-height: 1;
-  letter-spacing: -2px;
-}
-.pts-unit {
-  font-size: 17px;
-  color: rgba(255,255,255,0.5);
-  margin-left: 3px;
-  font-weight: 400;
-}
-.pts-sub {
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  margin-top: 3px;
-  margin-bottom: var(--sp3);
-}
-.pts-track {
-  height: 6px;
-  background: rgba(255,255,255,0.15);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-}
-.pts-fill {
-  height: 100%;
-  background: var(--success-mid);
-  border-radius: var(--r-pill);
-  transition: width 0.6s ease;
-}
-.pts-track-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  margin-top: 4px;
+.rewards-hero-body { }
+.rh-eyebrow {
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 8px;
 }
+.rh-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  white-space: pre-line;
+  margin-bottom: 10px;
+}
+.rh-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.5;
+}
+.rh-sub strong { color: rgba(255,255,255,.9); font-weight: 600; }
 
 /* ═══════════════════════════
    REWARD CARDS

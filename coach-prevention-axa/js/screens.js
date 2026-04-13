@@ -793,6 +793,24 @@ function screenRewards() {
   const rewards = getRewardsForProfile(p, done.length);
   const pct     = Math.min((score / 100) * 100, 100);
 
+  const unlocked     = rewards.filter(r => r.computedStatus === 'unlocked');
+  const nextAvail    = rewards.find(r => r.computedStatus === 'available');
+  const tierLabel    = scoreLevel(score).level === 'good' ? 'Or' : scoreLevel(score).level === 'average' ? 'Argent' : 'Bronze';
+
+  const heroEyebrow  = done.length === 0
+    ? 'Aucune action réalisée pour l\'instant'
+    : `${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}`;
+
+  const heroTitle    = unlocked.length > 0
+    ? `${unlocked.length} avantage${unlocked.length > 1 ? 's' : ''}\ndébloqué${unlocked.length > 1 ? 's' : ''}.`
+    : 'Vos avantages\nprévention.';
+
+  const heroSub      = nextAvail
+    ? `Encore ${nextAvail.minActions - done.length} action${nextAvail.minActions - done.length > 1 ? 's' : ''} pour débloquer : <strong>${nextAvail.title}</strong>`
+    : unlocked.length > 0
+      ? 'Tous vos avantages disponibles sont actifs.'
+      : 'Réalisez votre première action pour commencer.';
+
   function rewardCard(r, i) {
     const statusHtml =
       r.computedStatus === 'unlocked' ? `<span class="tag tag-success">Actif</span>` :
@@ -816,17 +834,15 @@ function screenRewards() {
 
   return `
     <div class="rewards-hero">
-      <div class="rewards-hero-top">
-        <span class="rewards-hero-label">Rewards AXA · ${p.firstName}</span>
-        <span class="tag tag-white">${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')} ${scoreLevel(score).level === 'good' ? 'Or' : scoreLevel(score).level === 'average' ? 'Argent' : 'Bronze'}</span>
+      <div class="rewards-hero-topbar">
+        <button class="topbar-back" onclick="goTo(9)" style="background:rgba(255,255,255,.15)" aria-label="Retour">${sv(IC.back)}</button>
+        <span class="rewards-hero-label">REWARDS AXA · ${p.firstName.toUpperCase()}</span>
+        <span class="tag tag-white">${sv(IC.shield, 'width:11px;height:11px;vertical-align:middle')} ${tierLabel}</span>
       </div>
-      <div class="rv rv1">
-        <div><span class="pts-big">${score}</span><span class="pts-unit">/100</span></div>
-        <p class="pts-sub">${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''} · profil ${p.propertyType}</p>
-      </div>
-      <div class="rv rv2">
-        <div class="pts-track"><div class="pts-fill" style="width:${pct}%"></div></div>
-        <div class="pts-track-labels"><span>Bronze · 0</span><span>Or · 70+</span></div>
+      <div class="rewards-hero-body rv rv1">
+        <div class="rh-eyebrow">${heroEyebrow}</div>
+        <div class="rh-title">${heroTitle}</div>
+        <div class="rh-sub">${heroSub}</div>
       </div>
     </div>
     <div class="body-sm">
