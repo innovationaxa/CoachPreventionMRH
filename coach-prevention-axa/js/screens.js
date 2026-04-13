@@ -621,41 +621,96 @@ function screenProjection() {
 function screenActionPlan() {
   const p = getProfile(window._ST.profileId);
   const allActions = getActionsForProfile(p, window._ST.diagAnswers);
-  const isLocataire = p.occupancyStatus === 'Locataire';
   const done = window._ST.completedActions || [];
-  const totalPts = allActions.reduce((s, a) => s + a.pts, 0);
-  const showAll = window._ST.showAllActions === true;
-  const TOP_N = 3;
-  const displayedActions = showAll ? allActions : allActions.slice(0, TOP_N);
-  const hidden = allActions.length - TOP_N;
+  const score = window._ST.currentScore || p.preparationScore;
+  const sl = scoreLevel(score);
+  const isLocataire = p.occupancyStatus === 'Locataire';
 
-  function actionCard(a, i) {
-    const effortDot = a.effort === 'low' ? '🟢' : a.effort === 'medium' ? '🟡' : '🔴';
-    const ownerTag = isLocataire && a.requiresOwner
-      ? `<span class="meta-tag meta-tag-amber" style="font-size:10px">⚠️ Accord propriétaire requis</span>`
-      : '';
+  // Split done / todo — sort todo by pts desc (most impactful first)
+  const todo     = allActions.filter(a => !done.includes(a.id)).sort((a, b) => b.pts - a.pts);
+  const doneList = allActions.filter(a =>  done.includes(a.id));
+  const nowGroup   = todo.filter(a => a.horizon === 'now');
+  const monthGroup = todo.filter(a => a.horizon === 'this_month');
+
+  const MAX = 3;
+  const showMoreNow   = window._ST.expandNow   === true;
+  const showMoreMonth = window._ST.expandMonth === true;
+  const remaining  = todo.length;
+  const totalPts   = todo.reduce((s, a) => s + a.pts, 0);
+
+  const RISK_ICON_BG = { inondation:'#DBEAFE', tempete:'#FEF3C7', incendie:'#FEE2E2', 'degat-eaux':'#CCFBF1', vol:'#EDE9FE', rga:'#FEF9C3' };
+
+  function actionCard(a) {
+    const riskIcon   = RISKS[a.riskId]?.icon || '📋';
+    const iconBg     = RISK_ICON_BG[a.riskId] || '#f3f4f6';
+    const effortDot  = a.effort === 'low' ? '🟢' : a.effort === 'medium' ? '🟡' : '🔴';
+    const effortTxt  = a.effort === 'low' ? 'Faible' : a.effort === 'medium' ? 'Moyen' : 'Élevé';
+    const costTag    = a.tags[0] || '';
+    const timeTag    = a.tags[1] && a.tags[1] !== costTag ? a.tags[1] : '';
+    const ownerBadge = isLocataire && a.requiresOwner
+      ? `<span class="plan-owner-badge">⚠️ Propriétaire</span>` : '';
     return `
-      <div class="reco-card rv rv${i+1}" onclick="openAction('${a.id}')">
-        <div class="reco-card-top">
-          <span class="reco-risk-badge" style="${riskStyle(a.riskColor)}">${a.riskLabel}</span>
-          <span class="meta-tag meta-tag-blue">+${a.pts} pts</span>
+      <div class="plan-card rv rv1" onclick="openAction('${a.id}')">
+        <div class="plan-card-icon" style="background:${iconBg}">${riskIcon}</div>
+        <div class="plan-card-body">
+          <div class="plan-card-risk">${a.riskLabel}</div>
+          <div class="plan-card-title">${a.title}</div>
+          <div class="plan-card-tags">
+            <span class="plan-tag">${effortDot} ${effortTxt}</span>
+            <span class="plan-tag">${costTag}</span>
+            ${timeTag ? `<span class="plan-tag">${timeTag}</span>` : ''}
+            ${ownerBadge}
+          </div>
         </div>
-        <div class="reco-title">${a.title}</div>
-        <div class="reco-tags">
-          <span class="meta-tag">${effortDot} ${a.effort === 'low' ? 'Effort faible' : a.effort === 'medium' ? 'Effort moyen' : 'Effort élevé'}</span>
-          ${a.tags.map((t, ti) => `<span class="meta-tag ${ti===0&&t.includes('Gratuit')?'meta-tag-green':ti===0&&t.includes('€')?'meta-tag-amber':''}">${t}</span>`).join('')}
-          ${ownerTag}
+        <div class="plan-pts-col">
+          <div class="plan-pts-num">+${a.pts}</div>
+          <div class="plan-pts-lbl">pts</div>
         </div>
-        <div class="reco-benefit">${a.benefit}</div>
+        <svg class="plan-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     `;
   }
 
+  function renderGroup(label, icon, bgColor, actions, showMore, stateKey) {
+    if (!actions.length) return '';
+    const visible = showMore ? actions : actions.slice(0, MAX);
+    const hiddenN = actions.length - MAX;
+    const grpPts  = actions.reduce((s, a) => s + a.pts, 0);
+    return `
+      <div class="plan-group rv rv1">
+        <div class="plan-group-hd">
+          <div class="plan-group-badge" style="background:${bgColor}">${icon}</div>
+          <div class="plan-group-info">
+            <div class="plan-group-title">${label}</div>
+            <div class="plan-group-sub">${actions.length} action${actions.length > 1 ? 's' : ''} · +${grpPts} pts disponibles</div>
+          </div>
+        </div>
+        ${visible.map(a => actionCard(a)).join('')}
+        ${!showMore && hiddenN > 0
+          ? `<button class="plan-more-btn" onclick="window._ST.${stateKey}=true;render(5);updateNav(5)">${hiddenN} action${hiddenN > 1 ? 's' : ''} de plus →</button>`
+          : showMore && actions.length > MAX
+          ? `<button class="plan-more-btn" onclick="window._ST.${stateKey}=false;render(5);updateNav(5)">Réduire ↑</button>`
+          : ''}
+      </div>
+    `;
+  }
+
+  const doneHtml = doneList.length > 0 ? `
+    <div class="plan-done-section">
+      <div class="plan-done-hd">✓ Déjà réalisées · ${doneList.length} action${doneList.length > 1 ? 's' : ''}</div>
+      ${doneList.map(a => `
+        <div class="plan-done-item">
+          <span class="plan-done-ck">✓</span>
+          <span class="plan-done-icon">${RISKS[a.riskId]?.icon || ''}</span>
+          <span class="plan-done-name">${a.riskLabel} — ${a.title}</span>
+          <span class="plan-done-pts">+${a.pts}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
   const rewards = getRewardsForProfile(p, done.length);
   const nextReward = rewards.find(r => r.computedStatus === 'available');
-  const score = window._ST.currentScore || p.preparationScore;
-  const sl = scoreLevel(score);
-  const remaining = allActions.filter(a => !done.includes(a.id)).length;
 
   return `
     <div class="actions-header">
@@ -670,7 +725,7 @@ function screenActionPlan() {
       <div class="ah-score-row">
         <span class="ah-score-num">${score}</span><span class="ah-score-denom">/100</span>
       </div>
-      <div class="ah-subtitle">${done.length} action${done.length !== 1 ? 's' : ''} réalisée${done.length !== 1 ? 's' : ''} · ${remaining} restante${remaining !== 1 ? 's' : ''} · ${p.propertyType}</div>
+      <div class="ah-subtitle">${remaining} action${remaining !== 1 ? 's' : ''} · +${totalPts} pts · ${p.propertyType}</div>
       <div class="ah-progress-wrap">
         <div class="ah-progress-track">
           <div class="ah-progress-fill" style="width:${Math.min(Math.round(score / 70 * 100), 100)}%"></div>
@@ -683,34 +738,28 @@ function screenActionPlan() {
     </div>
     <div class="body-sm">
 
-      <div class="section-title" style="margin-top:var(--sp3)">
-        ${allActions[0]?.horizon === 'now' ? '⚡ Actions prioritaires' : '📋 Actions recommandées'}
-      </div>
-      ${displayedActions.map((a, i) => actionCard(a, i)).join('')}
+      ${renderGroup('À faire maintenant', '⚡', 'rgba(239,68,68,0.10)', nowGroup, showMoreNow, 'expandNow')}
+      ${renderGroup('Ce mois-ci', '📋', 'rgba(0,0,143,0.07)', monthGroup, showMoreMonth, 'expandMonth')}
+      ${doneHtml}
 
-      ${!showAll && hidden > 0 ? `
-        <button class="btn-expand-actions rv rv4" onclick="window._ST.showAllActions=true;render(5);updateNav(5)">
-          Voir ${hidden} autre${hidden > 1 ? 's' : ''} action${hidden > 1 ? 's' : ''} disponible${hidden > 1 ? 's' : ''} →
-        </button>
-      ` : ''}
-      ${showAll && allActions.length > TOP_N ? `
-        <button class="btn-expand-actions" onclick="window._ST.showAllActions=false;render(5);updateNav(5)">
-          Réduire ↑
-        </button>
+      ${nextReward ? `
+        <div class="plan-reward-teaser rv rv2" onclick="goTo(8)">
+          <div class="plan-reward-icon">${nextReward.icon}</div>
+          <div class="plan-reward-body">
+            <div class="plan-reward-label">Prochain avantage</div>
+            <div class="plan-reward-title">${nextReward.title}</div>
+            <div class="plan-reward-sub">${Math.max(0, nextReward.minActions - done.length)} action${nextReward.minActions - done.length > 1 ? 's' : ''} de plus pour débloquer</div>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:16px;height:16px;flex-shrink:0;color:var(--n400)"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       ` : ''}
 
-      <div style="margin-top:var(--sp5)" class="rv rv5">
+      <div style="margin-top:var(--sp4);padding-bottom:var(--sp4)" class="rv rv5">
         <button class="btn btn-ghost" onclick="goTo(9)" style="width:100%;justify-content:center">
-          ${sv(IC.home, 'width:16px;height:16px')} Mon suivi de progression
+          ${sv(IC.home, 'width:16px;height:16px')} Mon tableau de bord
         </button>
       </div>
 
-      <div style="margin-top:var(--sp3)" class="rv rv6">
-        <button class="btn btn-primary" onclick="goTo(8)">
-          Voir mes rewards
-          <svg class="btn-icon">${sv(IC.arrow)}</svg>
-        </button>
-      </div>
     </div>
     <div class="bottom-safe"></div>
   `;
