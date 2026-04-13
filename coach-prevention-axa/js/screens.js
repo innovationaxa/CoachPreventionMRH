@@ -386,8 +386,21 @@ function screenScore() {
 ════════════════════════════ */
 function screenProjection() {
   const p = getProfile(window._ST.profileId);
-  const mainRisk = RISKS[p.mainRisks[0]];
+  const riskIdx = window._ST.projectionRiskIdx || 0;
+  const activeRiskId = p.mainRisks[riskIdx];
+  const mainRisk = RISKS[activeRiskId];
   if (!mainRisk) return '<div class="body"><p>Données manquantes</p></div>';
+
+  // Tab bar across all mainRisks
+  const tabsHtml = p.mainRisks.map((rId, i) => {
+    const r = RISKS[rId];
+    if (!r) return '';
+    const active = i === riskIdx;
+    return `<button class="proj-tab${active ? ' active' : ''}" onclick="window._ST.projectionRiskIdx=${i};render(4);updateNav(4)" aria-label="${r.label}">
+      <span class="proj-tab-icon">${r.icon}</span>
+      <span class="proj-tab-label">${r.label}</span>
+    </button>`;
+  }).join('');
 
   const damagesHtml = mainRisk.damages.map(d =>
     `<div class="damage-item rv rv2"><div class="damage-dot"></div>${d}</div>`
@@ -399,11 +412,14 @@ function screenProjection() {
       <div class="topbar" style="position:relative;padding-left:0;background:transparent">
         <button class="topbar-back" onclick="goTo(9)" style="background:rgba(255,255,255,.15)" aria-label="Retour">${sv(IC.back)}</button>
         <div class="topbar-info">
-          <div class="topbar-title" style="color:#fff">Projection de risque</div>
+          <div class="topbar-title" style="color:#fff">Risques identifiés</div>
           <div class="topbar-sub">Impact potentiel sur votre logement</div>
         </div>
       </div>
-      <div style="margin-top:var(--sp4)">
+      <div class="proj-tabs-wrap">
+        <div class="proj-tabs">${tabsHtml}</div>
+      </div>
+      <div style="margin-top:var(--sp3)">
         <div class="projection-risk-icon rv rv1">${mainRisk.icon}</div>
         <div class="projection-risk-name rv rv2">${mainRisk.label}</div>
         <div class="projection-tagline rv rv3">${mainRisk.explanation}</div>

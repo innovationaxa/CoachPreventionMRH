@@ -46,6 +46,7 @@ function goTo(idx) {
     window._ST.diagStep = 0;
     window._ST.diagAnswers = {};
   }
+  if (idx === 4) window._ST.projectionRiskIdx = 0;
   if (idx === 3) showLoadingThen(() => { render(3); updateNav(3); updateTabBar(3); });
   else { render(idx); updateNav(idx); updateTabBar(idx); }
 }

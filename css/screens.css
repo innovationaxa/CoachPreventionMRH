@@ -192,10 +192,21 @@
 .risk-score-comment { font-size: 11px; color: var(--n400); line-height: 1.4; }
 
 /* ── SCREEN 4 — RISK PROJECTION ── */
-.projection-hero { background: var(--axa); padding: var(--sp5) var(--sp5) var(--sp6); }
+.projection-hero { background: var(--axa); padding: var(--sp5) var(--sp5) var(--sp4); }
 .projection-risk-icon { font-size: 36px; margin-bottom: var(--sp2); }
 .projection-risk-name { font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 4px; }
 .projection-tagline { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.3; }
+
+/* Risk tabs */
+.proj-tabs-wrap { margin: var(--sp4) 0 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.proj-tabs-wrap::-webkit-scrollbar { display: none; }
+.proj-tabs { display: flex; gap: 8px; padding-bottom: 2px; min-width: max-content; }
+.proj-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 16px; border: none; border-radius: 12px; background: rgba(255,255,255,.12); cursor: pointer; transition: background .18s, transform .12s; min-width: 72px; }
+.proj-tab:active { transform: scale(.97); }
+.proj-tab.active { background: rgba(255,255,255,.26); box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+.proj-tab-icon { font-size: 20px; line-height: 1; }
+.proj-tab-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.65); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; font-family: var(--font); }
+.proj-tab.active .proj-tab-label { color: #fff; }
 
 .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp2); margin-bottom: var(--sp4); }
 .stat-card { background: var(--n50); border-radius: var(--r-md); padding: var(--sp3) var(--sp3); text-align: center; }
