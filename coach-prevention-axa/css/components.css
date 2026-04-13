@@ -594,11 +594,11 @@
   margin-bottom: 8px;
 }
 .rh-title {
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 700;
   color: #fff;
-  line-height: 1.1;
-  letter-spacing: -1px;
+  line-height: 1.2;
+  letter-spacing: -.2px;
   white-space: pre-line;
   margin-bottom: 10px;
 }

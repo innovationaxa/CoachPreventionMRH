@@ -852,9 +852,9 @@ function screenRewards() {
         <p>Ces avantages récompensent votre engagement en prévention. <strong>Ils ne modifient pas votre prime.</strong></p>
       </div>
 
-      <div class="reward-section-title">Avantages disponibles dès maintenant</div>
+      <div class="section-title" style="margin-top:var(--sp2)">Avantages disponibles dès maintenant</div>
       ${p1.map((r, i) => rewardCard(r, i)).join('')}
-      ${p2.length ? `<div class="reward-section-title">En cours d'étude — Bientôt disponibles</div>` : ''}
+      ${p2.length ? `<div class="section-title" style="margin-top:var(--sp4)">En cours d'étude — Bientôt disponibles</div>` : ''}
       ${p2.map((r, i) => rewardCard(r, i + p1.length)).join('')}
 
       <div style="margin-top:var(--sp4)" class="rv rv5">
