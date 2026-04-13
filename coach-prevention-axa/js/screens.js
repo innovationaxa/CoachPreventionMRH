@@ -69,9 +69,7 @@ function screenSelection() {
           Commencer le parcours
           <svg class="btn-icon">${sv(IC.arrow).replace('<svg','<svg').replace('viewBox','viewBox')}</svg>
         </button>
-        <a href="#" onclick="goTo(8);return false;" style="display:block;text-align:center;font-size:12px;color:var(--n400);margin-top:10px;text-decoration:none">
-          Vue agent AXA →
-        </a>
+
       </div>
     </div>
     <div class="bottom-safe"></div>
@@ -563,7 +561,7 @@ function screenProjection() {
             <div class="angel-entry-title">Une question sur cette garantie ?</div>
           </div>
         </div>
-        <p class="angel-entry-desc">Angel analyse vos conditions générales et vous explique précisément ce qui est couvert, les exclusions applicables et vos obligations de prévention pour ce risque.</p>
+        <p class="angel-entry-desc">Angel analyse votre contrat et vous explique précisément ce qui est couvert, les exclusions applicables et vos obligations de prévention pour ce risque.</p>
         <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
           Poser une question à Angel
           ${sv(IC.arrow, 'width:16px;height:16px')}
