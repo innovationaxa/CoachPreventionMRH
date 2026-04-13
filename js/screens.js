@@ -292,10 +292,6 @@ function screenScore() {
       : r.level === 'medium'
       ? 'Quelques actions simples réduiraient significativement votre exposition.'
       : 'Bonne maîtrise de ce risque. Maintenez vos équipements à jour.';
-    const localStat = lc && lc.sinistresStats && lc.sinistresStats[rId];
-    const localStatHtml = localStat
-      ? `<div class="local-stat-line"><span class="local-stat-icon">📍</span><span class="local-stat-text">${localStat.stat}</span><span class="local-stat-source">${localStat.source}</span></div>`
-      : '';
     return `
       <div class="risk-bar-row">
         <div class="risk-bar-header">
@@ -307,7 +303,6 @@ function screenScore() {
           <span class="risk-score-pts">${barScore}/100</span>
           <span class="risk-score-comment">${comment}</span>
         </div>
-        ${localStatHtml}
       </div>
     `;
   }).join('');
