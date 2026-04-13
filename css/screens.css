@@ -365,11 +365,18 @@
   letter-spacing: -.3px;
 }
 .coverage-note {
-  padding: 9px 14px;
+  padding: 9px 14px 7px;
   font-size: 11px;
-  color: var(--n500);
-  line-height: 1.45;
+  color: var(--n600);
+  line-height: 1.5;
   border-top: 1px solid var(--n100);
+}
+.coverage-cg-ref {
+  padding: 5px 14px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--n400);
+  letter-spacing: .2px;
 }
 .coverage-prevention-nudge {
   display: flex;

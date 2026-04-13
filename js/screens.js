@@ -434,30 +434,40 @@ function screenProjection() {
   let coverageHtml = '';
   if (cov && p.contract) {
     const statusConfig = {
-      'covered':     { label: 'Couvert',             cls: 'covered',     icon: '✓' },
-      'partial':     { label: 'Partiel',             cls: 'partial',     icon: '⚡' },
-      'not-covered': { label: 'Non couvert',         cls: 'not-covered', icon: '✕' }
+      'covered':     { label: 'Couvert',        cls: 'covered',     icon: '✓' },
+      'partial':     { label: 'Partiel',        cls: 'partial',     icon: '⚡' },
+      'not-covered': { label: 'Non couvert',    cls: 'not-covered', icon: '✕' }
     };
     const sc = statusConfig[cov.status] || statusConfig['not-covered'];
 
-    const detailsHtml = cov.limit ? `
-      <div class="coverage-details">
+    // Details row: capital + franchise, or franchise only (RGA case)
+    let detailsHtml = '';
+    if (cov.limit || cov.franchise) {
+      const limitCol = cov.limit ? `
         <div class="coverage-detail-item">
           <div class="coverage-detail-label">Capital garanti</div>
           <div class="coverage-detail-value">${cov.limit}</div>
         </div>
-        <div class="coverage-detail-sep"></div>
+        <div class="coverage-detail-sep"></div>` : '';
+      const franchiseCol = cov.franchise ? `
         <div class="coverage-detail-item">
           <div class="coverage-detail-label">Franchise</div>
           <div class="coverage-detail-value">${cov.franchise}</div>
-        </div>
-      </div>` : '';
+        </div>` : '';
+      if (limitCol || franchiseCol) {
+        detailsHtml = `<div class="coverage-details">${limitCol}${franchiseCol}</div>`;
+      }
+    }
+
+    const cgRefHtml = cov.cgRef && cov.cgRef !== '—'
+      ? `<div class="coverage-cg-ref">${sv(IC.info, 'width:11px;height:11px;vertical-align:-1px')} Conditions Générales — ${cov.cgRef}</div>`
+      : '';
 
     const bridgeMsg = cov.status === 'covered'
-      ? `La prévention vous aide à <strong>éviter de mobiliser votre franchise</strong> (${cov.franchise}) et à limiter les démarches de sinistre.`
+      ? `La prévention vous aide à <strong>éviter de mobiliser votre franchise</strong> (${cov.franchise}) et limite les démarches de déclaration de sinistre.`
       : cov.status === 'partial'
-      ? `Une partie des dommages n'est pas remboursée. La prévention réduit de <strong>${mainRisk.avoidablePercent}%</strong> les pertes non couvertes par votre contrat.`
-      : `Ce risque n'est pas couvert. La prévention est votre <strong>seule protection</strong> — elle évite <strong>${mainRisk.avoidablePercent}%</strong> des dommages.`;
+      ? `Votre couverture est partielle ou conditionnelle. La prévention réduit de <strong>${mainRisk.avoidablePercent}%</strong> les dommages qui resteraient à votre charge.`
+      : `Ce risque n'est pas couvert par votre contrat. La prévention est votre <strong>seule protection</strong> — elle évite <strong>${mainRisk.avoidablePercent}%</strong> des dommages.`;
 
     coverageHtml = `
       <div class="section-title" style="margin-top:var(--sp5)">Votre couverture AXA</div>
@@ -474,10 +484,25 @@ function screenProjection() {
         </div>
         ${detailsHtml}
         <div class="coverage-note">${cov.note}</div>
+        ${cgRefHtml}
         <div class="coverage-prevention-nudge">
           <div class="coverage-prevention-icon">${sv(IC.shield, 'width:13px;height:13px')}</div>
           <div class="coverage-prevention-text">${bridgeMsg}</div>
         </div>
+      </div>
+      <div class="angel-entry-card rv rv3" role="button" onclick="tabMock('Angel — IA AXA')" style="margin-bottom:var(--sp2)">
+        <div class="angel-entry-head">
+          <div class="angel-entry-circle"><img src="assets/Vector.svg" class="angel-entry-icon" alt="Angel"></div>
+          <div class="angel-entry-text">
+            <div class="angel-entry-eyebrow">ANGEL · VOTRE ASSISTANT AXA</div>
+            <div class="angel-entry-title">Une question sur cette garantie ?</div>
+          </div>
+        </div>
+        <p class="angel-entry-desc">Angel analyse vos conditions générales et vous explique précisément ce qui est couvert, les exclusions applicables et vos obligations de prévention pour ce risque.</p>
+        <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
+          Poser une question à Angel
+          ${sv(IC.arrow, 'width:16px;height:16px')}
+        </button>
       </div>`;
   }
 
