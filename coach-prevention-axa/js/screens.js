@@ -713,6 +713,26 @@ function screenActionDetail() {
       ${servicesHtml}
       ${tutosHtml}
       ${aidesHtml}
+
+      <div class="angel-entry-card rv" style="margin-top:var(--sp5)" onclick="tabMock('Angel — IA AXA')" role="button" tabindex="0">
+        <div class="angel-entry-head">
+          <div class="angel-entry-circle">
+            <img src="assets/Vector.svg" alt="" class="angel-entry-icon">
+          </div>
+          <div class="angel-entry-text">
+            <div class="angel-entry-eyebrow">ANGEL · IA AXA</div>
+            <div class="angel-entry-title">Besoin d'aide pour réaliser cette action ?</div>
+          </div>
+          <svg class="angel-entry-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <p class="angel-entry-desc">Angel vous guide pas à pas — questions, conseils personnalisés et mise en relation avec les bons artisans.</p>
+        <div class="angel-entry-chips">
+          <span class="angel-mode-chip">💬 Chat</span>
+          <span class="angel-mode-chip">🎙️ Vocal</span>
+          <span class="angel-mode-chip">✦ IA générative</span>
+        </div>
+      </div>
+
       ${conseillerHtml}
     </div>
     <div class="detail-sticky">
@@ -722,7 +742,7 @@ function screenActionDetail() {
         </div>
       ` : `
         <button class="btn btn-success" onclick="completeAction('${a.id}')">
-          Je l'ai fait ✓
+          Je l'ai fait
           <svg class="btn-icon">${sv(IC.check)}</svg>
         </button>
       `}
@@ -968,7 +988,7 @@ function screenMonSuivi() {
           🏅 ${sl.level === 'weak' ? 'Bronze' : sl.level === 'average' ? 'Argent' : 'Or'}
         </div>
       </div>
-      <p class="score-tagline rv rv3">${actionsText}</p>
+      <p class="score-tagline rv rv3">${done.length > 0 ? `${done.length} action${done.length > 1 ? 's' : ''} réalisée${done.length > 1 ? 's' : ''}` : sl.label}</p>
       <div style="height:56px"></div>
     </div>
     <div class="suivi-hero-arch"></div>
@@ -1003,11 +1023,18 @@ function screenMonSuivi() {
     <div class="body-sm">
 
       ${nextAction ? `
-        <div class="suivi-potential-banner rv rv1">
-          <span>Avec toutes vos actions</span>
-          <span class="score-potential-arrow">→ ${potential}/100</span>
+        <div class="suivi-potential-card rv rv1" onclick="goTo(5)">
+          <div class="suivi-potential-card-body">
+            <div class="suivi-potential-eyebrow">Si vous réalisez toutes vos actions</div>
+            <div class="suivi-potential-main">
+              <span class="suivi-potential-num">${potential}</span><span class="suivi-potential-denom">/100</span>
+              <span class="suivi-potential-gain">+${potential - score} pts</span>
+            </div>
+            <div class="suivi-potential-hint">${remaining.length} action${remaining.length !== 1 ? 's' : ''} restante${remaining.length !== 1 ? 's' : ''} dans votre plan — commencez maintenant</div>
+          </div>
+          <svg class="next-action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
-        <div class="section-title rv rv1" style="margin-top:var(--sp3)">Prochaine action recommandée</div>
+        <div class="section-title rv rv1" style="margin-top:var(--sp4)">Prochaine action recommandée</div>
         <div class="next-action-card rv rv1" onclick="openAction('${nextAction.id}')">
           <span style="font-size:20px">${RISKS[nextAction.riskId]?.icon || '📋'}</span>
           <div>

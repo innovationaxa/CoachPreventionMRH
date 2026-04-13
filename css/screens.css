@@ -445,12 +445,27 @@
 .score-badge-tier {
   background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.12);
 }
-.suivi-potential-banner {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--axa-xlight); border: 1px solid var(--axa-light);
-  border-radius: var(--r-md); padding: 9px 13px;
-  font-size: 12px; color: var(--axa-dark); margin-bottom: 2px;
+.suivi-potential-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--axa); border-radius: var(--r-lg); padding: 16px 14px 16px 16px;
+  cursor: pointer; margin-bottom: 2px;
+  transition: filter .18s;
 }
+.suivi-potential-card:hover { filter: brightness(1.08); }
+.suivi-potential-card-body { flex: 1; }
+.suivi-potential-eyebrow {
+  font-size: 9px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase;
+  color: rgba(255,255,255,.55); margin-bottom: 4px;
+}
+.suivi-potential-main { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.suivi-potential-num { font-size: 30px; font-weight: 700; color: #fff; letter-spacing: -1px; line-height: 1; }
+.suivi-potential-denom { font-size: 14px; color: rgba(255,255,255,.55); font-weight: 500; }
+.suivi-potential-gain {
+  font-size: 13px; font-weight: 700; color: var(--success-mid);
+  background: rgba(255,255,255,.1); border-radius: var(--r-pill); padding: 2px 9px;
+}
+.suivi-potential-hint { font-size: 11px; color: rgba(255,255,255,.6); line-height: 1.4; }
+.suivi-potential-card .next-action-arrow { color: rgba(255,255,255,.6); width: 20px; height: 20px; flex-shrink: 0; }
 .suivi-hero {
   background: linear-gradient(145deg, var(--axa) 0%, var(--axa-mid) 100%);
   padding: var(--sp5) var(--sp5) var(--sp6);
