@@ -272,6 +272,126 @@
 .damage-item:last-child { border-bottom: none; }
 .damage-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--danger-mid); flex-shrink: 0; }
 
+/* Coverage card — S4 */
+.coverage-card {
+  border: 1.5px solid var(--n150);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: var(--sp3);
+}
+.coverage-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp2);
+  padding: 12px 14px 10px;
+}
+.coverage-contract-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.coverage-contract-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--axa-xlight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--axa);
+}
+.coverage-contract-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--n800);
+  line-height: 1.2;
+}
+.coverage-contract-ref {
+  font-size: 10px;
+  color: var(--n400);
+  margin-top: 1px;
+}
+.coverage-status-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.coverage-status-covered {
+  background: #E6F4EA;
+  color: #1E7E34;
+}
+.coverage-status-partial {
+  background: #FFF3E0;
+  color: #E65100;
+}
+.coverage-status-not-covered {
+  background: #FFEBEE;
+  color: #C62828;
+}
+.coverage-details {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid var(--n100);
+  border-bottom: 1px solid var(--n100);
+}
+.coverage-detail-item {
+  flex: 1;
+  padding: 10px 14px;
+  text-align: center;
+}
+.coverage-detail-sep {
+  width: 1px;
+  background: var(--n100);
+}
+.coverage-detail-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--n400);
+  margin-bottom: 3px;
+}
+.coverage-detail-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--n800);
+  letter-spacing: -.3px;
+}
+.coverage-note {
+  padding: 9px 14px;
+  font-size: 11px;
+  color: var(--n500);
+  line-height: 1.45;
+  border-top: 1px solid var(--n100);
+}
+.coverage-prevention-nudge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--axa-xlight);
+  border-top: 1px solid rgba(0,0,143,0.08);
+}
+.coverage-prevention-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--axa);
+  opacity: .7;
+}
+.coverage-prevention-text {
+  font-size: 11px;
+  color: var(--axa);
+  line-height: 1.5;
+}
+.coverage-prevention-text strong { font-weight: 700; }
+
 /* ── SCREEN 5 — ACTION PLAN ── */
 .actions-header { background: var(--axa); padding: var(--sp4) var(--sp5) var(--sp5); }
 .ah-toprow { display: flex; align-items: center; gap: var(--sp2); margin-bottom: var(--sp4); }

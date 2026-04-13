@@ -23,7 +23,16 @@ const PROFILES = {
     mainRisks: ['inondation','tempete','degat-eaux'],
     condition: 'maison_rdc',
     hasGarden: true,
-    tagline: 'Automne-hiver · Risques élevés détectés'
+    tagline: 'Automne-hiver · Risques élevés détectés',
+    contract: { name: 'MRH AXA Confort', ref: 'MRH-2024-78432' },
+    coverage: {
+      'inondation': { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Couvert en régime CatNat après arrêté préfectoral' },
+      'tempete':    { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Tempête, grêle et neige inclus dans votre formule' },
+      'degat-eaux': { status: 'covered',     limit: '80 000 €',  franchise: '150 €',  note: 'Dommages mobiliers et immobiliers couverts' },
+      'vol':        { status: 'covered',     limit: '5 000 €',   franchise: '300 €',  note: 'Vols avec effraction couverts' },
+      'incendie':   { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Incendie, explosion et foudre inclus' },
+      'rga':        { status: 'not-covered', limit: null,        franchise: null,     note: 'Non couvert — extension RGA disponible sur devis' }
+    }
   },
   'profil-b': {
     id: 'profil-b',
@@ -42,7 +51,16 @@ const PROFILES = {
     condition: 'all',
     hasGarden: false,
     completedActions: ['incendie-detecteur-fumee'],
-    tagline: 'Nouveau contrat · Plan de départ'
+    tagline: 'Nouveau contrat · Plan de départ',
+    contract: { name: 'MRH AXA Essentiel', ref: 'MRH-2025-12089' },
+    coverage: {
+      'vol':        { status: 'partial',     limit: '3 000 €',   franchise: '300 €',  note: 'Bijoux et objets de valeur couverts jusqu\'à 1 500 € — coffre-fort requis au-delà' },
+      'degat-eaux': { status: 'covered',     limit: '50 000 €',  franchise: '150 €',  note: 'Fuites, ruptures et infiltrations couvertes' },
+      'incendie':   { status: 'covered',     limit: '100 000 €', franchise: '380 €',  note: 'Incendie, explosion et dégâts électriques couverts' },
+      'inondation': { status: 'not-covered', limit: null,        franchise: null,     note: 'Non couvert en appartement — couverture assurée par la copropriété' },
+      'tempete':    { status: 'partial',     limit: '50 000 €',  franchise: '380 €',  note: 'Dommages directs à l\'appartement couverts — toiture couverte par la copropriété' },
+      'rga':        { status: 'not-covered', limit: null,        franchise: null,     note: 'Non applicable — appartement en immeuble béton' }
+    }
   },
   'profil-c': {
     id: 'profil-c',
@@ -61,7 +79,16 @@ const PROFILES = {
     condition: 'maison',
     hasGarden: true,
     completedActions: ['incendie-detecteur-fumee','dde-goutieres'],
-    tagline: 'Profil avancé · Risque RGA spécifique'
+    tagline: 'Profil avancé · Risque RGA spécifique',
+    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2023-55214' },
+    coverage: {
+      'incendie':   { status: 'covered',     limit: '200 000 €', franchise: '380 €',  note: 'Incendie, explosion, foudre et dégâts électriques inclus' },
+      'degat-eaux': { status: 'covered',     limit: '100 000 €', franchise: '150 €',  note: 'Fuites et infiltrations couvertes — recherche de fuite incluse' },
+      'rga':        { status: 'not-covered', limit: null,        franchise: null,     note: 'Non couvert — extension Retrait-Gonflement des Argiles disponible' },
+      'vol':        { status: 'covered',     limit: '8 000 €',   franchise: '300 €',  note: 'Vols avec effraction et vandalisme couverts' },
+      'tempete':    { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Tempête, grêle et neige inclus' },
+      'inondation': { status: 'partial',     limit: '150 000 €', franchise: '380 €',  note: 'Couvert en régime CatNat uniquement — pas de garantie hors arrêté' }
+    }
   },
   'profil-d': {
     id: 'profil-d',
@@ -80,7 +107,16 @@ const PROFILES = {
     condition: 'all',
     hasGarden: false,
     completedActions: [],
-    tagline: 'Nouvel achat · Copropriété · Score faible'
+    tagline: 'Nouvel achat · Copropriété · Score faible',
+    contract: { name: 'MRH AXA Confort', ref: 'MRH-2025-33871' },
+    coverage: {
+      'degat-eaux': { status: 'covered',     limit: '80 000 €',  franchise: '150 €',  note: 'Dommages dans votre appartement couverts — copropriété couverte séparément' },
+      'vol':        { status: 'covered',     limit: '5 000 €',   franchise: '300 €',  note: 'Vols avec effraction dans les parties privatives' },
+      'incendie':   { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Incendie, explosion et foudre couverts dans votre appartement' },
+      'tempete':    { status: 'partial',     limit: '80 000 €',  franchise: '380 €',  note: 'Intérieur couvert par votre contrat — toiture couverte par le syndicat de copropriété' },
+      'inondation': { status: 'partial',     limit: '80 000 €',  franchise: '380 €',  note: 'Couvert en régime CatNat — dommages intérieurs uniquement' },
+      'rga':        { status: 'not-covered', limit: null,        franchise: null,     note: 'Non applicable — appartement en immeuble' }
+    }
   },
   'profil-e': {
     id: 'profil-e',
@@ -99,7 +135,16 @@ const PROFILES = {
     condition: 'maison',
     hasGarden: true,
     completedActions: ['incendie-detecteur-fumee'],
-    tagline: 'Été · Risques feux et sécheresse'
+    tagline: 'Été · Risques feux et sécheresse',
+    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2024-90123' },
+    coverage: {
+      'incendie':   { status: 'covered',     limit: '200 000 €', franchise: '380 €',  note: 'Feux de végétation et incendies domestiques couverts' },
+      'rga':        { status: 'not-covered', limit: null,        franchise: null,     note: 'Non couvert — extension Retrait-Gonflement des Argiles disponible' },
+      'tempete':    { status: 'covered',     limit: '150 000 €', franchise: '380 €',  note: 'Vents violents (mistral), grêle et neige inclus' },
+      'vol':        { status: 'covered',     limit: '8 000 €',   franchise: '300 €',  note: 'Vols avec effraction et vandalisme couverts' },
+      'degat-eaux': { status: 'covered',     limit: '100 000 €', franchise: '150 €',  note: 'Dommages mobiliers et immobiliers couverts' },
+      'inondation': { status: 'partial',     limit: '150 000 €', franchise: '380 €',  note: 'Couvert en régime CatNat après arrêté préfectoral' }
+    }
   }
 };
 

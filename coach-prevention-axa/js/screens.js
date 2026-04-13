@@ -429,6 +429,58 @@ function screenProjection() {
     `<div class="damage-item rv rv2"><div class="damage-dot"></div>${d}</div>`
   ).join('');
 
+  // Coverage card
+  const cov = (p.coverage || {})[activeRiskId];
+  let coverageHtml = '';
+  if (cov && p.contract) {
+    const statusConfig = {
+      'covered':     { label: 'Couvert',             cls: 'covered',     icon: '✓' },
+      'partial':     { label: 'Partiel',             cls: 'partial',     icon: '⚡' },
+      'not-covered': { label: 'Non couvert',         cls: 'not-covered', icon: '✕' }
+    };
+    const sc = statusConfig[cov.status] || statusConfig['not-covered'];
+
+    const detailsHtml = cov.limit ? `
+      <div class="coverage-details">
+        <div class="coverage-detail-item">
+          <div class="coverage-detail-label">Capital garanti</div>
+          <div class="coverage-detail-value">${cov.limit}</div>
+        </div>
+        <div class="coverage-detail-sep"></div>
+        <div class="coverage-detail-item">
+          <div class="coverage-detail-label">Franchise</div>
+          <div class="coverage-detail-value">${cov.franchise}</div>
+        </div>
+      </div>` : '';
+
+    const bridgeMsg = cov.status === 'covered'
+      ? `La prévention vous aide à <strong>éviter de mobiliser votre franchise</strong> (${cov.franchise}) et à limiter les démarches de sinistre.`
+      : cov.status === 'partial'
+      ? `Une partie des dommages n'est pas remboursée. La prévention réduit de <strong>${mainRisk.avoidablePercent}%</strong> les pertes non couvertes par votre contrat.`
+      : `Ce risque n'est pas couvert. La prévention est votre <strong>seule protection</strong> — elle évite <strong>${mainRisk.avoidablePercent}%</strong> des dommages.`;
+
+    coverageHtml = `
+      <div class="section-title" style="margin-top:var(--sp5)">Votre couverture AXA</div>
+      <div class="coverage-card rv rv2">
+        <div class="coverage-card-top">
+          <div class="coverage-contract-info">
+            <div class="coverage-contract-icon">${sv(IC.shield, 'width:16px;height:16px')}</div>
+            <div>
+              <div class="coverage-contract-name">${p.contract.name}</div>
+              <div class="coverage-contract-ref">Réf. ${p.contract.ref}</div>
+            </div>
+          </div>
+          <div class="coverage-status-badge coverage-status-${sc.cls}">${sc.icon} ${sc.label}</div>
+        </div>
+        ${detailsHtml}
+        <div class="coverage-note">${cov.note}</div>
+        <div class="coverage-prevention-nudge">
+          <div class="coverage-prevention-icon">${sv(IC.shield, 'width:13px;height:13px')}</div>
+          <div class="coverage-prevention-text">${bridgeMsg}</div>
+        </div>
+      </div>`;
+  }
+
   return `
     <div class="projection-hero">
       <div class="progress-bar" style="position:relative;margin-bottom:var(--sp4)"><div class="progress-fill" style="width:67%"></div></div>
@@ -459,16 +511,15 @@ function screenProjection() {
           <div class="stat-label">des dommages sont évitables</div>
         </div>
       </div>
-      <div class="section-title">Dommages évitables</div>
+      <div class="section-title">Dommages potentiels</div>
       <div class="damage-list">${damagesHtml}</div>
-      <div class="reassure blue rv rv3" style="margin-bottom:var(--sp4)">
-        <span class="reassure-icon">${sv(IC.info)}</span>
-        <span>Avec les bons gestes, <strong>${mainRisk.avoidablePercent} % des dégâts</strong> peuvent être évités avant même qu'un sinistre survienne.</span>
+      ${coverageHtml}
+      <div style="margin-top:var(--sp5)">
+        <button class="btn btn-primary rv rv4" onclick="goTo(5)">
+          Voir les actions recommandées
+          ${sv(IC.arrow, 'width:18px;height:18px')}
+        </button>
       </div>
-      <button class="btn btn-primary rv rv4" onclick="goTo(5)">
-        Voir les actions recommandées
-        <svg class="btn-icon">${sv(IC.arrow)}</svg>
-      </button>
     </div>
     <div class="bottom-safe"></div>
   `;
