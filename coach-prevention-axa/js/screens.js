@@ -254,6 +254,7 @@ function screenDiagnostic() {
           </div>
         </div>
         <div class="q-card-text">${q.text}</div>
+        ${q.hint ? `<div class="q-hint"><span class="q-hint-icon">ℹ</span>${q.hint}</div>` : ''}
         <div class="option-list">${optionsHtml}</div>
       </div>
     </div>
@@ -281,28 +282,50 @@ function screenScore() {
   const offset = Math.round(circ * (1 - score / 100));
   const lc = p.localContext || null;
 
+  /* ── Diagnostic impact per risk ── */
+  const diagPtsPerRisk = {};
+  (window._ST.questions || []).forEach(q => {
+    const ans = (window._ST.diagAnswers || {})[q.id];
+    const opt = q.options.find(o => o.v === ans);
+    if (opt && opt.pts > 0) diagPtsPerRisk[q.riskId] = (diagPtsPerRisk[q.riskId] || 0) + opt.pts;
+  });
+  const nRisksImproved = p.mainRisks.filter(rId => (diagPtsPerRisk[rId] || 0) > 0).length;
+
   const riskBarsHtml = p.mainRisks.map(rId => {
     const r = RISKS[rId];
     if (!r) return '';
-    const barScore = r.level === 'high' ? 35 : r.level === 'medium' ? 55 : 78;
-    const fillClass = r.level === 'high' ? 'risk-fill-danger' : r.level === 'medium' ? 'risk-fill-warn' : 'risk-fill-success';
-    const tagClass  = r.level === 'high' ? 'tag-danger' : r.level === 'medium' ? 'tag-warn' : 'tag-success';
-    const comment   = r.level === 'high'
+    const diagPts   = diagPtsPerRisk[rId] || 0;
+    const baseScore = r.level === 'high' ? 30 : r.level === 'medium' ? 50 : 76;
+    const barScore  = Math.min(baseScore + Math.round(diagPts * 0.65), 88);
+    const effLevel  = barScore < 45 ? 'high' : barScore < 68 ? 'medium' : 'low';
+    const fillClass = effLevel === 'high' ? 'risk-fill-danger' : effLevel === 'medium' ? 'risk-fill-warn' : 'risk-fill-success';
+    const tagClass  = effLevel === 'high' ? 'tag-danger' : effLevel === 'medium' ? 'tag-warn' : 'tag-success';
+    const tagLabel  = effLevel === 'high' ? 'Élevé' : effLevel === 'medium' ? 'Modéré' : 'Bien maîtrisé';
+    const comment   = effLevel === 'high'
       ? 'Préparation insuffisante — des actions urgentes sont recommandées.'
-      : r.level === 'medium'
-      ? 'Quelques actions simples réduiraient significativement votre exposition.'
+      : effLevel === 'medium'
+      ? 'Quelques actions réduiraient significativement votre exposition.'
       : 'Bonne maîtrise de ce risque. Maintenez vos équipements à jour.';
+    const levelChanged = effLevel !== r.level;
+    const impactHtml = diagPts > 0 ? `
+      <div class="risk-diag-impact">
+        ${levelChanged
+          ? `<span class="risk-level-old">${r.levelLabel}</span><span class="risk-level-arrow">→</span><span class="risk-level-new">${tagLabel}</span>`
+          : `<span class="risk-level-improved">↗ Exposition réduite</span>`}
+        <span class="risk-diag-pts">+${diagPts} pts diagnostic</span>
+      </div>` : '';
     return `
       <div class="risk-bar-row">
         <div class="risk-bar-header">
           <span class="risk-bar-label">${r.icon} ${r.label}</span>
-          <span class="tag ${tagClass}">${r.levelLabel}</span>
+          <span class="tag ${tagClass}">${tagLabel}</span>
         </div>
         <div class="risk-track"><div class="risk-fill ${fillClass}" style="width:${barScore}%"></div></div>
         <div class="risk-score-meta">
           <span class="risk-score-pts">${barScore}/100</span>
           <span class="risk-score-comment">${comment}</span>
         </div>
+        ${impactHtml}
       </div>
     `;
   }).join('');
@@ -409,6 +432,14 @@ function screenScore() {
       ${recentEventHtml}
 
       <div class="section-title rv rv2">Exposition par risque</div>
+      ${diagGain > 0 ? `
+        <div class="diag-impact-banner rv rv2">
+          <div class="diag-impact-icon">📊</div>
+          <div class="diag-impact-body">
+            <div class="diag-impact-title">Votre diagnostic a eu un impact</div>
+            <div class="diag-impact-sub">+${diagGain} pts · ${nRisksImproved} risque${nRisksImproved > 1 ? 's' : ''} amélioré${nRisksImproved > 1 ? 's' : ''} grâce à vos réponses</div>
+          </div>
+        </div>` : ''}
       <div class="risk-bars rv rv2">${riskBarsHtml}</div>
 
       ${testimonialHtml}
