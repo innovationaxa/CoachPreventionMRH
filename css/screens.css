@@ -173,6 +173,14 @@
 .angel-entry-desc {
   font-size: 12px; color: var(--n500); line-height: 1.5; margin-bottom: var(--sp3);
 }
+.angel-entry-cta {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #6574F8; color: #fff; border: none; border-radius: var(--r-md);
+  padding: 11px 16px; font-size: 14px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; transition: filter .18s;
+}
+.angel-entry-cta:hover { filter: brightness(1.1); }
+.angel-entry-cta .btn-icon { width: 16px; height: 16px; stroke: #fff; }
 .angel-entry-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .angel-mode-chip {
   font-size: 10px; font-weight: 600; color: #6574F8;

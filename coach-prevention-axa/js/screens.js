@@ -167,23 +167,21 @@ function screenLanding() {
         <div class="angel-or-line"></div>
       </div>
 
-      <div class="angel-entry-card rv rv4" onclick="tabMock('Angel — IA AXA')" role="button" tabindex="0">
+      <div class="angel-entry-card rv rv4" role="button" tabindex="0" onclick="tabMock('Angel — IA AXA')">
         <div class="angel-entry-head">
           <div class="angel-entry-circle">
             <img src="assets/Vector.svg" alt="" class="angel-entry-icon">
           </div>
           <div class="angel-entry-text">
-            <div class="angel-entry-eyebrow">ANGEL · IA AXA</div>
+            <div class="angel-entry-eyebrow">ANGEL · VOTRE ASSISTANT IA</div>
             <div class="angel-entry-title">Parcours guidé par IA</div>
           </div>
-          <svg class="angel-entry-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
         <p class="angel-entry-desc">Diagnostic conversationnel, analyse de vos risques et plan personnalisé — en mode chat ou vocal.</p>
-        <div class="angel-entry-chips">
-          <span class="angel-mode-chip">💬 Chat</span>
-          <span class="angel-mode-chip">🎙️ Vocal</span>
-          <span class="angel-mode-chip">✦ IA générative</span>
-        </div>
+        <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
+          Demander à Angel
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
 
       <div class="diag-skip-wrap rv rv5">
@@ -714,23 +712,21 @@ function screenActionDetail() {
       ${tutosHtml}
       ${aidesHtml}
 
-      <div class="angel-entry-card rv" style="margin-top:var(--sp5)" onclick="tabMock('Angel — IA AXA')" role="button" tabindex="0">
+      <div class="angel-entry-card rv" style="margin-top:var(--sp5)" role="button" tabindex="0" onclick="tabMock('Angel — IA AXA')">
         <div class="angel-entry-head">
           <div class="angel-entry-circle">
             <img src="assets/Vector.svg" alt="" class="angel-entry-icon">
           </div>
           <div class="angel-entry-text">
-            <div class="angel-entry-eyebrow">ANGEL · IA AXA</div>
+            <div class="angel-entry-eyebrow">ANGEL · VOTRE ASSISTANT IA</div>
             <div class="angel-entry-title">Besoin d'aide pour réaliser cette action ?</div>
           </div>
-          <svg class="angel-entry-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </div>
         <p class="angel-entry-desc">Angel vous guide pas à pas — questions, conseils personnalisés et mise en relation avec les bons artisans.</p>
-        <div class="angel-entry-chips">
-          <span class="angel-mode-chip">💬 Chat</span>
-          <span class="angel-mode-chip">🎙️ Vocal</span>
-          <span class="angel-mode-chip">✦ IA générative</span>
-        </div>
+        <button class="angel-entry-cta" onclick="event.stopPropagation();tabMock('Angel — IA AXA')">
+          Demander à Angel
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
 
       ${conseillerHtml}
