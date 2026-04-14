@@ -256,15 +256,15 @@ const RISKS = {
   'incendie': {
     id: 'incendie', label: 'Incendie', icon: '🔥',
     level: 'low', levelLabel: 'Faible',
-    avoidablePercent: 80,
+    avoidablePercent: 80, season: 'été',
     explanation: '80 % des incendies domestiques sont évitables. Le détecteur de fumée est obligatoire.',
     damages: ['Destruction totale du bien','Intoxication au CO','Voisins affectés','Perte de documents']
   },
   'rga': {
     id: 'rga', label: 'Retrait Gonflement des Argiles', icon: '🏚️',
     level: 'medium', levelLabel: 'Modéré',
-    avoidablePercent: 55,
-    explanation: 'Le sol argileux lyonnais se rétracte en été et gonfle en hiver, fragilisant les fondations.',
+    avoidablePercent: 55, season: 'été',
+    explanation: 'Le sol argileux se rétracte en période de sécheresse et gonfle lors des pluies, fragilisant progressivement les fondations.',
     damages: ['Fissures dans les murs porteurs','Déformation des ouvertures','Tassement différentiel','Fondations fragilisées']
   }
 };
@@ -413,6 +413,14 @@ const ALL_ACTIONS = [
     pts:4, conseilText:'Entretenez régulièrement les joints d\'étanchéité des installations sanitaires.',
     steps:['Inspecter les joints autour de la baignoire, douche, lavabo et WC','Vérifier l\'absence de moisissures noires (signe de joint poreux)','Retirer l\'ancien joint avec un cutter et du dissolvant','Appliquer le nouveau joint avec un pistolet silicone — laisser sécher 24h'],
     tags:['~10 €','20 min'] },
+  { id:'dde-detection-fuite', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
+    horizon:'this_month', momentDeVie:'subscription', condition:'all',
+    title:'Installer un détecteur de fuite d\'eau', effort:'low', duration:'15 min',
+    benefit:'Alerte dès les premières gouttes — limite les dégâts avant qu\'une fuite silencieuse cause des milliers d\'euros de travaux.',
+    pts:8, conseilText:'Placez un détecteur de fuite sous les éviers et derrière les appareils électroménagers.',
+    proof: { type: 'photo', label: 'Photo du détecteur installé (sous évier ou machine à laver)' },
+    steps:['Choisir un détecteur avec alarme sonore et/ou alerte smartphone','Placer sous l\'évier de cuisine, sous le lavabo, derrière le lave-linge et le lave-vaisselle','Tester le capteur en posant quelques gouttes d\'eau sur la sonde','Remplacer la pile selon les recommandations du fabricant (1–2 ans)'],
+    tags:['~30–80 €','15 min'] },
   { id:'dde-couper-eau-vacances', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
     horizon:'now', momentDeVie:'seasonal', condition:'all',
     title:'Couper l\'arrivée d\'eau avant de partir', effort:'low', duration:'5 min',

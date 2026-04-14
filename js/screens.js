@@ -82,6 +82,8 @@ function screenSelection() {
 function screenLanding() {
   const p = getProfile(window._ST.profileId);
   const isSeasonal = p.scenario === 'seasonal';
+  const seasons = p.mainRisks.map(r => (RISKS[r] || {}).season).filter(Boolean);
+  const seasonBadge = seasons.includes('été') ? '☀️ Saisonnalité été' : '🌧️ Saisonnalité automne-hiver';
 
   const benefitsHtml = [
     { icon: '🔍', label: 'Comprendre vos risques réels' },
@@ -114,7 +116,7 @@ function screenLanding() {
   return `
     <div class="landing-banner ${isSeasonal ? 'seasonal' : 'subscription'}">
       <div class="landing-scenario-badge rv rv1">
-        ${isSeasonal ? '🌧️ Saisonnalité automne-hiver' : '🏠 Nouveau contrat MRH'}
+        ${isSeasonal ? seasonBadge : '🏠 Nouveau contrat MRH'}
       </div>
       <h1 class="landing-h1 rv rv2">
         ${isSeasonal
