@@ -689,3 +689,421 @@ function screenPlan() {
     </div>
     <div style="height:24px"></div>`;
 }
+
+/* ════════════════════════════════════════════
+   S6 — V3-06 ACTIONS & DÉFIS
+════════════════════════════════════════════ */
+function screenActions() {
+  const p     = getProfile(window._ST.profileId);
+  const done  = window._ST.completedActions || [];
+  const pts   = window._ST.points || 0;
+  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
+  const todo  = allA.filter(a => !done.includes(a.id));
+  const doneA = allA.filter(a => done.includes(a.id));
+
+  /* Defis saisonniers — tirés des actions seasonales */
+  const defis = todo.filter(a => a.momentDeVie === 'seasonal').slice(0, 3);
+  /* Actions autonomie */
+  const autonomie = todo.filter(a => a.momentDeVie !== 'seasonal' || !defis.includes(a)).slice(0, 5);
+
+  /* Points total disponibles */
+  const ptsDisponibles = todo.reduce((s, a) => s + a.pts, 0);
+  const ptsDone        = doneA.reduce((s, a) => s + a.pts, 0);
+  const ptsTotal       = allA.reduce((s, a) => s + a.pts, 0);
+  const pctProgress    = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
+
+  function actionCard(a) {
+    const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
+    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
+    const tags = a.tags || [];
+    return `
+      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon || '⚡'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
+            <div style="font-size:11px;color:var(--n500);margin-top:3px">${a.riskLabel} · ${effortLabel} · ${a.duration}</div>
+          </div>
+          <div style="flex-shrink:0;text-align:right">
+            <div style="font-size:14px;font-weight:700;color:var(--axa)">+${a.pts}</div>
+            <div style="font-size:10px;color:var(--n400)">pts</div>
+          </div>
+        </div>
+        ${tags.length ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          ${tags.map(t=>`<span style="font-size:10px;color:var(--n500);background:var(--n100);padding:3px 8px;border-radius:99px">${t}</span>`).join('')}
+        </div>` : ''}
+      </div>`;
+  }
+
+  function defiCard(a) {
+    return `
+      <div onclick="openAction('${a.id}')" style="background:linear-gradient(135deg,var(--axa-xlight),var(--white));border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-10px;right:-10px;font-size:40px;opacity:.08">${RISKS[a.riskId]?.icon || '⚡'}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Défi · ${a.riskLabel}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
+            <div style="font-size:12px;color:var(--n600);margin-top:4px;line-height:1.4">${a.benefit}</div>
+          </div>
+          <div style="background:var(--axa);color:white;border-radius:var(--r-sm);padding:8px 10px;text-align:center;flex-shrink:0">
+            <div style="font-size:16px;font-weight:700">+${a.pts}</div>
+            <div style="font-size:9px;opacity:.8">pts</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div style="background:var(--axa);padding:18px var(--sp5) 22px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:white')}
+        </button>
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
+          <div style="font-size:17px;font-weight:700;color:white">Actions & Défis</div>
+        </div>
+        <div style="margin-left:auto;flex-shrink:0" onclick="goTo(8)" style="cursor:pointer">
+          <div style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer" onclick="goTo(8)">
+            <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:11px;color:rgba(255,255,255,.7)">${ptsDone} pts gagnés</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.5)">${ptsDisponibles} pts disponibles</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s ease"></div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;text-align:center">${doneA.length} action${doneA.length>1?'s':''} réalisée${doneA.length>1?'s':''} · ${todo.length} restante${todo.length>1?'s':''}</div>
+      </div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+      ${defis.length ? `
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:var(--n900)">Défis en cours</div>
+            <span style="font-size:11px;color:var(--axa);background:var(--axa-xlight);padding:2px 8px;border-radius:99px;font-weight:600">${defis.length} actif${defis.length>1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">${defis.map(defiCard).join('')}</div>
+        </div>` : ''}
+
+      ${autonomie.length ? `
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Actions en autonomie</div>
+          <div style="display:flex;flex-direction:column;gap:8px">${autonomie.map(actionCard).join('')}</div>
+        </div>` : ''}
+
+      ${!todo.length ? `
+        <div style="text-align:center;padding:32px 16px">
+          <div style="font-size:40px;margin-bottom:12px">🏆</div>
+          <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:6px">Toutes les actions réalisées !</div>
+          <p style="font-size:13px;color:var(--n500)">Consultez vos récompenses disponibles.</p>
+        </div>` : ''}
+
+      <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
+        ${pts > 0 ? `<span style="background:var(--axa);color:white;border-radius:99px;padding:1px 8px;font-size:11px">${pts} pts</span>` : ''}
+      </button>
+    </div>
+    <div style="height:24px"></div>`;
+}
+
+/* ════════════════════════════════════════════
+   S7 — V3-07 DÉTAIL ACTION
+════════════════════════════════════════════ */
+function screenDetailAction() {
+  const p    = getProfile(window._ST.profileId);
+  const done = window._ST.completedActions || [];
+  const aId  = window._ST.selectedAction;
+  const a    = ALL_ACTIONS.find(x => x.id === aId);
+
+  if (!a) return `<div style="padding:40px;text-align:center;color:var(--n500)">Action introuvable.</div>`;
+
+  const isDone    = done.includes(a.id);
+  const hasProof  = a.proof;
+  const proofDone = (window._ST.proofUploaded||{})[a.id];
+  const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
+  const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
+  const risk = RISKS[a.riskId] || {};
+  const fromScreen = window._ST.diagCompleted ? 5 : 6;
+
+  const stepsHtml = (a.steps||[]).map((s,i) =>
+    `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;${i<a.steps.length-1?'border-bottom:1px solid var(--n100)':''}">
+      <div style="width:22px;height:22px;border-radius:50%;background:var(--axa);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</div>
+      <div style="font-size:13px;color:var(--n700);line-height:1.5;padding-top:2px">${s}</div>
+    </div>`
+  ).join('');
+
+  const tags = (a.tags||[]).map(t =>
+    `<span style="font-size:11px;color:var(--n600);background:var(--n100);padding:4px 10px;border-radius:99px">${t}</span>`
+  ).join('');
+
+  return `
+    <div style="background:${isDone?'var(--success)':'var(--axa)'};padding:16px var(--sp5) 22px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="goTo(${fromScreen})" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:white')}
+        </button>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)">Détail de l'action</div>
+        ${isDone ? `<span style="margin-left:auto;font-size:11px;font-weight:700;color:white;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:99px">✓ Réalisée</span>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:48px;height:48px;border-radius:var(--r-md);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${risk.icon||'⚡'}</div>
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${a.riskLabel}</div>
+          <div style="font-size:17px;font-weight:700;color:white;line-height:1.3">${a.title}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:14px">
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:700;color:var(--axa);background:var(--axa-xlight);padding:5px 12px;border-radius:99px">+${a.pts} pts</span>
+        <span style="font-size:12px;color:${effortColor};background:${effortColor==='var(--success)'?'var(--success-light)':effortColor==='var(--warn)'?'var(--warn-light)':'var(--danger-light)'};padding:5px 12px;border-radius:99px;font-weight:600">${effortLabel}</span>
+        <span style="font-size:12px;color:var(--n600);background:var(--n100);padding:5px 12px;border-radius:99px">${a.duration}</span>
+        ${tags}
+      </div>
+
+      <div style="background:var(--success-bg);border-left:3px solid var(--success);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px">
+        <div style="font-size:11px;font-weight:700;color:var(--success);margin-bottom:3px">Bénéfice</div>
+        <div style="font-size:13px;color:var(--n700);line-height:1.5">${a.benefit}</div>
+      </div>
+
+      ${stepsHtml ? `
+        <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Étapes</div>
+          ${stepsHtml}
+        </div>` : ''}
+
+      ${hasProof && !isDone ? `
+        <div style="background:var(--n50);border:1px dashed var(--n300);border-radius:var(--r-md);padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:4px">Justificatif demandé</div>
+          <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${a.proof.label}</div>
+          <button onclick="mockUploadProof('${a.id}', 7)" style="padding:9px 16px;background:${proofDone?'var(--success)':'var(--n700)'};color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">
+            ${proofDone ? '✓ Preuve ajoutée' : '📎 Ajouter la preuve'}
+          </button>
+        </div>` : ''}
+
+      ${isDone
+        ? `<div style="background:var(--success-bg);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:16px;text-align:center">
+            <div style="font-size:28px;margin-bottom:8px">✅</div>
+            <div style="font-size:15px;font-weight:700;color:var(--success)">Action réalisée !</div>
+            <div style="font-size:12px;color:var(--n600);margin-top:4px">+${a.pts} pts ajoutés à votre compteur</div>
+           </div>`
+        : `<button onclick="completeAction('${a.id}')" style="width:100%;padding:14px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            ${sv(IC.check,'width:18px;height:18px;fill:white')} Marquer comme réalisée
+            <span style="background:rgba(255,255,255,.2);border-radius:99px;padding:2px 8px;font-size:12px">+${a.pts} pts</span>
+           </button>`
+      }
+
+      <button onclick="goTo(${fromScreen})" style="width:100%;padding:12px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer">
+        Retour au plan
+      </button>
+    </div>
+    <div style="height:24px"></div>`;
+}
+
+/* ── S8 — Récompenses ─────────────────────────────────────────────────── */
+function screenRewards() {
+  const st = window._ST;
+  const profile = PROFILES.find(p => p.id === st.profileId) || PROFILES[0];
+  const completedCount = st.completedActions.length;
+  const rewards = getRewardsForProfile(profile, completedCount);
+  const pts = st.points;
+
+  const unlocked = rewards.filter(r => r.computedStatus === 'unlocked');
+  const available = rewards.filter(r => r.computedStatus === 'available');
+  const teaser = rewards.filter(r => r.computedStatus === 'teaser');
+
+  function rewardCard(r) {
+    const isUnlocked = r.computedStatus === 'unlocked';
+    const isTeaser   = r.computedStatus === 'teaser';
+    const statusLabel = isUnlocked ? '✓ Débloqué' : isTeaser ? r.teaser : `${r.minActions} action${r.minActions>1?'s':''} requise${r.minActions>1?'s':''}`;
+    const statusColor = isUnlocked ? 'var(--success)' : isTeaser ? 'var(--warn)' : 'var(--n400)';
+    const statusBg    = isUnlocked ? 'var(--success-bg)' : isTeaser ? 'var(--warn-light)' : 'var(--n100)';
+
+    return `<div style="background:var(--white);border:1.5px solid ${isUnlocked?'var(--success-light)':'var(--n150)'};border-radius:var(--r-md);padding:14px;display:flex;gap:12px;align-items:flex-start;${isTeaser?'opacity:.7':''}">
+      <div style="width:44px;height:44px;border-radius:var(--r-sm);background:${r.iconBg};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${r.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+          <span style="font-size:13px;font-weight:700;color:var(--n800)">${r.title}</span>
+          <span style="font-size:11px;font-weight:700;color:var(--axa);background:var(--axa-xlight);padding:2px 7px;border-radius:99px">${r.subtitle}</span>
+        </div>
+        <div style="font-size:11px;color:var(--n500);line-height:1.45;margin-bottom:8px">${r.desc}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <span style="font-size:11px;font-weight:600;color:${statusColor};background:${statusBg};padding:3px 9px;border-radius:99px">${statusLabel}</span>
+          ${isUnlocked ? `<button onclick="tabMock('Activer : ${r.title}')" style="padding:7px 12px;background:var(--success);color:white;border:none;border-radius:var(--r-sm);font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer">Activer</button>` : ''}
+        </div>
+        ${isUnlocked && r.disclaimer ? `<div style="font-size:10px;color:var(--n400);margin-top:5px">${r.disclaimer}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  const nextTarget = available.length > 0 ? available.sort((a,b)=>a.minActions-b.minActions)[0] : null;
+  const ptsToNext  = nextTarget ? Math.max(0, nextTarget.minActions - completedCount) : 0;
+
+  return `<div class="screen-header" style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);padding:24px var(--sp5) 20px;color:white">
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7;margin-bottom:4px">Module Récompenses</div>
+    <div style="font-size:20px;font-weight:700">Vos avantages</div>
+    <div style="font-size:12px;opacity:.8;margin-top:2px">${profile.name} — ${completedCount} action${completedCount!==1?'s':''} réalisée${completedCount!==1?'s':''}</div>
+  </div>
+
+  <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+    <!-- Points counter -->
+    <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:16px;text-align:center">
+      <div style="font-size:32px;font-weight:800;color:var(--axa);line-height:1">${pts}</div>
+      <div style="font-size:12px;color:var(--n500);margin-top:2px">points de prévention</div>
+      ${nextTarget ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--n100)">
+          <div style="font-size:11px;color:var(--n500);margin-bottom:6px">
+            Encore <strong style="color:var(--axa)">${ptsToNext} action${ptsToNext>1?'s':''}</strong> pour débloquer <em>${nextTarget.title}</em>
+          </div>
+          <div style="height:6px;background:var(--n100);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(100,Math.round(completedCount/nextTarget.minActions*100))}%;background:var(--axa);border-radius:99px;transition:width .4s"></div>
+          </div>
+        </div>` : `<div style="margin-top:8px;font-size:11px;color:var(--success);font-weight:600">🎉 Toutes les récompenses disponibles sont débloquées !</div>`}
+    </div>
+
+    ${unlocked.length > 0 ? `
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">✓ Débloquées (${unlocked.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${unlocked.map(rewardCard).join('')}</div>
+      </div>` : ''}
+
+    ${available.length > 0 ? `
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">À débloquer (${available.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${available.map(rewardCard).join('')}</div>
+      </div>` : ''}
+
+    ${teaser.length > 0 ? `
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Bientôt disponible (${teaser.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${teaser.map(rewardCard).join('')}</div>
+      </div>` : ''}
+
+    <div style="height:12px"></div>
+  </div>`;
+}
+
+/* ── S9 — Historique & Activité ───────────────────────────────────────── */
+function screenHistorique() {
+  const st = window._ST;
+  const profile = PROFILES.find(p => p.id === st.profileId) || PROFILES[0];
+  const completedIds = st.completedActions;
+  const pts = st.points;
+
+  const doneActions = ALL_ACTIONS.filter(a => completedIds.includes(a.id));
+  const levels = getRiskLevels(profile, st.diagAnswers);
+
+  const riskIds = Object.keys(RISKS);
+  const risksWithLevels = riskIds.map(riskId => {
+    const risk = RISKS[riskId];
+    const lvl  = getRiskLevelInfo(levels[riskId] || 'modere');
+    return { riskId, risk, lvl };
+  }).sort((a,b) => b.lvl.step - a.lvl.step);
+
+  const diagDate   = st.diagCompleted ? 'Aujourd\'hui' : null;
+  const startScore = profile.preparationScore || 40;
+
+  function actionRow(a, idx) {
+    const risk = RISKS[a.riskId];
+    const riskLabel = risk ? risk.label : '';
+    const days = idx * 2;
+    const dateStr = days === 0 ? 'Aujourd\'hui' : days <= 2 ? 'Hier' : `Il y a ${days} jours`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--n100)">
+      <div style="width:32px;height:32px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${a.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--n800);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
+        <div style="font-size:11px;color:var(--n400)">${riskLabel} · ${dateStr}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--axa);background:var(--axa-xlight);padding:3px 8px;border-radius:99px;flex-shrink:0">+${a.pts} pts</span>
+    </div>`;
+  }
+
+  const actionsHtml = doneActions.length > 0
+    ? doneActions.map((a, i) => actionRow(a, i)).join('')
+    : `<div style="padding:24px;text-align:center;color:var(--n400);font-size:13px">Aucune action réalisée pour l'instant</div>`;
+
+  return `<div class="screen-header" style="background:var(--white);border-bottom:1px solid var(--n150);padding:20px var(--sp5) 16px">
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--n400);margin-bottom:4px">Mon Bilan</div>
+    <div style="font-size:20px;font-weight:700;color:var(--n800)">Historique & Activité</div>
+    <div style="font-size:12px;color:var(--n500);margin-top:2px">${profile.name} · ${profile.city}</div>
+  </div>
+
+  <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:var(--axa-xlight);border-radius:var(--r-md);padding:12px 8px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--axa)">${pts}</div>
+        <div style="font-size:10px;color:var(--n500);margin-top:1px">pts</div>
+      </div>
+      <div style="background:var(--success-bg);border-radius:var(--r-md);padding:12px 8px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--success)">${doneActions.length}</div>
+        <div style="font-size:10px;color:var(--n500);margin-top:1px">action${doneActions.length!==1?'s':''}</div>
+      </div>
+      <div style="background:var(--n100);border-radius:var(--r-md);padding:12px 8px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--n700)">${diagDate ? '1' : '0'}</div>
+        <div style="font-size:10px;color:var(--n500);margin-top:1px">diag.</div>
+      </div>
+    </div>
+
+    <!-- Risk summary -->
+    <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:10px">Niveaux de risque actuels</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${risksWithLevels.map(({riskId, risk, lvl}) => `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--n700);width:80px;flex-shrink:0">${risk.label}</span>
+            <div style="flex:1;height:6px;background:var(--n100);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:${Math.round(lvl.step/5*100)}%;background:${lvl.hex};border-radius:99px"></div>
+            </div>
+            <span style="font-size:10px;font-weight:700;color:${lvl.hex};width:60px;flex-shrink:0;text-align:right">${lvl.label}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Action history -->
+    <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:4px">Actions réalisées</div>
+      ${actionsHtml}
+    </div>
+
+    <!-- Export -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="generateBilan()" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        ${sv(IC.download,'width:16px;height:16px;fill:white')} Télécharger mon bilan PDF
+      </button>
+      <button onclick="mockSendBilan()" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer">
+        Envoyer par e-mail
+      </button>
+    </div>
+
+    <div style="height:16px"></div>
+  </div>`;
+}
+
+/* ── SCREENS registry ─────────────────────────────────────────────────── */
+const SCREENS = {
+  s0: screenSelection,
+  s1: screenHub,
+  s2: screenDiagnostic,
+  s3: screenRisques,
+  s4: screenDeepDive,
+  s5: screenPlan,
+  s6: screenActions,
+  s7: screenDetailAction,
+  s8: screenRewards,
+  s9: screenHistorique
+};
