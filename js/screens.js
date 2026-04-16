@@ -334,3 +334,358 @@ function screenDiagnostic() {
     </div>
     <div style="height:20px"></div>`;
 }
+
+/* ════════════════════════════════════════════
+   S3 — V3-03 VUE ENRICHIE POST-DIAGNOSTIC
+════════════════════════════════════════════ */
+function screenRisques() {
+  const p      = getProfile(window._ST.profileId);
+  const levels = getRiskLevels(p, window._ST.diagAnswers);
+  const mainRisks = p.mainRisks;
+  const improved = mainRisks.filter(r => (levels[r]||{}).improved);
+  const degraded = mainRisks.filter(r => (levels[r]||{}).degraded);
+
+  const riskRows = mainRisks.map(rId => {
+    const r  = RISKS[rId];
+    const lv = levels[rId] || {};
+    const li = lv.levelInfo || getRiskLevelInfo('modere');
+    const zoneLi = getRiskLevelInfo(lv.zoneLevel || li.id);
+    const changed = lv.improved || lv.degraded;
+    return `
+      <div onclick="openRisk('${rId}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:var(--r-sm);background:${li.bg};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${r.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--n900)">${r.label}</div>
+          <div style="margin-top:5px">${levelBar(li.id)}</div>
+          ${changed ? `
+            <div style="margin-top:5px;display:flex;align-items:center;gap:5px">
+              <span style="font-size:10px;color:var(--n400);text-decoration:line-through">${zoneLi.label}</span>
+              <span style="font-size:10px;color:var(--n400)">→</span>
+              ${levelChip(li.id,'sm')}
+              ${lv.improved ? `<span style="font-size:10px;color:var(--success);font-weight:600">↓ Amélioré</span>` : `<span style="font-size:10px;color:var(--danger);font-weight:600">↑ Attention</span>`}
+            </div>` : `<div style="margin-top:5px">${levelChip(li.id,'sm')}</div>`
+          }
+        </div>
+        <div style="flex-shrink:0;color:var(--n300)">
+          ${sv(IC.arrow,'width:16px;height:16px;fill:var(--n300)')}
+        </div>
+      </div>`;
+  }).join('');
+
+  /* Summary banner */
+  const totalImproved = improved.length;
+  const summaryBanner = totalImproved > 0
+    ? `<div style="background:var(--success-bg);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+        ${sv(IC.check,'width:16px;height:16px;fill:var(--success);flex-shrink:0;margin-top:1px')}
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--success)">Votre diagnostic a amélioré ${totalImproved} risque${totalImproved>1?'s':''}</div>
+          <div style="font-size:12px;color:var(--n600);margin-top:3px;line-height:1.5">Grâce à vos équipements et habitudes, votre exposition réelle est plus faible qu'estimée initialement.</div>
+        </div>
+       </div>`
+    : `<div style="background:var(--info-bg);border:1px solid var(--info-light);border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+        ${sv(IC.info,'width:16px;height:16px;fill:var(--info);flex-shrink:0;margin-top:1px')}
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--info)">Vue mise à jour</div>
+          <div style="font-size:12px;color:var(--n600);margin-top:3px;line-height:1.5">Vos niveaux ont été affinés selon vos réponses. Consultez le plan d'action pour réduire vos risques.</div>
+        </div>
+       </div>`;
+
+  /* Diag answers recap (top 3) */
+  const answeredQs = Object.keys(window._ST.diagAnswers||{}).slice(0,3).map(qid => {
+    const q   = (window._ST.questions||[]).find(x=>x.id===qid);
+    const val = window._ST.diagAnswers[qid];
+    if (!q) return '';
+    const opt = q.options.find(o=>o.v===val);
+    const dot = val==='yes'?'var(--success)':val==='no'?'var(--danger-mid)':'var(--warn-mid)';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--n100)">
+      <div style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0"></div>
+      <div style="flex:1;font-size:12px;color:var(--n700)">${q.text.replace(/\s\?.*$/,'')}</div>
+      <span style="font-size:11px;font-weight:600;color:var(--n600);flex-shrink:0">${opt?opt.l:val}</span>
+    </div>`;
+  }).join('');
+
+  return `
+    <div style="background:var(--axa);padding:16px var(--sp5) 20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:white')}
+        </button>
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55)">Résultats</div>
+          <div style="font-size:17px;font-weight:700;color:white">Vos risques mis à jour</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px">${p.location} · Diagnostic complété</div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:14px">
+      ${summaryBanner}
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Exposition par risque</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${riskRows}</div>
+      </div>
+
+      ${answeredQs ? `
+        <div style="background:var(--n50);border-radius:var(--r-md);padding:12px 14px">
+          <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Vos réponses clés</div>
+          ${answeredQs}
+          <div style="font-size:11px;color:var(--n400);margin-top:8px;text-align:center">${Object.keys(window._ST.diagAnswers||{}).length} questions répondues</div>
+        </div>` : ''}
+
+      <div style="display:flex;gap:10px">
+        <button onclick="goTo(5)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Mon plan d'action
+        </button>
+        <button onclick="goTo(1)" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
+          Retour
+        </button>
+      </div>
+    </div>
+    <div style="height:24px"></div>`;
+}
+
+/* ════════════════════════════════════════════
+   S4 — V3-04 DEEP DIVE RISQUE
+════════════════════════════════════════════ */
+function screenDeepDive() {
+  const p      = getProfile(window._ST.profileId);
+  const riskId = window._ST.selectedRisk || p.mainRisks[0];
+  const r      = RISKS[riskId] || {};
+  const levels = getRiskLevels(p, window._ST.diagCompleted ? window._ST.diagAnswers : {});
+  const lv     = levels[riskId] || {};
+  const li     = lv.levelInfo || getRiskLevelInfo('modere');
+  const cov    = (p.coverage||{})[riskId] || {};
+  const lc     = p.localContext || {};
+  const stats  = (lc.sinistresStats||{})[riskId];
+  const testi  = lc.testimonial;
+  const svcs   = (SERVICES_BY_RISK[riskId]||[]).slice(0,2);
+  const tutos  = (TUTORIALS_BY_RISK[riskId]||[]).slice(0,2);
+
+  /* Risk actions for this risk */
+  const riskActions = getActionsForProfile(p, window._ST.diagAnswers)
+    .filter(a => a.riskId === riskId)
+    .slice(0,3);
+
+  const covIcon  = cov.status==='covered'?'✓':cov.status==='partial'?'◑':'✗';
+  const covLabel = cov.status==='covered'?'Couvert':cov.status==='partial'?'Couverture partielle':'Non applicable';
+  const covColor = cov.status==='covered'?'var(--success)':cov.status==='partial'?'var(--warn)':'var(--n500)';
+
+  const actionItems = riskActions.map(a =>
+    `<div onclick="openAction('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--n150);border-radius:var(--r-sm);cursor:pointer">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--axa-light);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${sv(IC.bolt,'width:13px;height:13px;fill:var(--axa)')}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--n900)">${a.title}</div>
+        <div style="font-size:11px;color:var(--n500);margin-top:1px">${a.duration} · ${a.pts} pts</div>
+      </div>
+      ${sv(IC.arrow,'width:14px;height:14px;fill:var(--n300);flex-shrink:0')}
+    </div>`
+  ).join('');
+
+  const serviceItems = svcs.map(s =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--n150);border-radius:var(--r-sm)">
+      <div style="font-size:20px">${s.logo}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--n900)">${s.label}</div>
+        <div style="font-size:10px;color:var(--n500)">${s.tag}</div>
+      </div>
+      <span style="font-size:11px;color:var(--axa);font-weight:600;flex-shrink:0">${s.cta}</span>
+    </div>`
+  ).join('');
+
+  return `
+    <div style="background:${li.bg};padding:18px var(--sp5) 22px;position:relative">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:'+li.hex)}
+        </button>
+        <div style="font-size:11px;color:${li.hex};font-weight:600;opacity:.7">Analyse détaillée</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:var(--r-md);background:white;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:var(--shadow-sm)">${r.icon}</div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:${li.hex};line-height:1.2">${r.label}</div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+            ${levelChip(li.id)}
+            ${levelBar(li.id)}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+      <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Pourquoi ce niveau ?</div>
+        <p style="font-size:13px;color:var(--n700);line-height:1.55;margin:0">${r.explanation}</p>
+        ${stats ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n100);font-size:12px;color:var(--n600);display:flex;gap:6px;align-items:flex-start">
+          ${sv(IC.info,'width:13px;height:13px;fill:var(--n400);flex-shrink:0;margin-top:1px')}
+          <span>${stats.stat} <span style="color:var(--n400)">(${stats.source})</span></span>
+        </div>` : ''}
+      </div>
+
+      ${cov.status ? `
+        <div style="background:var(--n50);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+          <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Votre couverture AXA</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:18px;color:${covColor};font-weight:700">${covIcon}</span>
+            <span style="font-size:14px;font-weight:700;color:${covColor}">${covLabel}</span>
+            ${cov.limit ? `<span style="font-size:12px;color:var(--n500);margin-left:auto">Plafond ${cov.limit}</span>` : ''}
+          </div>
+          ${cov.franchise ? `<div style="font-size:12px;color:var(--n600)">Franchise : ${cov.franchise}</div>` : ''}
+          ${cov.note ? `<div style="margin-top:8px;font-size:11px;color:var(--n500);line-height:1.5;border-top:1px solid var(--n150);padding-top:8px">${cov.note}</div>` : ''}
+        </div>` : ''}
+
+      ${testi ? `
+        <div style="background:var(--warn-bg);border-left:3px solid var(--warn-mid);border-radius:0 var(--r-md) var(--r-md) 0;padding:12px 14px">
+          <div style="font-size:10px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Cas similaire · ${testi.situation}</div>
+          <p style="font-size:12px;color:var(--n700);line-height:1.55;font-style:italic;margin:0">"${testi.text}"</p>
+          <div style="font-size:10px;color:var(--n400);margin-top:6px">${testi.source}</div>
+        </div>` : ''}
+
+      ${riskActions.length ? `
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Actions recommandées</div>
+          <div style="display:flex;flex-direction:column;gap:8px">${actionItems}</div>
+        </div>` : ''}
+
+      ${svcs.length ? `
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Services & partenaires</div>
+          <div style="display:flex;flex-direction:column;gap:8px">${serviceItems}</div>
+        </div>` : ''}
+
+      <div style="display:flex;gap:10px">
+        <button onclick="goTo(5)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Plan d'action
+        </button>
+        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
+          Retour
+        </button>
+      </div>
+    </div>
+    <div style="height:24px"></div>`;
+}
+
+/* ════════════════════════════════════════════
+   S5 — V3-05 PLAN D'ACTION
+════════════════════════════════════════════ */
+function screenPlan() {
+  const p     = getProfile(window._ST.profileId);
+  const done  = window._ST.completedActions || [];
+  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
+  const now   = allA.filter(a => a.horizon==='now'   && !done.includes(a.id));
+  const month = allA.filter(a => a.horizon==='this_month' && !done.includes(a.id));
+  const doneA = allA.filter(a => done.includes(a.id));
+
+  function actionRow(a) {
+    const effortColor = a.effort==='low'?'var(--success)':a.effort==='medium'?'var(--warn)':'var(--danger)';
+    const effortLabel = a.effort==='low'?'Facile':a.effort==='medium'?'Moyen':'Avancé';
+    return `
+      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px">
+        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon||'⚡'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--n500)">${a.riskLabel}</span>
+            <span style="font-size:11px;color:${effortColor};font-weight:600">${effortLabel}</span>
+            <span style="font-size:11px;color:var(--n400)">${a.duration}</span>
+          </div>
+          <div style="font-size:11px;color:var(--n600);margin-top:4px;line-height:1.4">${a.benefit}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+          <span style="font-size:12px;font-weight:700;color:var(--axa)">${a.pts} pts</span>
+          ${sv(IC.arrow,'width:14px;height:14px;fill:var(--n300)')}
+        </div>
+      </div>`;
+  }
+
+  function doneRow(a) {
+    return `
+      <div style="background:var(--success-bg);border:1px solid var(--success-light);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;gap:10px">
+        <div style="width:24px;height:24px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${sv(IC.check,'width:12px;height:12px;fill:white')}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--success)">${a.title}</div>
+          <div style="font-size:11px;color:var(--success);opacity:.7">+${a.pts} pts gagnés</div>
+        </div>
+      </div>`;
+  }
+
+  const pts = window._ST.points || 0;
+
+  return `
+    <div style="background:var(--axa);padding:16px var(--sp5) 22px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:white')}
+        </button>
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55)">Prévention</div>
+          <div style="font-size:17px;font-weight:700;color:white">Mon plan d'action</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;flex-shrink:0">
+          <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.55)">pts gagnés</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:700;color:white">${doneA.length}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.55)">réalisée${doneA.length>1?'s':''}</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:700;color:white">${now.length+month.length}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.55)">à faire</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
+          <div style="font-size:16px;font-weight:700;color:white">${allA.reduce((s,a)=>s+a.pts,0)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.55)">pts disponibles</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+      ${now.length ? `
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--danger)"></div>
+            <div style="font-size:13px;font-weight:700;color:var(--n900)">À faire maintenant</div>
+            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${now.length} action${now.length>1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">${now.slice(0,3).map(actionRow).join('')}</div>
+        </div>` : ''}
+
+      ${month.length ? `
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--info-mid)"></div>
+            <div style="font-size:13px;font-weight:700;color:var(--n900)">Ce mois-ci</div>
+            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${month.length} action${month.length>1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">${month.slice(0,3).map(actionRow).join('')}</div>
+        </div>` : ''}
+
+      ${doneA.length ? `
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Déjà réalisées ✓</div>
+          <div style="display:flex;flex-direction:column;gap:6px">${doneA.slice(0,3).map(doneRow).join('')}</div>
+        </div>` : ''}
+
+      ${!now.length && !month.length ? `
+        <div style="text-align:center;padding:32px 16px">
+          <div style="font-size:40px;margin-bottom:12px">🎉</div>
+          <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:6px">Plan d'action complété !</div>
+          <div style="font-size:13px;color:var(--n500)">Toutes les actions ont été réalisées. Consultez vos récompenses.</div>
+        </div>` : ''}
+
+      <button onclick="goTo(6)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.bolt,'width:15px;height:15px;fill:var(--n700)')} Voir Actions & Défis
+      </button>
+    </div>
+    <div style="height:24px"></div>`;
+}
