@@ -24,6 +24,14 @@ const PROFILES = {
     condition: 'maison_rdc',
     hasGarden: true,
     tagline: 'Automne-hiver · Risques élevés détectés',
+    riskExposure: {
+      'inondation': { zoneLevel:'tres_eleve', canImprove:true  },
+      'tempete':    { zoneLevel:'eleve',      canImprove:true  },
+      'degat-eaux': { zoneLevel:'modere',     canImprove:true  },
+      'vol':        { zoneLevel:'faible',     canImprove:true  },
+      'incendie':   { zoneLevel:'faible',     canImprove:true  },
+      'rga':        { zoneLevel:'tres_faible',canImprove:false }
+    },
     contract: { name: 'MRH AXA Confort', ref: 'MRH-2024-78432' },
     localContext: {
       georisquesZone: 'Zone orange inondation (PPRI Loire-Atlantique)',
@@ -67,6 +75,14 @@ const PROFILES = {
     hasGarden: false,
     completedActions: ['incendie-detecteur-fumee'],
     tagline: 'Nouveau contrat · Plan de départ',
+    riskExposure: {
+      'vol':        { zoneLevel:'eleve',      canImprove:true  },
+      'degat-eaux': { zoneLevel:'modere',     canImprove:true  },
+      'incendie':   { zoneLevel:'modere',     canImprove:true  },
+      'inondation': { zoneLevel:'faible',     canImprove:false },
+      'tempete':    { zoneLevel:'tres_faible',canImprove:false },
+      'rga':        { zoneLevel:'tres_faible',canImprove:false }
+    },
     contract: { name: 'MRH AXA Essentiel', ref: 'MRH-2025-12089' },
     localContext: {
       georisquesZone: 'Zone urbaine dense — risque vol et DDE',
@@ -110,6 +126,14 @@ const PROFILES = {
     hasGarden: true,
     completedActions: ['incendie-detecteur-fumee','dde-goutieres'],
     tagline: 'Profil avancé · Risque RGA spécifique',
+    riskExposure: {
+      'rga':        { zoneLevel:'eleve',      canImprove:true  },
+      'incendie':   { zoneLevel:'modere',     canImprove:true  },
+      'degat-eaux': { zoneLevel:'modere',     canImprove:true  },
+      'vol':        { zoneLevel:'faible',     canImprove:true  },
+      'tempete':    { zoneLevel:'faible',     canImprove:false },
+      'inondation': { zoneLevel:'tres_faible',canImprove:false }
+    },
     contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2023-55214' },
     localContext: {
       georisquesZone: 'Zone argileuse (aléa fort à très fort) — secteur Lyon 3e',
@@ -153,6 +177,14 @@ const PROFILES = {
     hasGarden: false,
     completedActions: [],
     tagline: 'Nouvel achat · Copropriété · Score faible',
+    riskExposure: {
+      'degat-eaux': { zoneLevel:'eleve',      canImprove:true  },
+      'vol':        { zoneLevel:'modere',     canImprove:true  },
+      'incendie':   { zoneLevel:'modere',     canImprove:true  },
+      'tempete':    { zoneLevel:'modere',     canImprove:false },
+      'inondation': { zoneLevel:'faible',     canImprove:false },
+      'rga':        { zoneLevel:'tres_faible',canImprove:false }
+    },
     contract: { name: 'MRH AXA Confort', ref: 'MRH-2025-33871' },
     localContext: {
       georisquesZone: 'Zone urbaine — copropriété ancienne · faible risque naturel',
@@ -196,6 +228,14 @@ const PROFILES = {
     hasGarden: true,
     completedActions: ['incendie-detecteur-fumee'],
     tagline: 'Été · Risques feux et sécheresse',
+    riskExposure: {
+      'incendie':   { zoneLevel:'tres_eleve', canImprove:true  },
+      'rga':        { zoneLevel:'eleve',      canImprove:true  },
+      'tempete':    { zoneLevel:'eleve',      canImprove:true  },
+      'degat-eaux': { zoneLevel:'modere',     canImprove:true  },
+      'vol':        { zoneLevel:'faible',     canImprove:false },
+      'inondation': { zoneLevel:'faible',     canImprove:false }
+    },
     contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2024-90123' },
     localContext: {
       georisquesZone: 'Zone incendie PACA — feux de forêt · sol argileux (aléa fort)',
@@ -222,6 +262,16 @@ const PROFILES = {
     }
   }
 };
+
+/* ── NIVEAUX DE RISQUE V3 ── */
+const RISK_LEVELS = [
+  { id:'tres_eleve',  step:5, label:'Très élevé',  color:'danger',   hex:'#EF4444', bg:'#FEE2E2' },
+  { id:'eleve',       step:4, label:'Élevé',        color:'warn',     hex:'#F59E0B', bg:'#FEF3C7' },
+  { id:'modere',      step:3, label:'Modéré',       color:'info',     hex:'#3B82F6', bg:'#DBEAFE' },
+  { id:'faible',      step:2, label:'Faible',        color:'success',  hex:'#10B981', bg:'#D1FAE5' },
+  { id:'tres_faible', step:1, label:'Très faible',  color:'neutral',  hex:'#9CA3AF', bg:'#F3F4F6' }
+];
+const LEVEL_ORDER = ['tres_faible','faible','modere','eleve','tres_eleve'];
 
 /* ── RISQUES ── */
 const RISKS = {
@@ -781,4 +831,49 @@ function scoreLevel(score) {
   if (score < 45)  return { level: 'weak',    label: 'Faible',   color: 'danger' };
   if (score < 70)  return { level: 'average',  label: 'Modéré',   color: 'warn' };
   return               { level: 'good',    label: 'Bon',      color: 'success' };
+}
+
+/* ── HELPERS V3 ── */
+
+function getRiskLevelInfo(levelId) {
+  return RISK_LEVELS.find(l => l.id === levelId) || RISK_LEVELS[2];
+}
+
+function getRiskLevels(profile, diagAnswers) {
+  diagAnswers = diagAnswers || {};
+  const hasDiag = Object.keys(diagAnswers).length > 0;
+  const result = {};
+
+  Object.keys(RISKS).forEach(function(riskId) {
+    const base = (profile.riskExposure || {})[riskId] || { zoneLevel:'modere', canImprove:false };
+    let idx = LEVEL_ORDER.indexOf(base.zoneLevel);
+
+    if (hasDiag && base.canImprove) {
+      const relatedQs = ALL_QUESTIONS.filter(function(q) { return q.riskId === riskId; });
+      const yesCount  = relatedQs.filter(function(q) { return diagAnswers[q.id] === 'yes'; }).length;
+      const noCount   = relatedQs.filter(function(q) { return diagAnswers[q.id] === 'no'; }).length;
+      if (yesCount >= 2) idx = Math.max(0, idx - 1);
+      if (noCount  >= 2) idx = Math.min(4, idx + 1);
+    }
+
+    const adjLevel = LEVEL_ORDER[idx];
+    result[riskId] = {
+      riskId,
+      zoneLevel:         base.zoneLevel,
+      homeAdjustedLevel: adjLevel,
+      improved:  hasDiag && idx < LEVEL_ORDER.indexOf(base.zoneLevel),
+      degraded:  hasDiag && idx > LEVEL_ORDER.indexOf(base.zoneLevel),
+      hasDiagnosticData: hasDiag,
+      levelInfo: getRiskLevelInfo(adjLevel)
+    };
+  });
+  return result;
+}
+
+function computePoints(profile, completedIds) {
+  const done = profile.completedActions || [];
+  const newlyDone = (completedIds || []).filter(function(id) { return !done.includes(id); });
+  return ALL_ACTIONS
+    .filter(function(a) { return newlyDone.includes(a.id); })
+    .reduce(function(s, a) { return s + a.pts; }, 0);
 }
