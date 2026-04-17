@@ -14,8 +14,19 @@ window._ST = {
   points:           0,
   selectedAction:   null,
   selectedRisk:     null,
-  proofUploaded:    {}
+  proofUploaded:    {},
+  hubTab:           'risques',
+  diagHistory:      []
 };
+
+function switchHubTab(tab) {
+  if (tab === 'actions' && !window._ST.diagCompleted) {
+    showToast('🔒 Terminez d\'abord votre diagnostic', 'warn');
+    return;
+  }
+  window._ST.hubTab = tab;
+  render(1);
+}
 
 /* ── RENDER ── */
 function render(idx) {
@@ -51,6 +62,11 @@ function goTo(idx) {
   if (idx === 3) {
     showLoadingThen(() => {
       window._ST.diagCompleted = true;
+      if (!Array.isArray(window._ST.diagHistory)) window._ST.diagHistory = [];
+      window._ST.diagHistory.push({
+        date: new Date().toISOString(),
+        answers: { ...window._ST.diagAnswers }
+      });
       render(3); updateNav(3); updateTabBar(3);
     });
     return;
@@ -170,8 +186,20 @@ function selectProfile(id) {
   window._ST.proofUploaded  = {};
   window._ST.selectedRisk   = null;
   window._ST.selectedAction = null;
+  window._ST.hubTab         = 'risques';
+  window._ST.diagHistory    = [];
   render(0);
   updateNav(0);
+}
+
+function restartDiagnostic() {
+  const p = getProfile(window._ST.profileId);
+  window._ST.questions   = getQuestionsForProfile(p);
+  window._ST.diagStep    = 0;
+  window._ST.diagAnswers = {};
+  render(2);
+  updateNav(2);
+  updateTabBar(2);
 }
 
 function startFromSelection() {
@@ -182,12 +210,16 @@ function startFromSelection() {
 /* ── DIAGNOSTIC ── */
 function selectDiagOpt(qid, val, el) {
   if (!window._ST.diagAnswers) window._ST.diagAnswers = {};
+  if (window._ST._diagAdvancing) return;
   window._ST.diagAnswers[qid] = val;
   const opts = el.closest('.option-list');
   if (opts) opts.querySelectorAll('.opt-item').forEach(o => o.classList.remove('sel'));
   el.classList.add('sel');
-  const nextBtn = document.getElementById('diagNextBtn');
-  if (nextBtn) { nextBtn.disabled = false; nextBtn.style.opacity = '1'; }
+  window._ST._diagAdvancing = true;
+  setTimeout(() => {
+    window._ST._diagAdvancing = false;
+    diagNext();
+  }, 280);
 }
 
 function diagNext() {

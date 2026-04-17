@@ -1,17 +1,27 @@
+#!/usr/bin/env bash
+# Build self-contained preview.html bundle from index.html + css/ + js/
+set -e
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+OUT="$ROOT/preview.html"
+
+{
+  cat <<'HEAD'
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Coach Prévention MRH — AXA</title>
+  <title>Coach Prévention MRH V3 — Preview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/screens.css">
-  <link rel="stylesheet" href="css/animations.css">
+  <style>
+HEAD
+  cat css/tokens.css css/base.css css/components.css css/screens.css css/animations.css
+  cat <<'MIDH'
+  </style>
 </head>
 <body>
   <div class="app-stage">
@@ -34,8 +44,6 @@
         </div>
       </div>
       <div class="screen-wrap" id="app"></div>
-
-      <!-- TAB BAR V2 style — hidden on S0, shown on S1+ -->
       <nav class="tab-bar" id="tabBar" aria-label="Navigation principale">
         <div class="tab-main">
           <button class="tab-item" data-tab="accueil" onclick="tabMock('Accueil')" aria-label="Accueil">
@@ -85,8 +93,14 @@
       <button class="step-btn" data-step="9" onclick="goTo(9)"><span class="step-num">10</span><span class="step-lbl">Historique</span></button>
     </nav>
   </div>
-  <script src="js/data.js"></script>
-  <script src="js/screens.js"></script>
-  <script src="js/app.js"></script>
+  <script>
+MIDH
+  cat js/data.js js/screens.js js/app.js
+  cat <<'FOOT'
+  </script>
 </body>
 </html>
+FOOT
+} > "$OUT"
+
+echo "Built: $OUT ($(wc -l < "$OUT") lines, $(wc -c < "$OUT") bytes)"
