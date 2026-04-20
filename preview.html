@@ -3886,7 +3886,7 @@ function screenHub() {
         <button onclick="switchHubTab('risques')" style="flex:1;padding:9px 14px;background:${tab==='risques'?'var(--white)':'transparent'};color:${tab==='risques'?'var(--axa)':'var(--n500)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:${tab==='risques'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
           Mes risques
         </button>
-        <button onclick="${diagDone?`goTo(6)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" style="flex:1;padding:9px 14px;background:transparent;color:${diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+        <button onclick="switchHubTab('actions')" style="flex:1;padding:9px 14px;background:${tab==='actions'?'var(--white)':'transparent'};color:${tab==='actions'?'var(--axa)':(diagDone?'var(--n500)':'var(--n400)')};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:${tab==='actions'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
           Mes Actions
           ${!diagDone ? `<span style="font-size:11px">🔒</span>` : todoCount > 0 ? `<span style="background:var(--axa);color:white;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700">${todoCount}</span>` : ''}
         </button>
@@ -4060,29 +4060,89 @@ function hubActionsTab(p, diagDone) {
   const allA  = getActionsForProfile(p, window._ST.diagAnswers);
   const todo  = allA.filter(a => !done.includes(a.id));
   const doneA = allA.filter(a => done.includes(a.id));
-  const now   = todo.filter(a => a.horizon === 'now');
-  const month = todo.filter(a => a.horizon === 'this_month');
   const pts   = window._ST.points || 0;
-  const ptsDispo = todo.reduce((s, a) => s + a.pts, 0);
+  const ptsDone  = doneA.reduce((s, a) => s + a.pts, 0);
+  const ptsTotal = allA.reduce((s, a) => s + a.pts, 0);
+  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
 
-  function actionRow(a) {
-    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
+  /* Actions groupées par risque principal (todo uniquement pour les cartes ouvrables) */
+  const actionsByRisk = {};
+  p.mainRisks.forEach(r => actionsByRisk[r] = []);
+  todo.forEach(a => { if (actionsByRisk[a.riskId] !== undefined) actionsByRisk[a.riskId].push(a); });
+
+  /* Défi du moment actif */
+  const today = new Date().toISOString().slice(0,10);
+  const activeDefi = (typeof DEFIS_DU_MOMENT !== 'undefined')
+    ? DEFIS_DU_MOMENT.find(d => d.expiresAt > today && !(window._ST.completedDefis||[]).includes(d.id))
+    : null;
+
+  function categoryCard(riskId) {
+    const risk  = RISKS[riskId] || {};
+    const cv    = (typeof RISK_CATEGORY_VERBS !== 'undefined' && RISK_CATEGORY_VERBS[riskId]) || { verb: 'Agir', phrase: '' };
+    const acts  = actionsByRisk[riskId] || [];
+    const ptsCat = acts.reduce((s,a)=>s+a.pts,0);
+    const isDone = acts.length === 0;
+    const levelColor = risk.level==='high' ? 'var(--danger)' : risk.level==='medium' ? 'var(--warn)' : 'var(--success)';
     return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
-        <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${RISKS[a.riskId]?.icon||'⚡'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-          <div style="font-size:11px;color:var(--n500);margin-top:2px">${a.riskLabel} · ${effortLabel} · ${a.duration}</div>
-        </div>
-        <div style="flex-shrink:0;text-align:right">
-          <div style="font-size:13px;font-weight:700;color:var(--axa)">+${a.pts}</div>
-          <div style="font-size:10px;color:var(--n400)">pts</div>
+      <div onclick="${isDone ? '' : `openCategoryModal('${riskId}')`}"
+           style="background:var(--white);border:1.5px solid ${isDone?'var(--success-light, #d4f4e1)':'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:${isDone?'default':'pointer'};position:relative">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="width:40px;height:40px;border-radius:10px;background:${isDone?'var(--success-light, #d4f4e1)':'var(--axa-xlight)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${risk.icon || '⚡'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:12px;font-weight:700;color:${isDone?'var(--success)':'var(--n900)'}">${cv.verb} — ${risk.label || riskId}</div>
+              ${isDone ? '<span style="font-size:10px;background:var(--success);color:white;border-radius:99px;padding:1px 7px">✓ Fait</span>' : `<div style="width:7px;height:7px;border-radius:50%;background:${levelColor};flex-shrink:0"></div>`}
+            </div>
+            <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
+            ${isDone
+              ? '<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉</div>'
+              : `<div style="font-size:10px;color:var(--n400);margin-top:4px">${acts.length} action${acts.length>1?'s':''} · +${ptsCat} pts</div>`}
+          </div>
+          ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
         </div>
       </div>`;
   }
 
+  function defiHeroCard(d) {
+    const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
+    return `
+      <div onclick="openDefi('${d.id}')"
+           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:1.5px solid #d4a017;border-radius:var(--r-md);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-8px;top:-8px;font-size:44px;opacity:.1">${d.icon}</div>
+        <div style="display:flex;align-items:center;gap:10px;position:relative">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(251,191,36,.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${d.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px">🔥 Défi · ${d.period}</div>
+            <div style="font-size:13px;font-weight:700;color:white;line-height:1.25">${d.title}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,.55);margin-top:3px">${d.lotIcon} ${d.lot} · 🕐 ${daysLeft}j</div>
+          </div>
+          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:5px 9px;font-size:12px;font-weight:700;flex-shrink:0">+${d.pts}</div>
+        </div>
+      </div>`;
+  }
+
+  const boosts = [
+    { icon:'🔄', title:'Refaire mon diagnostic', sub:'Mettre à jour mon score', pts:10, onclick:'goTo(2)' },
+    { icon:'📸', title:'Ajouter une photo de mon logement', sub:'Inventaire visuel pour l\'assureur', pts:20, onclick:"showToast('Bientôt disponible','info')" },
+    { icon:'👥', title:'Inviter un proche', sub:'Partagez votre Coach Prévention', pts:30, onclick:"showToast('Bientôt disponible','info')" },
+    { icon:'📝', title:'Compléter mon profil', sub:'Ajoutez les détails de votre logement', pts:15, onclick:'goTo(0)' }
+  ];
+
+  function boostRow(b) {
+    return `
+      <div onclick="${b.onclick}" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100);cursor:pointer">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${b.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--n900)">${b.title}</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:1px">${b.sub}</div>
+        </div>
+        <div style="background:var(--axa-xlight);color:var(--axa);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0">+${b.pts} pts</div>
+        <div style="color:var(--n300);font-size:16px">›</div>
+      </div>`;
+  }
+
   return `
-    <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:16px">
+    <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:18px">
 
       <div style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);border-radius:var(--r-md);padding:14px 16px;color:white">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -4095,50 +4155,65 @@ function hubActionsTab(p, diagDone) {
           </button>
         </div>
         <div style="height:5px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${Math.min(100, Math.round((doneA.length/Math.max(1, allA.length))*100))}%;background:var(--success-mid);border-radius:99px"></div>
+          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px"></div>
         </div>
-        <div style="font-size:10.5px;opacity:.7;margin-top:5px">${doneA.length} / ${allA.length} actions · ${ptsDispo} pts à gagner</div>
+        <div style="font-size:10.5px;opacity:.7;margin-top:5px">${doneA.length} / ${allA.length} actions · ${ptsTotal - ptsDone} pts à gagner</div>
       </div>
 
-      ${now.length ? `
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--danger)"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">À faire maintenant</div>
-            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${now.length}</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${now.map(actionRow).join('')}</div>
-        </div>` : ''}
+      ${activeDefi ? defiHeroCard(activeDefi) : ''}
 
-      ${month.length ? `
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--info-mid)"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Ce mois-ci</div>
-            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${month.length}</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${month.map(actionRow).join('')}</div>
-        </div>` : ''}
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
+        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Gagnez des points en sécurisant votre logement</div>
 
-      ${!todo.length ? `
-        <div style="text-align:center;padding:28px 16px;background:var(--success-bg);border-radius:var(--r-md)">
-          <div style="font-size:36px;margin-bottom:10px">🏆</div>
-          <div style="font-size:15px;font-weight:700;color:var(--success);margin-bottom:4px">Toutes les actions réalisées !</div>
-          <div style="font-size:12px;color:var(--n500)">Consultez vos récompenses.</div>
-        </div>` : ''}
+        <div onclick="showToast('Quiz bientôt disponible ! +5 pts','info')"
+             style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:28px">🧠</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:700;color:white">Quiz de la semaine</div>
+              <span style="font-size:9px;background:#fbbf24;color:#1a1a00;border-radius:99px;padding:1px 6px;font-weight:700">NOUVEAU</span>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
+          </div>
+          <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
+            <div style="font-size:13px;font-weight:700;color:white">+5</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${p.mainRisks.map(categoryCard).join('')}
+        </div>
+      </div>
 
       ${doneA.length > 0 ? `
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Déjà réalisées (${doneA.length})</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             ${doneA.map(a => `
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--success-bg);border:1px solid var(--success-light);border-radius:var(--r-md);opacity:.85">
-                <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0">${sv(IC.check,'width:11px;height:11px;fill:white')}</div>
-                <div style="flex:1;font-size:12px;font-weight:600;color:var(--success)">${a.title}</div>
-                <span style="font-size:11px;font-weight:700;color:var(--success)">+${a.pts} pts</span>
+              <div onclick="openAction('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--success-bg);border:1px solid var(--success-light);border-radius:var(--r-md);cursor:pointer">
+                <div style="width:22px;height:22px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0">${sv(IC.check,'width:12px;height:12px;fill:white')}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:12.5px;font-weight:600;color:var(--success);line-height:1.3">${a.title}</div>
+                  <div style="font-size:10.5px;color:var(--n500);margin-top:1px">${a.riskLabel}</div>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:var(--success);flex-shrink:0">+${a.pts} pts</span>
               </div>`).join('')}
           </div>
         </div>` : ''}
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Gagner plus de points</div>
+        <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
+          ${boosts.map(boostRow).join('')}
+        </div>
+      </div>
+
+      <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
+        ${pts > 0 ? `<span style="background:var(--axa);color:white;border-radius:99px;padding:1px 8px;font-size:11px">${pts} pts</span>` : ''}
+      </button>
     </div>`;
 }
 
@@ -4308,8 +4383,8 @@ function screenRisques() {
         </div>` : ''}
 
       <div style="display:flex;gap:10px">
-        <button onclick="goTo(5)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Mon plan d'action
+        <button onclick="window._ST.hubTab='actions';goTo(1)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Mes Actions
         </button>
         <button onclick="goTo(1)" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
           Retour
@@ -4414,121 +4489,9 @@ function screenDeepDive() {
    S5 — V3-05 PLAN D'ACTION
 ════════════════════════════════════════════ */
 function screenPlan() {
-  const p     = getProfile(window._ST.profileId);
-  const done  = window._ST.completedActions || [];
-  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
-  const now   = allA.filter(a => a.horizon==='now'   && !done.includes(a.id));
-  const month = allA.filter(a => a.horizon==='this_month' && !done.includes(a.id));
-  const doneA = allA.filter(a => done.includes(a.id));
-
-  function actionRow(a) {
-    const effortColor = a.effort==='low'?'var(--success)':a.effort==='medium'?'var(--warn)':'var(--danger)';
-    const effortLabel = a.effort==='low'?'Facile':a.effort==='medium'?'Moyen':'Avancé';
-    return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px">
-        <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon||'⚡'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap">
-            <span style="font-size:11px;color:var(--n500)">${a.riskLabel}</span>
-            <span style="font-size:11px;color:${effortColor};font-weight:600">${effortLabel}</span>
-            <span style="font-size:11px;color:var(--n400)">${a.duration}</span>
-          </div>
-          <div style="font-size:11px;color:var(--n600);margin-top:4px;line-height:1.4">${a.benefit}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-          <span style="font-size:12px;font-weight:700;color:var(--axa)">${a.pts} pts</span>
-          ${sv(IC.arrow,'width:14px;height:14px;fill:var(--n300)')}
-        </div>
-      </div>`;
-  }
-
-  function doneRow(a) {
-    return `
-      <div style="background:var(--success-bg);border:1px solid var(--success-light);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;gap:10px">
-        <div style="width:24px;height:24px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          ${sv(IC.check,'width:12px;height:12px;fill:white')}
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;color:var(--success)">${a.title}</div>
-          <div style="font-size:11px;color:var(--success);opacity:.7">+${a.pts} pts gagnés</div>
-        </div>
-      </div>`;
-  }
-
-  const pts = window._ST.points || 0;
-
-  return `
-    <div style="background:var(--axa);padding:16px var(--sp5) 22px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
-          ${sv(IC.back,'width:18px;height:18px;fill:white')}
-        </button>
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.55)">Prévention</div>
-          <div style="font-size:17px;font-weight:700;color:white">Mon plan d'action</div>
-        </div>
-        <div style="margin-left:auto;text-align:right;flex-shrink:0">
-          <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.55)">pts gagnés</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px">
-        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
-          <div style="font-size:16px;font-weight:700;color:white">${doneA.length}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.55)">réalisée${doneA.length>1?'s':''}</div>
-        </div>
-        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
-          <div style="font-size:16px;font-weight:700;color:white">${now.length+month.length}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.55)">à faire</div>
-        </div>
-        <div style="flex:1;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center">
-          <div style="font-size:16px;font-weight:700;color:white">${allA.reduce((s,a)=>s+a.pts,0)}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.55)">pts disponibles</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
-
-      ${now.length ? `
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--danger)"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">À faire maintenant</div>
-            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${now.length} action${now.length>1?'s':''}</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${now.slice(0,3).map(actionRow).join('')}</div>
-        </div>` : ''}
-
-      ${month.length ? `
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--info-mid)"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Ce mois-ci</div>
-            <span style="margin-left:auto;font-size:11px;color:var(--n400)">${month.length} action${month.length>1?'s':''}</span>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${month.slice(0,3).map(actionRow).join('')}</div>
-        </div>` : ''}
-
-      ${doneA.length ? `
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Déjà réalisées ✓</div>
-          <div style="display:flex;flex-direction:column;gap:6px">${doneA.slice(0,3).map(doneRow).join('')}</div>
-        </div>` : ''}
-
-      ${!now.length && !month.length ? `
-        <div style="text-align:center;padding:32px 16px">
-          <div style="font-size:40px;margin-bottom:12px">🎉</div>
-          <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:6px">Plan d'action complété !</div>
-          <div style="font-size:13px;color:var(--n500)">Toutes les actions ont été réalisées. Consultez vos récompenses.</div>
-        </div>` : ''}
-
-      <button onclick="goTo(6)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.bolt,'width:15px;height:15px;fill:var(--n700)')} Voir Actions & Défis
-      </button>
-    </div>
-    <div style="height:24px"></div>`;
+  window._ST.hubTab = 'actions';
+  setTimeout(() => goTo(1), 0);
+  return `<div style="padding:24px;text-align:center;color:var(--n500);font-size:13px">Redirection vers Mes Actions…</div>`;
 }
 
 /* ════════════════════════════════════════════
@@ -4609,169 +4572,9 @@ function openDefi(id) {
 }
 
 function screenActions() {
-  const p     = getProfile(window._ST.profileId);
-  const done  = window._ST.completedActions || [];
-  const pts   = window._ST.points || 0;
-  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
-  const todo  = allA.filter(a => !done.includes(a.id));
-  const doneA = allA.filter(a => done.includes(a.id));
-  const ptsDone     = doneA.reduce((s, a) => s + a.pts, 0);
-  const ptsTotal    = allA.reduce((s, a) => s + a.pts, 0);
-  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
-
-  /* Actions groupées par risque principal */
-  const actionsByRisk = {};
-  p.mainRisks.forEach(r => actionsByRisk[r] = []);
-  todo.forEach(a => { if (actionsByRisk[a.riskId] !== undefined) actionsByRisk[a.riskId].push(a); });
-
-  /* Défi du moment actif */
-  const today = new Date().toISOString().slice(0,10);
-  const activeDefi = (typeof DEFIS_DU_MOMENT !== 'undefined')
-    ? DEFIS_DU_MOMENT.find(d => d.expiresAt > today && !(window._ST.completedDefis||[]).includes(d.id))
-    : null;
-
-  function categoryCard(riskId) {
-    const risk  = RISKS[riskId] || {};
-    const cv    = RISK_CATEGORY_VERBS[riskId] || { verb: 'Agir', phrase: '' };
-    const acts  = actionsByRisk[riskId] || [];
-    const ptsCat = acts.reduce((s,a)=>s+a.pts,0);
-    const isDone = acts.length === 0;
-    const levelColor = risk.level==='high' ? 'var(--danger)' : risk.level==='medium' ? 'var(--warn)' : 'var(--success)';
-    return `
-      <div onclick="${isDone ? '' : `openCategoryModal('${riskId}')`}"
-           style="background:var(--white);border:1.5px solid ${isDone?'var(--success-light, #d4f4e1)':'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:${isDone?'default':'pointer'};position:relative">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div style="width:40px;height:40px;border-radius:10px;background:${isDone?'var(--success-light, #d4f4e1)':'var(--axa-xlight)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${risk.icon || '⚡'}</div>
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-              <div style="font-size:12px;font-weight:700;color:${isDone?'var(--success)':'var(--n900)'}">${cv.verb} — ${risk.label || riskId}</div>
-              ${isDone ? '<span style="font-size:10px;background:var(--success);color:white;border-radius:99px;padding:1px 7px">✓ Fait</span>' : `<div style="width:7px;height:7px;border-radius:50%;background:${levelColor};flex-shrink:0"></div>`}
-            </div>
-            <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
-            ${isDone
-              ? '<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉</div>'
-              : `<div style="font-size:10px;color:var(--n400);margin-top:4px">${acts.length} action${acts.length>1?'s':''} · +${ptsCat} pts</div>`}
-          </div>
-          ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
-        </div>
-      </div>`;
-  }
-
-  /* Défi hero card — compact */
-  function defiHeroCard(d) {
-    const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
-    return `
-      <div onclick="openDefi('${d.id}')"
-           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:1.5px solid #d4a017;border-radius:var(--r-md);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden">
-        <div style="position:absolute;right:-8px;top:-8px;font-size:44px;opacity:.1">${d.icon}</div>
-        <div style="display:flex;align-items:center;gap:10px;position:relative">
-          <div style="width:40px;height:40px;border-radius:10px;background:rgba(251,191,36,.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${d.icon}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:9px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px">🔥 Défi · ${d.period}</div>
-            <div style="font-size:13px;font-weight:700;color:white;line-height:1.25">${d.title}</div>
-            <div style="font-size:10.5px;color:rgba(255,255,255,.55);margin-top:3px">${d.lotIcon} ${d.lot} · 🕐 ${daysLeft}j</div>
-          </div>
-          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:5px 9px;font-size:12px;font-weight:700;flex-shrink:0">+${d.pts}</div>
-        </div>
-      </div>`;
-  }
-
-  /* Items boost "Gagner plus de points" */
-  const diagDone = !!window._ST.diagCompleted;
-  const boosts = [
-    diagDone
-      ? { icon:'🔄', title:'Refaire mon diagnostic', sub:'Mettre à jour mon score', pts:10, onclick:'goTo(2)' }
-      : { icon:'🩺', title:'Faire mon diagnostic Prévention', sub:'5 min · personnalise vos actions', pts:50, onclick:'goTo(2)' },
-    { icon:'📸', title:'Ajouter une photo de mon logement', sub:'Inventaire visuel pour l\'assureur', pts:20, onclick:"alert('Bientôt disponible')" },
-    { icon:'👥', title:'Inviter un proche', sub:'Partagez votre Coach Prévention', pts:30, onclick:"alert('Bientôt disponible')" },
-    { icon:'📝', title:'Compléter mon profil', sub:'Ajoutez les détails de votre logement', pts:15, onclick:'goTo(0)' }
-  ];
-
-  function boostRow(b) {
-    return `
-      <div onclick="${b.onclick}" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100);cursor:pointer">
-        <div style="width:38px;height:38px;border-radius:50%;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${b.icon}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--n900)">${b.title}</div>
-          <div style="font-size:11px;color:var(--n500);margin-top:1px">${b.sub}</div>
-        </div>
-        <div style="background:var(--axa-xlight);color:var(--axa);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0">+${b.pts} pts</div>
-        <div style="color:var(--n300);font-size:16px">›</div>
-      </div>`;
-  }
-
-  return `
-    <div style="background:var(--axa);padding:18px var(--sp5) 22px;position:relative;overflow:hidden">
-      <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
-          ${sv(IC.back,'width:18px;height:18px;fill:white')}
-        </button>
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
-          <div style="font-size:17px;font-weight:700;color:white">Mes Actions</div>
-        </div>
-        <div style="margin-left:auto;flex-shrink:0">
-          <div onclick="goTo(8)" style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer">
-            <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:10px 12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:11px;color:rgba(255,255,255,.7)">${ptsDone} pts gagnés</span>
-          <span style="font-size:11px;color:rgba(255,255,255,.5)">${ptsTotal - ptsDone} pts disponibles</span>
-        </div>
-        <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s ease"></div>
-        </div>
-        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;text-align:center">${doneA.length} action${doneA.length>1?'s':''} réalisée${doneA.length>1?'s':''} · ${todo.length} restante${todo.length>1?'s':''}</div>
-      </div>
-    </div>
-
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:20px">
-
-      ${activeDefi ? defiHeroCard(activeDefi) : ''}
-
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
-        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Gagnez des points en sécurisant votre logement</div>
-
-        <div onclick="alert('Quiz bientôt disponible ! +20 pts')"
-             style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
-          <div style="font-size:28px">🧠</div>
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-              <div style="font-size:13px;font-weight:700;color:white">Quiz de la semaine</div>
-              <span style="font-size:9px;background:#fbbf24;color:#1a1a00;border-radius:99px;padding:1px 6px;font-weight:700">NOUVEAU</span>
-            </div>
-            <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
-          </div>
-          <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:13px;font-weight:700;color:white">+5</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${p.mainRisks.map(categoryCard).join('')}
-        </div>
-      </div>
-
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Gagner plus de points</div>
-        <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
-          ${boosts.map(boostRow).join('')}
-        </div>
-      </div>
-
-      <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
-        ${pts > 0 ? `<span style="background:var(--axa);color:white;border-radius:99px;padding:1px 8px;font-size:11px">${pts} pts</span>` : ''}
-      </button>
-    </div>
-    <div style="height:24px"></div>`;
+  window._ST.hubTab = 'actions';
+  setTimeout(() => goTo(1), 0);
+  return `<div style="padding:24px;text-align:center;color:var(--n500);font-size:13px">Redirection vers Mes Actions…</div>`;
 }
 
 /* ════════════════════════════════════════════
@@ -4797,7 +4600,7 @@ function screenDetailAction() {
         <div style="background:linear-gradient(135deg,#00008F,#1a1aaa);padding:16px var(--sp5) 22px;position:relative;overflow:hidden">
           <div style="position:absolute;right:-16px;top:-16px;font-size:80px;opacity:.08">${d.icon}</div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-            <button onclick="goTo(6)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+            <button onclick="window._ST.hubTab='actions';goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
               ${sv(IC.back,'width:18px;height:18px;fill:white')}
             </button>
             <div style="font-size:11px;color:rgba(255,255,255,.6)">Défi du moment</div>
@@ -4849,7 +4652,7 @@ function screenDetailAction() {
   const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
   const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
   const risk = RISKS[a.riskId] || {};
-  const fromScreen = window._ST.diagCompleted ? 5 : 6;
+  const backAction = "window._ST.hubTab='actions';goTo(1)";
 
   const stepsHtml = (a.steps||[]).map((s,i) =>
     `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;${i<a.steps.length-1?'border-bottom:1px solid var(--n100)':''}">
@@ -4868,7 +4671,7 @@ function screenDetailAction() {
   return `
     <div style="background:${isDone?'var(--success)':'var(--axa)'};padding:16px var(--sp5) 22px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button onclick="goTo(${fromScreen})" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+        <button onclick="${backAction}" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
           ${sv(IC.back,'width:18px;height:18px;fill:white')}
         </button>
         <div style="font-size:11px;color:rgba(255,255,255,.6)">Détail de l'action</div>
@@ -4955,8 +4758,8 @@ function screenDetailAction() {
            </button>`
       }
 
-      <button onclick="goTo(${fromScreen})" style="width:100%;padding:12px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer">
-        Retour au plan
+      <button onclick="${backAction}" style="width:100%;padding:12px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer">
+        ← Mes Actions
       </button>
     </div>
     <div style="height:24px"></div>`;
