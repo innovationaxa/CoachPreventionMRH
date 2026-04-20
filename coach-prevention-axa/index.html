@@ -35,18 +35,18 @@
       </div>
       <div class="screen-wrap" id="app"></div>
 
-      <!-- TAB BAR — hidden on S0/S1, shown on S2+ -->
+      <!-- TAB BAR V2 style — hidden on S0, shown on S1+ -->
       <nav class="tab-bar" id="tabBar" aria-label="Navigation principale">
         <div class="tab-main">
-          <button class="tab-item" data-tab="accueil" onclick="goTo(9)" aria-label="Accueil">
+          <button class="tab-item" data-tab="accueil" onclick="tabMock('Accueil')" aria-label="Accueil">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span class="tab-label">Accueil</span>
           </button>
-          <button class="tab-item" data-tab="contacts" onclick="tabMock('Contacts')" aria-label="Contacts">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-            <span class="tab-label">Contacts</span>
+          <button class="tab-item" data-tab="contrats" onclick="tabMock('Mes contrats')" aria-label="Mes contrats">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <span class="tab-label">Contrats</span>
           </button>
-          <button class="tab-item" data-tab="prevention" onclick="goTo(9)" aria-label="Prévention">
+          <button class="tab-item" data-tab="prevention" onclick="goTo(1)" aria-label="Coach Prévention">
             <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
             <span class="tab-label">Prévention</span>
           </button>
@@ -66,23 +66,23 @@
     <nav class="step-nav" id="stepNav" aria-label="Étapes">
       <button class="step-btn active" data-step="0" onclick="goTo(0)"><span class="step-num">1</span><span class="step-lbl">Profil</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="1" onclick="goTo(1)"><span class="step-num">2</span><span class="step-lbl">Accueil</span></button>
+      <button class="step-btn" data-step="1" onclick="goTo(1)"><span class="step-num">2</span><span class="step-lbl">Hub</span></button>
       <div class="step-sep"></div>
       <button class="step-btn" data-step="2" onclick="goTo(2)"><span class="step-num">3</span><span class="step-lbl">Diagnostic</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="3" onclick="goTo(3)"><span class="step-num">4</span><span class="step-lbl">Score</span></button>
+      <button class="step-btn" data-step="3" onclick="goTo(3)"><span class="step-num">4</span><span class="step-lbl">Risques</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="4" onclick="goTo(4)"><span class="step-num">5</span><span class="step-lbl">Risques</span></button>
+      <button class="step-btn" data-step="4" onclick="goTo(4)"><span class="step-num">5</span><span class="step-lbl">Deep dive</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="5" onclick="goTo(5)"><span class="step-num">6</span><span class="step-lbl">Actions</span></button>
+      <button class="step-btn" data-step="5" onclick="goTo(5)"><span class="step-num">6</span><span class="step-lbl">Plan</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="6" onclick="goTo(6)"><span class="step-num">7</span><span class="step-lbl">Détail</span></button>
+      <button class="step-btn" data-step="6" onclick="goTo(6)"><span class="step-num">7</span><span class="step-lbl">Actions</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="7" onclick="goTo(7)"><span class="step-num">8</span><span class="step-lbl">Succès</span></button>
+      <button class="step-btn" data-step="7" onclick="goTo(7)"><span class="step-num">8</span><span class="step-lbl">Détail</span></button>
       <div class="step-sep"></div>
       <button class="step-btn" data-step="8" onclick="goTo(8)"><span class="step-num">9</span><span class="step-lbl">Rewards</span></button>
       <div class="step-sep"></div>
-      <button class="step-btn" data-step="9" onclick="goTo(9)"><span class="step-num">10</span><span class="step-lbl">Suivi</span></button>
+      <button class="step-btn" data-step="9" onclick="goTo(9)"><span class="step-num">10</span><span class="step-lbl">Historique</span></button>
     </nav>
   </div>
   <script src="js/data.js"></script>
