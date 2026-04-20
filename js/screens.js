@@ -601,54 +601,32 @@ function screenDeepDive() {
   const lc     = p.localContext || {};
   const stats  = (lc.sinistresStats||{})[riskId];
   const testi  = lc.testimonial;
-  const svcs   = (SERVICES_BY_RISK[riskId]||[]).slice(0,2);
-  const tutos  = (TUTORIALS_BY_RISK[riskId]||[]).slice(0,2);
-
-  /* Risk actions for this risk */
-  const riskActions = getActionsForProfile(p, window._ST.diagAnswers)
-    .filter(a => a.riskId === riskId)
-    .slice(0,3);
 
   const covIcon  = cov.status==='covered'?'✓':cov.status==='partial'?'◑':'✗';
   const covLabel = cov.status==='covered'?'Couvert':cov.status==='partial'?'Couverture partielle':'Non applicable';
   const covColor = cov.status==='covered'?'var(--success)':cov.status==='partial'?'var(--warn)':'var(--n500)';
 
-  const actionItems = riskActions.map(a =>
-    `<div onclick="openAction('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--n150);border-radius:var(--r-sm);cursor:pointer">
-      <div style="width:28px;height:28px;border-radius:50%;background:var(--axa-light);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        ${sv(IC.bolt,'width:13px;height:13px;fill:var(--axa)')}
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--n900)">${a.title}</div>
-        <div style="font-size:11px;color:var(--n500);margin-top:1px">${a.duration} · ${a.pts} pts</div>
-      </div>
-      ${sv(IC.arrow,'width:14px;height:14px;fill:var(--n300);flex-shrink:0')}
-    </div>`
-  ).join('');
-
-  const serviceItems = svcs.map(s =>
-    `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--n150);border-radius:var(--r-sm)">
-      <div style="font-size:20px">${s.logo}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--n900)">${s.label}</div>
-        <div style="font-size:10px;color:var(--n500)">${s.tag}</div>
-      </div>
-      <span style="font-size:11px;color:var(--axa);font-weight:600;flex-shrink:0">${s.cta}</span>
-    </div>`
-  ).join('');
-
   return `
-    <div style="background:${li.bg};padding:18px var(--sp5) 22px;position:relative">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
-          ${sv(IC.back,'width:18px;height:18px;fill:'+li.hex)}
+    <div style="background:var(--axa);padding:18px var(--sp5) 22px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;position:relative">
+        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:2px">
+          ${sv(IC.back,'width:18px;height:18px;fill:white')}
         </button>
-        <div style="font-size:11px;color:${li.hex};font-weight:600;opacity:.7">Analyse détaillée</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:52px;height:52px;border-radius:var(--r-md);background:white;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:var(--shadow-sm)">${r.icon}</div>
         <div>
-          <div style="font-size:20px;font-weight:700;color:${li.hex};line-height:1.2">${r.label}</div>
+          <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px">Coach Prévention</div>
+          <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:3px 10px 3px 7px">
+            <span style="font-size:13px;line-height:1">🏠</span>
+            <span style="font-size:11px;font-weight:700;color:white;letter-spacing:.3px">Habitation</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;position:relative">
+        <div style="width:52px;height:52px;border-radius:var(--r-md);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${r.icon}</div>
+        <div>
+          <div style="font-size:19px;font-weight:700;color:white;line-height:1.2">${r.label}</div>
           <div style="margin-top:6px;display:flex;align-items:center;gap:8px">
             ${levelChip(li.id)}
             ${levelBar(li.id)}
@@ -657,28 +635,18 @@ function screenDeepDive() {
       </div>
     </div>
 
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:20px">
 
-      <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Pourquoi ce niveau ?</div>
-        <p style="font-size:13px;color:var(--n700);line-height:1.55;margin:0">${r.explanation}</p>
-        ${stats ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n100);font-size:12px;color:var(--n600);display:flex;gap:6px;align-items:flex-start">
-          ${sv(IC.info,'width:13px;height:13px;fill:var(--n400);flex-shrink:0;margin-top:1px')}
-          <span>${stats.stat} <span style="color:var(--n400)">(${stats.source})</span></span>
-        </div>` : ''}
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Pourquoi ce niveau ?</div>
+        <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+          <p style="font-size:13px;color:var(--n700);line-height:1.55;margin:0">${r.explanation}</p>
+          ${stats ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--n100);font-size:12px;color:var(--n600);display:flex;gap:6px;align-items:flex-start">
+            ${sv(IC.info,'width:13px;height:13px;fill:var(--n400);flex-shrink:0;margin-top:1px')}
+            <span>${stats.stat} <span style="color:var(--n400)">(${stats.source})</span></span>
+          </div>` : ''}
+        </div>
       </div>
-
-      ${cov.status ? `
-        <div style="background:var(--n50);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
-          <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Votre couverture AXA</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <span style="font-size:18px;color:${covColor};font-weight:700">${covIcon}</span>
-            <span style="font-size:14px;font-weight:700;color:${covColor}">${covLabel}</span>
-            ${cov.limit ? `<span style="font-size:12px;color:var(--n500);margin-left:auto">Plafond ${cov.limit}</span>` : ''}
-          </div>
-          ${cov.franchise ? `<div style="font-size:12px;color:var(--n600)">Franchise : ${cov.franchise}</div>` : ''}
-          ${cov.note ? `<div style="margin-top:8px;font-size:11px;color:var(--n500);line-height:1.5;border-top:1px solid var(--n150);padding-top:8px">${cov.note}</div>` : ''}
-        </div>` : ''}
 
       ${testi ? `
         <div style="background:var(--warn-bg);border-left:3px solid var(--warn-mid);border-radius:0 var(--r-md) var(--r-md) 0;padding:12px 14px">
@@ -687,26 +655,25 @@ function screenDeepDive() {
           <div style="font-size:10px;color:var(--n400);margin-top:6px">${testi.source}</div>
         </div>` : ''}
 
-      ${riskActions.length ? `
+      ${cov.status ? `
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Actions recommandées</div>
-          <div style="display:flex;flex-direction:column;gap:8px">${actionItems}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Votre couverture AXA</div>
+          <div style="background:var(--white);border:2px solid ${covColor};border-radius:var(--r-md);padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.07)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:${cov.franchise||cov.note?'12px':'0'}">
+              <div style="width:40px;height:40px;border-radius:50%;background:${cov.status==='covered'?'var(--success-bg)':cov.status==='partial'?'var(--warn-bg)':'var(--n100)'};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:${covColor};flex-shrink:0">${covIcon}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;font-weight:700;color:${covColor}">${covLabel}</div>
+                ${cov.limit ? `<div style="font-size:12px;color:var(--n500);margin-top:2px">Plafond ${cov.limit}</div>` : ''}
+              </div>
+            </div>
+            ${cov.franchise ? `<div style="padding-top:10px;border-top:1px solid var(--n100);font-size:12px;color:var(--n600)">Franchise : <strong>${cov.franchise}</strong></div>` : ''}
+            ${cov.note ? `<div style="margin-top:8px;font-size:11px;color:var(--n500);line-height:1.5;${cov.franchise?'':'padding-top:10px;border-top:1px solid var(--n100)'}">${cov.note}</div>` : ''}
+          </div>
         </div>` : ''}
 
-      ${svcs.length ? `
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Services & partenaires</div>
-          <div style="display:flex;flex-direction:column;gap:8px">${serviceItems}</div>
-        </div>` : ''}
-
-      <div style="display:flex;gap:10px">
-        <button onclick="window._ST.hubTab='actions';goTo(1)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions recommandées
-        </button>
-        <button onclick="goTo(1)" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
-          Retour
-        </button>
-      </div>
+      <button onclick="window._ST.hubTab='actions';goTo(1)" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions recommandées
+      </button>
     </div>
     <div style="height:24px"></div>`;
 }
@@ -988,6 +955,9 @@ function screenDetailAction() {
     `<span style="font-size:11px;color:var(--n600);background:var(--n100);padding:4px 10px;border-radius:99px">${t}</span>`
   ).join('');
 
+  const tuto = (TUTORIALS_BY_RISK[a.riskId]||[]).find(t => t.type==='video');
+  const svcs = (SERVICES_BY_RISK[a.riskId]||[]).slice(0,2);
+
   return `
     <div style="background:${isDone?'var(--success)':'var(--axa)'};padding:16px var(--sp5) 22px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -1024,6 +994,37 @@ function screenDetailAction() {
         <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
           <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Étapes</div>
           ${stepsHtml}
+        </div>` : ''}
+
+      ${tuto ? `
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Vidéo tuto</div>
+          <div style="background:var(--n900);border-radius:var(--r-md);overflow:hidden;cursor:pointer;position:relative" onclick="showToast('▶ Lecture de la vidéo (démo)','info')">
+            <div style="height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e)">
+              <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center">
+                <div style="width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent white;margin-left:3px"></div>
+              </div>
+              <div style="position:absolute;bottom:0;left:0;right:0;padding:10px 12px;background:linear-gradient(transparent,rgba(0,0,0,.7))">
+                <div style="font-size:12px;font-weight:600;color:white;line-height:1.3">${tuto.title}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px">${tuto.duration} · ${tuto.source}</div>
+              </div>
+            </div>
+          </div>
+        </div>` : ''}
+
+      ${svcs.length ? `
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Services utiles</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${svcs.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);cursor:pointer" onclick="showToast('${s.cta} — ${s.label} (démo)','info')">
+              <div style="font-size:20px;flex-shrink:0">${s.logo}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:600;color:var(--n900)">${s.label}</div>
+                <div style="font-size:10px;color:var(--n500)">${s.tag}</div>
+              </div>
+              <span style="font-size:11px;color:var(--axa);font-weight:600;flex-shrink:0">${s.cta}</span>
+            </div>`).join('')}
+          </div>
         </div>` : ''}
 
       ${hasProof && !isDone ? `
