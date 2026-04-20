@@ -3249,14 +3249,14 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
     title:'Poser les batardeaux sur les portes', effort:'medium', duration:'30 min',
     benefit:'Réduit de 80 % les infiltrations d\'eau et de boue lors d\'une crue.',
-    pts:8, conseilText:'Installez des batardeaux sur les portes pour limiter les entrées d\'eau et de boue dans l\'habitation.',
+    pts:60, conseilText:'Installez des batardeaux sur les portes pour limiter les entrées d\'eau et de boue dans l\'habitation.',
     steps:['Sortir les batardeaux et vérifier l\'état des joints','Poser le batardeau sur la porte d\'entrée en commençant par l\'extérieur','Ajuster la hauteur pour assurer l\'étanchéité','Répéter pour chaque porte exposée aux entrées d\'eau'],
     tags:['Gratuit (déjà équipé)','30 min'] },
   { id:'inondation-calfeutrer', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
     horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
     title:'Calfeutrer toutes les ouvertures basses', effort:'low', duration:'20 min',
     benefit:'Empêche l\'eau de pénétrer par les soupiraux, aérations et petites ouvertures.',
-    pts:6, conseilText:'Calfeutrez les ouvertures (fenêtres, portes, soupiraux, aérations…) à l\'aide de barrières, sacs de sable ou tout moyen de les rendre étanches.',
+    pts:40, conseilText:'Calfeutrez les ouvertures (fenêtres, portes, soupiraux, aérations…) à l\'aide de barrières, sacs de sable ou tout moyen de les rendre étanches.',
     steps:['Identifier toutes les ouvertures basses (soupiraux, aérations, vide-sanitaires)','Préparer des sacs de sable ou des boudins anti-inondation','Bloquer chaque ouverture en commençant par les plus exposées','Vérifier l\'étanchéité en cherchant les courants d\'air'],
     tags:['Gratuit','20 min'] },
   { id:'inondation-clapets', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
@@ -3264,7 +3264,7 @@ const ALL_ACTIONS = [
     requiresOwner: true,
     title:'Installer des clapets anti-retour', effort:'high', duration:'Sur RDV',
     benefit:'Évite le reflux des eaux usées en cas d\'inondation — protège les caves et sous-sols.',
-    pts:12, conseilText:'Installez des clapets anti-retour sur le réseau d\'eaux usées pour éviter le reflux des eaux en cas d\'inondation.',
+    pts:150, conseilText:'Installez des clapets anti-retour sur le réseau d\'eaux usées pour éviter le reflux des eaux en cas d\'inondation.',
     proof: { type: 'certificate', label: 'Attestation d\'installation (plombier)' },
     steps:['Repérer l\'emplacement du réseau d\'eaux usées en sous-sol','Contacter un plombier certifié pour l\'installation','Faire vérifier le bon fonctionnement du clapet','Tester le mécanisme une fois par an'],
     tags:['400–800 €','Plombier requis'] },
@@ -3273,7 +3273,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'both', condition:'maison',
     title:'Nettoyer les gouttières et chéneaux', effort:'low', duration:'30 min',
     benefit:'Évite les débordements et infiltrations en toiture lors des fortes pluies.',
-    pts:5, conseilText:'Maintenez en bon état vos toitures, chéneaux et gouttières.',
+    pts:30, conseilText:'Maintenez en bon état vos toitures, chéneaux et gouttières.',
     steps:['Munir d\'une échelle sécurisée et de gants de travail','Retirer les feuilles et débris à la main ou avec un crochet','Rincer avec un tuyau d\'arrosage de haut en bas','Vérifier l\'état des fixations et remplacer si besoin'],
     tags:['Gratuit','30 min'] },
   /* DÉGÂT DES EAUX */
@@ -3281,14 +3281,14 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
     title:'Réviser les joints d\'étanchéité', effort:'low', duration:'20 min',
     benefit:'Un joint détérioré = fuite silencieuse pendant des semaines. Coût de réparation x10.',
-    pts:4, conseilText:'Entretenez régulièrement les joints d\'étanchéité des installations sanitaires.',
+    pts:25, conseilText:'Entretenez régulièrement les joints d\'étanchéité des installations sanitaires.',
     steps:['Inspecter les joints autour de la baignoire, douche, lavabo et WC','Vérifier l\'absence de moisissures noires (signe de joint poreux)','Retirer l\'ancien joint avec un cutter et du dissolvant','Appliquer le nouveau joint avec un pistolet silicone — laisser sécher 24h'],
     tags:['~10 €','20 min'] },
   { id:'dde-detection-fuite', riskId:'degat-eaux', riskLabel:'Dégât des eaux', riskColor:'info',
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
     title:'Installer un détecteur de fuite d\'eau', effort:'low', duration:'15 min',
     benefit:'Alerte dès les premières gouttes — limite les dégâts avant qu\'une fuite silencieuse cause des milliers d\'euros de travaux.',
-    pts:8, conseilText:'Placez un détecteur de fuite sous les éviers et derrière les appareils électroménagers.',
+    pts:60, conseilText:'Placez un détecteur de fuite sous les éviers et derrière les appareils électroménagers.',
     proof: { type: 'photo', label: 'Photo du détecteur installé (sous évier ou machine à laver)' },
     steps:['Choisir un détecteur avec alarme sonore et/ou alerte smartphone','Placer sous l\'évier de cuisine, sous le lavabo, derrière le lave-linge et le lave-vaisselle','Tester le capteur en posant quelques gouttes d\'eau sur la sonde','Remplacer la pile selon les recommandations du fabricant (1–2 ans)'],
     tags:['~30–80 €','15 min'] },
@@ -3296,7 +3296,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'all',
     title:'Couper l\'arrivée d\'eau avant de partir', effort:'low', duration:'5 min',
     benefit:'La cause n° 1 de sinistre en vacances. 5 secondes qui évitent des semaines de travaux.',
-    pts:4, conseilText:'Coupez l\'arrivée d\'eau en cas d\'absence prolongée.',
+    pts:25, conseilText:'Coupez l\'arrivée d\'eau en cas d\'absence prolongée.',
     steps:['Localiser le robinet d\'arrêt général (souvent sous l\'évier ou en cave)','Tourner le robinet en position fermée','Purger les robinets pour vider les tuyaux','Noter l\'emplacement dans votre carnet de logement'],
     tags:['Gratuit','5 min'] },
   /* INCENDIE */
@@ -3304,7 +3304,7 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
     title:'Installer un détecteur de fumée', effort:'low', duration:'15 min',
     benefit:'Obligatoire par la loi. Divise par 3 le risque de décès en cas d\'incendie nocturne.',
-    pts:8, conseilText:'Installez un détecteur de fumée chez vous, et ce, à chaque étage.',
+    pts:60, conseilText:'Installez un détecteur de fumée chez vous, et ce, à chaque étage.',
     proof: { type: 'photo', label: 'Photo du détecteur installé (norme NF EN 14604)' },
     steps:['Choisir un détecteur NF EN 14604 (norme européenne)','Fixer au plafond, au centre de la pièce, à 30 cm des murs','Tester le détecteur après installation (bouton test)','Remplacer la pile chaque année et le détecteur tous les 10 ans'],
     tags:['~20 €','15 min'] },
@@ -3312,7 +3312,7 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
     title:'Réviser la chaudière annuellement', effort:'low', duration:'Sur RDV',
     benefit:'Obligatoire. Prévient les pannes, les fuites de gaz et les intoxications au CO.',
-    pts:6, conseilText:'Faites réviser votre chaudière une fois par an par un plombier-chauffagiste agréé — c\'est obligatoire.',
+    pts:40, conseilText:'Faites réviser votre chaudière une fois par an par un plombier-chauffagiste agréé — c\'est obligatoire.',
     proof: { type: 'certificate', label: 'Rapport d\'entretien annuel (technicien agréé)' },
     steps:['Contacter votre installateur ou signer un contrat d\'entretien annuel','Préparer les accès à la chaudière (dégager l\'espace)','Demander un compte-rendu d\'intervention écrit','Conserver le rapport dans le carnet d\'entretien du logement'],
     tags:['100–150 €','Sur RDV'] },
@@ -3320,7 +3320,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'all',
     title:'Débrancher les appareils en veille', effort:'low', duration:'5 min',
     benefit:'Un chargeur laissé branché peut déclencher un incendie. Réflexe à adopter avant de partir.',
-    pts:3, conseilText:'Veillez à débrancher vos chargeurs dès que les batteries sont pleines.',
+    pts:20, conseilText:'Veillez à débrancher vos chargeurs dès que les batteries sont pleines.',
     steps:['Faire le tour de chaque pièce avant de partir','Débrancher les chargeurs de téléphone, tablette, enceintes','Éteindre la box Internet et les multiprises','Vérifier que le four, les plaques et la cafetière sont éteints'],
     tags:['Gratuit','5 min'] },
   /* VOL */
@@ -3328,7 +3328,7 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'all',
     title:'Répertorier vos objets de valeur', effort:'medium', duration:'60 min',
     benefit:'Indispensable pour le remboursement assurance. Sans inventaire, les preuves manquent.',
-    pts:5, conseilText:'Répertoriez vos objets de valeur, notez leurs numéros de série et photographiez-les.',
+    pts:30, conseilText:'Répertoriez vos objets de valeur, notez leurs numéros de série et photographiez-les.',
     steps:['Lister tous les objets de valeur (bijoux, électronique, art)','Photographier chaque objet sous plusieurs angles','Relever les numéros de série et conserver les factures','Stocker la liste dans le cloud ou chez un proche (pas au domicile)'],
     tags:['Gratuit','60 min'] },
   { id:'vol-serrure-3pts', riskId:'vol', riskLabel:'Vol', riskColor:'neutral',
@@ -3336,7 +3336,7 @@ const ALL_ACTIONS = [
     requiresOwner: true,
     title:'Installer une serrure 3 points', effort:'medium', duration:'Sur RDV',
     benefit:'Multiplie par 4 la résistance à l\'effraction. Norme A2P recommandée par les assureurs.',
-    pts:8, conseilText:'Disposez d\'une serrure 3 points sur votre porte d\'entrée.',
+    pts:60, conseilText:'Disposez d\'une serrure 3 points sur votre porte d\'entrée.',
     proof: { type: 'invoice', label: 'Facture serrurier certifié A2P' },
     steps:['Faire appel à un serrurier certifié A2P (agrément assureur)','Choisir une serrure avec point de verrouillage haut, bas et central','Demander un devis comparatif (150–300 € main d\'œuvre incluse)','Conserver le certificat A2P pour votre dossier assurance'],
     tags:['150–300 €','Serrurier A2P'] },
@@ -3344,7 +3344,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'all',
     title:'Sécuriser avant les vacances', effort:'low', duration:'15 min',
     benefit:'65 % des cambriolages ont lieu en été. Quelques gestes simples font toute la différence.',
-    pts:5, conseilText:'Si vous devez vous absenter, faites suivre votre courrier et demandez à un proche de surveiller.',
+    pts:30, conseilText:'Si vous devez vous absenter, faites suivre votre courrier et demandez à un proche de surveiller.',
     steps:['S\'inscrire à "Opération Tranquillité Vacances" (police / gendarmerie)','Confier les clés à une personne de confiance','Mettre les objets de valeur en lieu sûr ou en coffre bancaire','Brancher des minuteries sur les lumières pour simuler une présence'],
     tags:['Gratuit','15 min'] },
   /* RGA */
@@ -3353,7 +3353,7 @@ const ALL_ACTIONS = [
     requiresOwner: true,
     title:'Aménager un trottoir périphérique', effort:'high', duration:'Sur RDV',
     benefit:'Évacue les eaux de pluie loin des fondations et réduit les cycles humidité/sécheresse.',
-    pts:8, conseilText:'Aménagez un trottoir périphérique autour de votre maison pour éloigner l\'eau des fondations.',
+    pts:60, conseilText:'Aménagez un trottoir périphérique autour de votre maison pour éloigner l\'eau des fondations.',
     proof: { type: 'invoice', label: 'Facture de travaux (maçon ou paysagiste)' },
     steps:['Faire réaliser un diagnostic de sol par un géotechnicien','Définir le tracé avec un paysagiste ou maçon','Poser une dalle béton ou gravier stabilisé en pente vers l\'extérieur','Contrôler l\'état chaque printemps et reboucher les fissures'],
     tags:['500–2000 €','Pro requis'] },
@@ -3361,14 +3361,14 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'maison',
     title:'Éloigner la végétation des façades', effort:'medium', duration:'60 min',
     benefit:'Les racines profondes accentuent les cycles de rétraction du sol argileux.',
-    pts:6, conseilText:'Évitez de planter des végétaux près des façades.',
+    pts:40, conseilText:'Évitez de planter des végétaux près des façades.',
     steps:['Identifier les arbres et haies à moins de 5 m des murs','Couper les branches surplombant la toiture','Pour les grands arbres : faire appel à un élagueur certifié','Ne pas replanter à moins de 5 m des fondations'],
     tags:['Variable','60 min ou Pro'] },
   { id:'rga-goutieres', riskId:'rga', riskLabel:'RGA', riskColor:'warn',
     horizon:'now', momentDeVie:'seasonal', condition:'maison',
     title:'Désencombrer les gouttières (RGA)', effort:'low', duration:'30 min',
     benefit:'Évite l\'accumulation d\'eau en pied de façade qui aggrave les cycles argile sèche/humide.',
-    pts:4, conseilText:'Désencombrez vos gouttières et raccordez-les au réseau d\'évacuation pour éloigner l\'eau des fondations.',
+    pts:25, conseilText:'Désencombrez vos gouttières et raccordez-les au réseau d\'évacuation pour éloigner l\'eau des fondations.',
     steps:['Vérifier l\'état des gouttières et descentes pluviales','Retirer les feuilles et débris accumulés','Raccorder les descentes vers l\'égout pluvial ou l\'infiltration','Vérifier qu\'aucune eau ne stagne en pied de mur'],
     tags:['Gratuit','30 min'] },
   /* INONDATION — actions supplémentaires */
@@ -3377,7 +3377,7 @@ const ALL_ACTIONS = [
     requiresOwner: true,
     title:'Réhausser le circuit électrique à 1,5 m', effort:'high', duration:'Sur RDV',
     benefit:'Protège le tableau et les prises d\'un court-circuit en cas de montée des eaux.',
-    pts:10, conseilText:'Réhaussez le circuit électrique (tableau, prises de courant) et les systèmes de chauffage au-dessus de 1,5 m du sol.',
+    pts:100, conseilText:'Réhaussez le circuit électrique (tableau, prises de courant) et les systèmes de chauffage au-dessus de 1,5 m du sol.',
     proof: { type: 'certificate', label: 'Attestation Consuel (conformité électrique)' },
     steps:['Faire réaliser un diagnostic électrique par un électricien certifié','Établir un plan de rehaussement du tableau et des prises basses','Réaliser les travaux hors période de risque inondation','Obtenir l\'attestation de conformité Consuel après travaux'],
     tags:['800–2000 €','Électricien requis'] },
@@ -3385,14 +3385,14 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'maison_rdc',
     title:'Aménager une zone refuge en hauteur', effort:'medium', duration:'60 min',
     benefit:'Permet de se mettre en sécurité si la montée des eaux est trop rapide pour évacuer.',
-    pts:6, conseilText:'Aménagez une zone refuge en hauteur, munie d\'un accès vers l\'extérieur (fenêtre de toit, balcon).',
+    pts:40, conseilText:'Aménagez une zone refuge en hauteur, munie d\'un accès vers l\'extérieur (fenêtre de toit, balcon).',
     steps:['Identifier la pièce en hauteur la plus accessible (étage, grenier)','Y stocker eau, médicaments, lampe et radio à piles','Vérifier qu\'une fenêtre ou trappe permet d\'alerter les secours','Informer tous les occupants de l\'emplacement et du protocole'],
     tags:['Gratuit','60 min'] },
   { id:'inondation-produits-sensibles', riskId:'inondation', riskLabel:'Inondation', riskColor:'info',
     horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
     title:'Mettre à l\'abri les produits sensibles', effort:'low', duration:'15 min',
     benefit:'Évite la pollution des eaux de crue par les produits chimiques et la perte de médicaments.',
-    pts:4, conseilText:'Mettez à l\'abri les produits sensibles (médicaments, produits chimiques…) afin d\'éviter un risque de pollution important.',
+    pts:25, conseilText:'Mettez à l\'abri les produits sensibles (médicaments, produits chimiques…) afin d\'éviter un risque de pollution important.',
     steps:['Rassembler médicaments, produits d\'entretien et chimiques','Les placer dans des sacs hermétiques ou boîtes étanches','Les monter à l\'étage ou dans un meuble en hauteur','Faire de même pour les documents importants et le matériel informatique'],
     tags:['Gratuit','15 min'] },
   /* INCENDIE — actions supplémentaires */
@@ -3400,7 +3400,7 @@ const ALL_ACTIONS = [
     horizon:'this_month', momentDeVie:'subscription', condition:'maison',
     title:'Faire ramoner les conduits de cheminée', effort:'low', duration:'Sur RDV',
     benefit:'Obligatoire 1 à 2 fois/an. Prévient le feu de cheminée et l\'intoxication au monoxyde de carbone.',
-    pts:6, conseilText:'Faites ramoner vos conduits de cheminée, d\'inserts ou de poêles au moins une fois par an.',
+    pts:40, conseilText:'Faites ramoner vos conduits de cheminée, d\'inserts ou de poêles au moins une fois par an.',
     proof: { type: 'certificate', label: 'Certificat de ramonage (ramoneur agréé)' },
     steps:['Contacter un ramoneur agréé (vérifier accréditation)','Prévoir la prestation avant l\'hiver (septembre–octobre)','Demander un certificat de ramonage pour votre assurance','Vérifier la ventilation de la pièce après le ramonage'],
     tags:['80–150 €','Ramoneur agréé'] },
@@ -3408,7 +3408,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'maison',
     title:'Débroussailler le jardin et le terrain', effort:'medium', duration:'120 min',
     benefit:'Réduit le combustible disponible et ralentit la propagation d\'un feu de végétation.',
-    pts:5, conseilText:'Si vous avez un jardin ou un terrain, débroussaillez-le régulièrement.',
+    pts:30, conseilText:'Si vous avez un jardin ou un terrain, débroussaillez-le régulièrement.',
     steps:['Couper les herbes hautes et végétaux secs dans un rayon de 50 m','Élaguer les branches basses des arbres jusqu\'à 2 m de hauteur','Ramasser et évacuer les déchets végétaux (ne pas brûler en période sèche)','Laisser un espace libre entre les arbres pour ne pas créer de continuité'],
     tags:['Gratuit ou Pro','120 min'] },
   /* VOL — actions supplémentaires */
@@ -3416,7 +3416,7 @@ const ALL_ACTIONS = [
     horizon:'now', momentDeVie:'seasonal', condition:'maison_rdc',
     title:'Ranger les équipements extérieurs', effort:'low', duration:'10 min',
     benefit:'Les échelles et outils laissés dehors facilitent l\'intrusion — 1 cambrioleur sur 3 utilise ce qui est à portée.',
-    pts:4, conseilText:'En extérieur, ne laissez rien qui puisse faciliter une intrusion : échelles, marchepieds ou outils pourraient être utilisés à mauvais escient.',
+    pts:25, conseilText:'En extérieur, ne laissez rien qui puisse faciliter une intrusion : échelles, marchepieds ou outils pourraient être utilisés à mauvais escient.',
     steps:['Rentrer les échelles, escabeaux et marchepieds dans un local fermé','Verrouiller l\'abri de jardin et le garage','Ranger les outils de jardinage (pioches, barres)','Fermer et verrouiller le portail et la clôture'],
     tags:['Gratuit','10 min'] }
 ];
@@ -3556,7 +3556,7 @@ const DEFIS_DU_MOMENT = [
     riskId: 'incendie',
     icon: '📸',
     pts: 150,
-    lot: 'Carte cadeau Decathlon 30 €',
+    lot: 'Lots exclusifs à gagner',
     lotIcon: '🎁',
     period: 'Avril 2026',
     expiresAt: '2026-05-01',
@@ -3886,8 +3886,8 @@ function screenHub() {
         <button onclick="switchHubTab('risques')" style="flex:1;padding:9px 14px;background:${tab==='risques'?'var(--white)':'transparent'};color:${tab==='risques'?'var(--axa)':'var(--n500)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:${tab==='risques'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
           Mes risques
         </button>
-        <button onclick="switchHubTab('actions')" style="flex:1;padding:9px 14px;background:${tab==='actions'?'var(--white)':'transparent'};color:${tab==='actions'?'var(--axa)':diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};box-shadow:${tab==='actions'?'0 1px 3px rgba(0,0,0,.08)':'none'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
-          Actions & Défis
+        <button onclick="${diagDone?`goTo(6)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" style="flex:1;padding:9px 14px;background:transparent;color:${diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+          Mes Actions
           ${!diagDone ? `<span style="font-size:11px">🔒</span>` : todoCount > 0 ? `<span style="background:var(--axa);color:white;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700">${todoCount}</span>` : ''}
         </button>
       </div>
@@ -4403,8 +4403,8 @@ function screenDeepDive() {
           </div>
         </div>` : ''}
 
-      <button onclick="window._ST.hubTab='actions';goTo(1)" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions recommandées
+      <button onclick="openCategoryModal('${riskId}')" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions pour ce risque
       </button>
     </div>
     <div style="height:24px"></div>`;
@@ -4569,11 +4569,12 @@ function openCategoryModal(riskId) {
        </div>`
     : todo.map(modalActionRow).join('');
 
+  const device = document.querySelector('.device') || document.body;
   const bd = document.createElement('div');
   bd.id = 'cat-modal-bd';
-  bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:flex-end;justify-content:center';
+  bd.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end;justify-content:center';
   bd.innerHTML = `
-    <div id="cat-modal-sheet" style="background:white;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:0 0 32px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
+    <div id="cat-modal-sheet" style="background:white;width:100%;border-radius:20px 20px 0 0;padding:0 0 24px;max-height:85%;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
       <div style="display:flex;justify-content:center;padding:10px 0 4px">
         <div style="width:36px;height:4px;border-radius:99px;background:var(--n200)"></div>
       </div>
@@ -4593,7 +4594,7 @@ function openCategoryModal(riskId) {
     </div>`;
 
   bd.addEventListener('click', e => { if (e.target === bd) bd.remove(); });
-  document.body.appendChild(bd);
+  device.appendChild(bd);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       document.getElementById('cat-modal-sheet').style.transform = 'translateY(0)';
@@ -4656,22 +4657,21 @@ function screenActions() {
       </div>`;
   }
 
-  /* Défi hero card */
+  /* Défi hero card — compact */
   function defiHeroCard(d) {
     const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
     return `
       <div onclick="openDefi('${d.id}')"
-           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:2px solid #d4a017;border-radius:var(--r-md);padding:18px;cursor:pointer;position:relative;overflow:hidden">
-        <div style="position:absolute;right:-12px;top:-12px;font-size:64px;opacity:.1">${d.icon}</div>
-        <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 Défi du moment · ${d.period}</div>
-        <div style="font-size:15px;font-weight:700;color:white;line-height:1.35;margin-bottom:10px">${d.title}</div>
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:12px">
-          <span style="font-size:18px">${d.lotIcon}</span>
-          <span style="font-size:12px;font-weight:600;color:#fbbf24">${d.lot}</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:11px;color:rgba(255,255,255,.6)">🕐 Plus que ${daysLeft} jour${daysLeft>1?'s':''}</div>
-          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:13px;font-weight:700">🏆 +${d.pts} pts</div>
+           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:1.5px solid #d4a017;border-radius:var(--r-md);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-8px;top:-8px;font-size:44px;opacity:.1">${d.icon}</div>
+        <div style="display:flex;align-items:center;gap:10px;position:relative">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(251,191,36,.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${d.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px">🔥 Défi · ${d.period}</div>
+            <div style="font-size:13px;font-weight:700;color:white;line-height:1.25">${d.title}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,.55);margin-top:3px">${d.lotIcon} ${d.lot} · 🕐 ${daysLeft}j</div>
+          </div>
+          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:5px 9px;font-size:12px;font-weight:700;flex-shrink:0">+${d.pts}</div>
         </div>
       </div>`;
   }
@@ -4709,7 +4709,7 @@ function screenActions() {
         </button>
         <div>
           <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
-          <div style="font-size:17px;font-weight:700;color:white">Actions & Défis</div>
+          <div style="font-size:17px;font-weight:700;color:white">Mes Actions</div>
         </div>
         <div style="margin-left:auto;flex-shrink:0">
           <div onclick="goTo(8)" style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer">
@@ -4732,11 +4732,7 @@ function screenActions() {
 
     <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:20px">
 
-      ${activeDefi ? `
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">🔥 Défi du moment</div>
-          ${defiHeroCard(activeDefi)}
-        </div>` : ''}
+      ${activeDefi ? defiHeroCard(activeDefi) : ''}
 
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
@@ -4753,7 +4749,7 @@ function screenActions() {
             <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
           </div>
           <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:13px;font-weight:700;color:white">+20</div>
+            <div style="font-size:13px;font-weight:700;color:white">+5</div>
             <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
           </div>
         </div>
@@ -4812,7 +4808,7 @@ function screenDetailAction() {
           <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border:1px solid rgba(212,160,23,.4);border-radius:var(--r-sm);padding:10px 12px">
             <span style="font-size:20px">${d.lotIcon}</span>
             <div>
-              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Lot à gagner</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Récompense</div>
               <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
             </div>
             <div style="margin-left:auto;background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:14px;font-weight:700">+${d.pts} pts</div>

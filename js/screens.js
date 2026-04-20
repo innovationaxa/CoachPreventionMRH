@@ -154,8 +154,8 @@ function screenHub() {
         <button onclick="switchHubTab('risques')" style="flex:1;padding:9px 14px;background:${tab==='risques'?'var(--white)':'transparent'};color:${tab==='risques'?'var(--axa)':'var(--n500)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:${tab==='risques'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
           Mes risques
         </button>
-        <button onclick="switchHubTab('actions')" style="flex:1;padding:9px 14px;background:${tab==='actions'?'var(--white)':'transparent'};color:${tab==='actions'?'var(--axa)':diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};box-shadow:${tab==='actions'?'0 1px 3px rgba(0,0,0,.08)':'none'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
-          Actions & Défis
+        <button onclick="${diagDone?`goTo(6)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" style="flex:1;padding:9px 14px;background:transparent;color:${diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+          Mes Actions
           ${!diagDone ? `<span style="font-size:11px">🔒</span>` : todoCount > 0 ? `<span style="background:var(--axa);color:white;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700">${todoCount}</span>` : ''}
         </button>
       </div>
@@ -671,8 +671,8 @@ function screenDeepDive() {
           </div>
         </div>` : ''}
 
-      <button onclick="window._ST.hubTab='actions';goTo(1)" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions recommandées
+      <button onclick="openCategoryModal('${riskId}')" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions pour ce risque
       </button>
     </div>
     <div style="height:24px"></div>`;
@@ -837,11 +837,12 @@ function openCategoryModal(riskId) {
        </div>`
     : todo.map(modalActionRow).join('');
 
+  const device = document.querySelector('.device') || document.body;
   const bd = document.createElement('div');
   bd.id = 'cat-modal-bd';
-  bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:flex-end;justify-content:center';
+  bd.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end;justify-content:center';
   bd.innerHTML = `
-    <div id="cat-modal-sheet" style="background:white;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:0 0 32px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
+    <div id="cat-modal-sheet" style="background:white;width:100%;border-radius:20px 20px 0 0;padding:0 0 24px;max-height:85%;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
       <div style="display:flex;justify-content:center;padding:10px 0 4px">
         <div style="width:36px;height:4px;border-radius:99px;background:var(--n200)"></div>
       </div>
@@ -861,7 +862,7 @@ function openCategoryModal(riskId) {
     </div>`;
 
   bd.addEventListener('click', e => { if (e.target === bd) bd.remove(); });
-  document.body.appendChild(bd);
+  device.appendChild(bd);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       document.getElementById('cat-modal-sheet').style.transform = 'translateY(0)';
@@ -924,22 +925,21 @@ function screenActions() {
       </div>`;
   }
 
-  /* Défi hero card */
+  /* Défi hero card — compact */
   function defiHeroCard(d) {
     const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
     return `
       <div onclick="openDefi('${d.id}')"
-           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:2px solid #d4a017;border-radius:var(--r-md);padding:18px;cursor:pointer;position:relative;overflow:hidden">
-        <div style="position:absolute;right:-12px;top:-12px;font-size:64px;opacity:.1">${d.icon}</div>
-        <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 Défi du moment · ${d.period}</div>
-        <div style="font-size:15px;font-weight:700;color:white;line-height:1.35;margin-bottom:10px">${d.title}</div>
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:12px">
-          <span style="font-size:18px">${d.lotIcon}</span>
-          <span style="font-size:12px;font-weight:600;color:#fbbf24">${d.lot}</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:11px;color:rgba(255,255,255,.6)">🕐 Plus que ${daysLeft} jour${daysLeft>1?'s':''}</div>
-          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:13px;font-weight:700">🏆 +${d.pts} pts</div>
+           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:1.5px solid #d4a017;border-radius:var(--r-md);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-8px;top:-8px;font-size:44px;opacity:.1">${d.icon}</div>
+        <div style="display:flex;align-items:center;gap:10px;position:relative">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(251,191,36,.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${d.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px">🔥 Défi · ${d.period}</div>
+            <div style="font-size:13px;font-weight:700;color:white;line-height:1.25">${d.title}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,.55);margin-top:3px">${d.lotIcon} ${d.lot} · 🕐 ${daysLeft}j</div>
+          </div>
+          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:5px 9px;font-size:12px;font-weight:700;flex-shrink:0">+${d.pts}</div>
         </div>
       </div>`;
   }
@@ -977,7 +977,7 @@ function screenActions() {
         </button>
         <div>
           <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
-          <div style="font-size:17px;font-weight:700;color:white">Actions & Défis</div>
+          <div style="font-size:17px;font-weight:700;color:white">Mes Actions</div>
         </div>
         <div style="margin-left:auto;flex-shrink:0">
           <div onclick="goTo(8)" style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer">
@@ -1000,11 +1000,7 @@ function screenActions() {
 
     <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:20px">
 
-      ${activeDefi ? `
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">🔥 Défi du moment</div>
-          ${defiHeroCard(activeDefi)}
-        </div>` : ''}
+      ${activeDefi ? defiHeroCard(activeDefi) : ''}
 
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
@@ -1021,7 +1017,7 @@ function screenActions() {
             <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
           </div>
           <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:13px;font-weight:700;color:white">+20</div>
+            <div style="font-size:13px;font-weight:700;color:white">+5</div>
             <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
           </div>
         </div>
@@ -1080,7 +1076,7 @@ function screenDetailAction() {
           <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border:1px solid rgba(212,160,23,.4);border-radius:var(--r-sm);padding:10px 12px">
             <span style="font-size:20px">${d.lotIcon}</span>
             <div>
-              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Lot à gagner</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Récompense</div>
               <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
             </div>
             <div style="margin-left:auto;background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:14px;font-weight:700">+${d.pts} pts</div>
