@@ -3798,52 +3798,64 @@ function screenHub() {
   const allActions = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : [];
   const todoCount  = allActions.filter(a => !done.includes(a.id)).length;
 
-  /* ── HEADER (AXA + avatar + gift badge) ── */
+  /* ── HEADER redesigné : Coach Prévention + produit chip + tabs intégrés ── */
   const header = `
-    <div style="background:var(--axa);padding:18px var(--sp5) 24px;position:relative;overflow:hidden">
-      <div style="position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
-      <div style="position:absolute;right:40px;bottom:-40px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;position:relative">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.avatar}</div>
-          <div style="min-width:0">
-            <div style="font-size:11px;color:rgba(255,255,255,.55);font-weight:500">Coach Prévention MRH</div>
-            <div style="font-size:15px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.firstName}</div>
+    <div style="background:var(--axa);padding:18px var(--sp5) 0;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+      <div style="position:absolute;left:-30px;bottom:20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
+
+      <!-- Ligne 1 : service + produit chip + gift badge -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;position:relative">
+        <div style="min-width:0">
+          <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px">Coach Prévention</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="font-size:16px;font-weight:700;color:white">${p.firstName}</div>
+            <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:3px 10px 3px 7px">
+              <span style="font-size:13px;line-height:1">🏠</span>
+              <span style="font-size:11px;font-weight:700;color:white;letter-spacing:.3px">Habitation</span>
+            </div>
           </div>
         </div>
-        <button onclick="${diagDone?`goTo(8)`:`tabMock('🔒 Terminez d\\'abord votre diagnostic')`}" aria-label="Mes récompenses" style="position:relative;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:${diagDone?'pointer':'not-allowed'};opacity:${diagDone?1:.55};flex-shrink:0">
-          ${sv(IC.gift,'width:20px;height:20px;fill:white')}
-          ${pts > 0 ? `<span style="position:absolute;top:-4px;right:-4px;background:var(--success-mid);color:white;border-radius:99px;padding:2px 6px;font-size:10px;font-weight:700;font-family:var(--font);min-width:18px;text-align:center">${pts}</span>` : ''}
+        <button onclick="${diagDone?`goTo(8)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" aria-label="Mes récompenses" style="position:relative;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:${diagDone?'pointer':'not-allowed'};opacity:${diagDone?1:.5};flex-shrink:0;margin-top:2px">
+          ${sv(IC.gift,'width:18px;height:18px;fill:white')}
+          ${pts > 0 ? `<span style="position:absolute;top:-3px;right:-3px;background:var(--success-mid);color:white;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;font-family:var(--font);min-width:16px;text-align:center;line-height:1.4">${pts}</span>` : ''}
         </button>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:3px;display:flex;align-items:center;gap:4px">
-        ${sv(IC.pin,'width:11px;height:11px;fill:rgba(255,255,255,.55)')}${p.location} · ${p.propertyType}
-      </div>
-      <div style="font-size:11px;color:rgba(255,255,255,.4)">${p.contract.name} · ${p.contract.ref}</div>
-      <div style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border-radius:99px;padding:5px 12px">
-        ${diagDone
-          ? `${sv(IC.check,'width:12px;height:12px;fill:var(--success-mid)')}<span style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">Diagnostic complété · Vue personnalisée</span>`
-          : `${sv(IC.info,'width:12px;height:12px;fill:rgba(255,255,255,.6)')}<span style="font-size:11px;color:rgba(255,255,255,.75)">Vue de zone · Diagnostic recommandé</span>`}
-      </div>
-    </div>`;
 
-  /* ── INTERNAL TABS (pills) ── */
-  const tabs = `
-    <div style="padding:14px var(--sp5) 0">
-      <div style="display:flex;background:var(--n100);border-radius:99px;padding:4px;position:relative">
-        <button onclick="switchHubTab('risques')" style="flex:1;padding:9px 14px;background:${tab==='risques'?'var(--white)':'transparent'};color:${tab==='risques'?'var(--axa)':'var(--n500)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:${tab==='risques'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
-          Mes risques
+      <!-- Ligne 2 : localisation + contrat -->
+      <div style="position:relative;margin-bottom:10px">
+        <div style="font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px">
+          ${sv(IC.pin,'width:10px;height:10px;fill:rgba(255,255,255,.55)')}${p.location} · ${p.propertyType}
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px">${p.contract.name} · ${p.contract.ref}</div>
+      </div>
+
+      <!-- Ligne 3 : statut diagnostic -->
+      <div style="position:relative;margin-bottom:14px">
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.11);border-radius:99px;padding:4px 11px">
+          ${diagDone
+            ? `${sv(IC.check,'width:11px;height:11px;fill:var(--success-mid)')}<span style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">Diagnostic complété · Vue personnalisée</span>`
+            : `${sv(IC.info,'width:11px;height:11px;fill:rgba(255,255,255,.55)')}<span style="font-size:11px;color:rgba(255,255,255,.7)">Vue de zone · Diagnostic recommandé</span>`}
+        </div>
+      </div>
+
+      <!-- Tabs intégrés au bas du header (indicateur section active) -->
+      <div style="display:flex;border-top:1px solid rgba(255,255,255,.1)">
+        <button onclick="switchHubTab('risques')" style="flex:1;padding:11px 8px;background:transparent;border:none;border-bottom:2.5px solid ${tab==='risques'?'white':'transparent'};color:${tab==='risques'?'white':'rgba(255,255,255,.5)'};font-size:12px;font-weight:${tab==='risques'?'700':'500'};font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s">
+          ${sv(IC.shield,'width:12px;height:12px;fill:currentColor')}Mes risques
         </button>
-        <button onclick="switchHubTab('actions')" style="flex:1;padding:9px 14px;background:${tab==='actions'?'var(--white)':'transparent'};color:${tab==='actions'?'var(--axa)':diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};box-shadow:${tab==='actions'?'0 1px 3px rgba(0,0,0,.08)':'none'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
-          Actions & Défis
-          ${!diagDone ? `<span style="font-size:11px">🔒</span>` : (todoCount>0?`<span style="background:var(--axa);color:white;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700">${todoCount}</span>`:'')}
+        <button onclick="switchHubTab('actions')" style="flex:1;padding:11px 8px;background:transparent;border:none;border-bottom:2.5px solid ${tab==='actions'?'white':'transparent'};color:${tab==='actions'?'white':diagDone?'rgba(255,255,255,.5)':'rgba(255,255,255,.3)'};font-size:12px;font-weight:${tab==='actions'?'700':'500'};font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s">
+          ${sv(IC.bolt,'width:12px;height:12px;fill:currentColor')}Actions & Défis
+          ${!diagDone
+            ? `<span style="font-size:10px;opacity:.6">🔒</span>`
+            : todoCount > 0 ? `<span style="background:white;color:var(--axa);font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px;line-height:1.5">${todoCount}</span>` : ''}
         </button>
       </div>
     </div>`;
 
   const body = tab === 'risques' ? hubRisquesTab(p, diagDone) : hubActionsTab(p, diagDone);
 
-  return header + tabs + body + `<div style="height:24px"></div>`;
+  return header + body + `<div style="height:24px"></div>`;
 }
 
 /* ── HUB · Tab Risques ── */
@@ -4290,7 +4302,7 @@ function screenDeepDive() {
   return `
     <div style="background:${li.bg};padding:18px var(--sp5) 22px;position:relative">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
           ${sv(IC.back,'width:18px;height:18px;fill:'+li.hex)}
         </button>
         <div style="font-size:11px;color:${li.hex};font-weight:600;opacity:.7">Analyse détaillée</div>
@@ -4350,10 +4362,10 @@ function screenDeepDive() {
         </div>` : ''}
 
       <div style="display:flex;gap:10px">
-        <button onclick="goTo(5)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Plan d'action
+        <button onclick="window._ST.hubTab='actions';goTo(1)" style="flex:2;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions recommandées
         </button>
-        <button onclick="goTo(${window._ST.diagCompleted?3:1})" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
+        <button onclick="goTo(1)" style="flex:1;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">
           Retour
         </button>
       </div>
