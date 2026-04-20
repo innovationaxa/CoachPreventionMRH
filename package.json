@@ -1,0 +1,8 @@
+{
+  "name": "coach-prevention-mrh",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && cp -r preview.html index.html css js assets dist/ 2>/dev/null || true"
+  }
+}

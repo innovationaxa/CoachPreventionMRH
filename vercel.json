@@ -1,0 +1,12 @@
+{
+  "buildCommand": "mkdir -p dist && cp preview.html index.html dist/ && cp -r css js assets dist/",
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ]
+}
