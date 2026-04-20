@@ -170,21 +170,101 @@ function screenHub() {
 
 /* ── HUB · Tab Risques ── */
 function hubRisquesTab(p, diagDone) {
-  const levels    = getRiskLevels(p, diagDone ? window._ST.diagAnswers : {});
-  const mainRisks = p.mainRisks;
+  const levels     = getRiskLevels(p, diagDone ? window._ST.diagAnswers : {});
+  const zoneLevels = getRiskLevels(p, {});  /* toujours les niveaux zone pour la comparaison */
+  const mainRisks  = p.mainRisks;
   const otherRisks = Object.keys(RISKS).filter(r => !mainRisks.includes(r));
+  const nQ = (window._ST.questions||[]).length || getQuestionsForProfile(p).length;
 
+  /* ─ Calcul impact diagnostic ─ */
+  const improvedList = diagDone ? mainRisks.filter(r => (levels[r]||{}).improved) : [];
+  const degradedList = diagDone ? mainRisks.filter(r => (levels[r]||{}).degraded) : [];
+  const actionsCount = diagDone ? getActionsForProfile(p, window._ST.diagAnswers).length : 0;
+
+  /* ─ Carte diagnostic (compact, pre / post) ─ */
+  const diagCard = diagDone
+    ? `<div style="background:var(--white);border:1.5px solid var(--n200);border-radius:var(--r-md);padding:13px 14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;flex-shrink:0">${sv(IC.history,'width:16px;height:16px;fill:var(--axa)')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--n900)">Mettre à jour le diagnostic</div>
+            <div style="font-size:11px;color:var(--n500);margin-top:1px">Réévaluez votre exposition avec vos dernières infos.</div>
+          </div>
+          <button onclick="restartDiagnostic()" style="padding:7px 12px;background:var(--n100);color:var(--n700);border:none;border-radius:99px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;flex-shrink:0">Relancer</button>
+        </div>
+      </div>`
+    : `<div style="background:var(--white);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:13px 14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--axa);display:flex;align-items:center;justify-content:center;flex-shrink:0">${sv(IC.shield,'width:16px;height:16px;fill:white')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--n900)">Démarrer le diagnostic</div>
+            <div style="font-size:11px;color:var(--n500);margin-top:1px">${nQ} questions · 2 min · sans impact sur la prime</div>
+          </div>
+          <button onclick="goTo(2)" style="padding:7px 12px;background:var(--axa);color:white;border:none;border-radius:99px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;flex-shrink:0">Démarrer</button>
+        </div>
+      </div>`;
+
+  /* ─ Bloc explication pré-diagnostic : données géographiques ─ */
+  const zoneBlock = !diagDone ? `
+    <div style="background:var(--axa-xlight);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        ${sv(IC.pin,'width:13px;height:13px;fill:var(--axa)')}
+        <span style="font-size:12px;font-weight:700;color:var(--axa)">Analyse basée sur votre localisation</span>
+      </div>
+      <p style="font-size:12px;color:var(--n700);line-height:1.55;margin:0 0 10px">
+        Ces niveaux de risque sont estimés à partir des <strong>données géographiques de votre secteur</strong> : zone PPRI, historique météo, statistiques de sinistres locaux.<br><br>
+        Pour une analyse qui tient compte des <strong>caractéristiques réelles de votre logement</strong> — équipements de protection, type de construction, ancienneté — réalisez le diagnostic.
+      </p>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--axa);font-weight:600">
+        ${sv(IC.bolt,'width:11px;height:11px;fill:var(--axa)')}
+        Le diagnostic débloque vos recommandations personnalisées et vos récompenses.
+      </div>
+    </div>` : '';
+
+  /* ─ Bloc impact post-diagnostic ─ */
+  const impactBlock = diagDone ? `
+    <div style="background:linear-gradient(135deg,#f0fdf6 0%,var(--success-bg) 100%);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        ${sv(IC.check,'width:13px;height:13px;fill:var(--success)')}
+        <span style="font-size:12px;font-weight:700;color:var(--success)">Analyse personnalisée · Indicateurs mis à jour</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:${improvedList.length?'10':'0'}px">
+        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:var(--n800)">${mainRisks.length}</div>
+          <div style="font-size:10px;color:var(--n500);line-height:1.3;margin-top:1px">risques<br>analysés</div>
+        </div>
+        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:${improvedList.length>0?'var(--success)':'var(--n500)'}">${improvedList.length}</div>
+          <div style="font-size:10px;color:var(--n500);line-height:1.3;margin-top:1px">niveau${improvedList.length!==1?'s':''}<br>${improvedList.length>0?'réduit':'confirmé'}${improvedList.length!==1?'s':''}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center;cursor:pointer" onclick="switchHubTab('actions')">
+          <div style="font-size:20px;font-weight:800;color:var(--axa)">${actionsCount}</div>
+          <div style="font-size:10px;color:var(--axa);font-weight:600;line-height:1.3;margin-top:1px">actions<br>débloquées ↗</div>
+        </div>
+      </div>
+      ${improvedList.length > 0 ? `<div style="padding-top:10px;border-top:1px solid var(--success-light);font-size:11.5px;color:var(--success);font-weight:600;line-height:1.4">
+        ↓ Grâce aux équipements déclarés, ${improvedList.length} indicateur${improvedList.length>1?'s ont été réduits':' a été réduit'} par rapport à l'estimation géographique.
+      </div>` : `<div style="padding-top:10px;border-top:1px solid var(--success-light);font-size:11.5px;color:var(--n600);line-height:1.4">
+        ✓ Les niveaux de zone ont été confirmés par les caractéristiques de votre logement.
+      </div>`}
+    </div>` : '';
+
+  /* ─ Cartes risques principaux ─ */
   const riskCards = mainRisks.slice(0, 3).map(rId => {
-    const r  = RISKS[rId];
-    const lv = levels[rId] || {};
-    const li = lv.levelInfo || getRiskLevelInfo('modere');
-    const isHigh = li.step >= 4;
+    const r       = RISKS[rId];
+    const lv      = levels[rId] || {};
+    const li      = lv.levelInfo || getRiskLevelInfo('modere');
+    const zoneLv  = zoneLevels[rId] || {};
+    const zoneLi  = zoneLv.levelInfo || getRiskLevelInfo('modere');
+    const evolved = diagDone && lv.zoneLevel !== lv.homeAdjustedLevel;
+    const isHigh  = li.step >= 4;
+
     return `
-      <div onclick="openRisk('${rId}')" style="background:var(--white);border:1.5px solid ${isHigh?li.bg:'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:pointer;position:relative;overflow:hidden">
-        ${isHigh?`<div style="position:absolute;top:0;right:0;width:4px;height:100%;background:${li.hex}"></div>`:''}
+      <div onclick="openRisk('${rId}')" style="background:var(--white);border:1.5px solid ${!diagDone?'var(--n150)':isHigh?li.bg:'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:pointer;position:relative;overflow:hidden;${!diagDone?'opacity:.92':''}">
+        ${diagDone && isHigh ? `<div style="position:absolute;top:0;right:0;width:4px;height:100%;background:${li.hex}"></div>` : ''}
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
           <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
-            <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${li.bg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${r.icon}</div>
+            <div style="width:36px;height:36px;border-radius:var(--r-sm);background:${diagDone?li.bg:'var(--n100)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${r.icon}</div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:700;color:var(--n900)">${r.label}</div>
               <div style="margin-top:5px">${levelBar(li.id)}</div>
@@ -192,16 +272,27 @@ function hubRisquesTab(p, diagDone) {
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
             ${levelChip(li.id,'sm')}
-            ${lv.improved?`<span style="font-size:10px;color:var(--success);font-weight:600;display:flex;align-items:center;gap:2px">${sv(IC.down,'width:10px;height:10px;fill:var(--success)')}Amélioré</span>`:''}
+            ${!diagDone ? `<span style="font-size:10px;color:var(--n400);font-weight:500;margin-top:1px">Zone</span>` : ''}
+            ${diagDone && lv.improved ? `<span style="font-size:10px;color:var(--success);font-weight:700">↓ Réduit</span>` : ''}
+            ${diagDone && lv.degraded ? `<span style="font-size:10px;color:var(--danger);font-weight:700">↑ Aggravé</span>` : ''}
           </div>
         </div>
-        ${diagDone && lv.hasDiagnosticData
-          ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--n100);font-size:11px;color:var(--n500)">${r.explanation}</div>`
-          : ''}
+        ${diagDone && evolved ? `
+          <div style="margin-top:10px;padding:8px 10px;background:${lv.improved?'var(--success-bg)':'var(--danger-bg)'};border-radius:var(--r-sm);display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--n500);text-decoration:line-through">${zoneLi.label}</span>
+            <span style="font-size:11px;color:var(--n400)">→</span>
+            <span style="font-size:11px;font-weight:700;color:${li.hex}">${li.label}</span>
+            <span style="font-size:10px;color:var(--n500);margin-left:2px">· personnalisé</span>
+          </div>` : ''}
+        ${diagDone && !evolved ? `
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--n100);font-size:11px;color:var(--n500);display:flex;align-items:center;gap:5px">
+            ${sv(IC.check,'width:10px;height:10px;fill:var(--n400)')} Confirmé par votre diagnostic
+          </div>` : ''}
       </div>`;
   }).join('');
 
-  const secondaryRisks = [...mainRisks.slice(3), ...otherRisks.slice(0, 3)].slice(0, 3).map(rId => {
+  /* ─ Risques secondaires ─ */
+  const secondaryRisks = [...mainRisks.slice(3), ...otherRisks].slice(0, 3).map(rId => {
     const r  = RISKS[rId];
     const lv = levels[rId] || {};
     const li = lv.levelInfo || getRiskLevelInfo('faible');
@@ -213,46 +304,22 @@ function hubRisquesTab(p, diagDone) {
       </div>`;
   }).join('');
 
-  const nQ = (window._ST.questions||[]).length || getQuestionsForProfile(p).length;
+  /* ─ Bannière CTA actions post-diag ─ */
+  const actionsCTA = diagDone ? `
+    <button onclick="switchHubTab('actions')" style="width:100%;padding:13px 16px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+      <span style="display:flex;align-items:center;gap:8px">
+        ${sv(IC.bolt,'width:14px;height:14px;fill:white')}
+        Voir mes ${actionsCount} actions recommandées
+      </span>
+      ${sv(IC.arrow,'width:16px;height:16px;fill:white')}
+    </button>` : '';
 
-  /* Diagnostic card — pre vs post diag */
-  const diagBlock = diagDone
-    ? `
-      <div style="background:var(--white);border:1.5px solid var(--n200);border-radius:var(--r-md);padding:14px 16px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${sv(IC.history,'width:18px;height:18px;fill:var(--axa)')}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Faire un nouveau diagnostic</div>
-            <div style="font-size:11px;color:var(--n500);margin-top:2px;line-height:1.4">Réévaluez votre exposition aux risques avec vos dernières informations.</div>
-          </div>
-          <button onclick="restartDiagnostic()" style="padding:8px 14px;background:var(--axa);color:white;border:none;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;flex-shrink:0">
-            Relancer
-          </button>
-        </div>
-      </div>`
-    : `
-      <div style="background:var(--white);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px 16px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${sv(IC.shield,'width:18px;height:18px;fill:white')}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Démarrer le diagnostic</div>
-            <div style="font-size:11px;color:var(--n500);margin-top:2px">${nQ} questions · 2 min · sans impact sur la prime</div>
-          </div>
-          <button onclick="goTo(2)" style="padding:8px 14px;background:var(--axa);color:white;border:none;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;flex-shrink:0">
-            Démarrer
-          </button>
-        </div>
-      </div>`;
-
+  /* ─ Événement local ─ */
   const lc = p.localContext || {};
   const ev = lc.recentEvent;
   const contextBlock = ev ? `
     <div style="background:var(--warn-bg);border:1px solid var(--warn-light);border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
-      <div style="font-size:18px;flex-shrink:0">⚠️</div>
+      <span style="font-size:18px;flex-shrink:0">⚠️</span>
       <div>
         <div style="font-size:11px;font-weight:700;color:var(--warn)">Événement récent · ${ev.year}</div>
         <div style="font-size:12px;color:var(--n700);margin-top:3px;line-height:1.4">${ev.label} — ${ev.detail}</div>
@@ -260,23 +327,23 @@ function hubRisquesTab(p, diagDone) {
     </div>` : '';
 
   return `
-    <div style="padding:16px var(--sp5) 8px;display:flex;flex-direction:column;gap:16px">
-      ${diagBlock}
-
+    <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:14px">
+      ${diagCard}
+      ${zoneBlock}
+      ${impactBlock}
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div style="font-size:13px;font-weight:700;color:var(--n900)">Vos risques principaux</div>
-          <span style="font-size:11px;color:var(--n400)">${diagDone?'Vue personnalisée':'Vue de zone'}</span>
+          <span style="font-size:11px;font-weight:600;color:${diagDone?'var(--success)':'var(--n400)'}">${diagDone?'✓ Personnalisé':'Estimation zone'}</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">${riskCards}</div>
       </div>
-
       <div>
-        <div style="font-size:12px;font-weight:700;color:var(--n600);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Autres risques</div>
+        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Autres risques</div>
         <div style="display:flex;gap:8px">${secondaryRisks}</div>
       </div>
-
       ${contextBlock}
+      ${actionsCTA}
     </div>`;
 }
 
