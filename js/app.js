@@ -403,6 +403,37 @@ function mockSendBilan() {
   showToast('✉️ Bilan envoyé ! Vérifiez votre messagerie.', 'info');
 }
 
+/* ── MODAL : explication calcul niveaux de risque ── */
+function showZoneInfoModal() {
+  const device = document.querySelector('.device');
+  if (!device || device.querySelector('#zone-info-modal')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'zone-info-modal';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end';
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'width:100%;background:var(--white);border-radius:16px 16px 0 0;padding:20px 20px 28px;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,.61,.36,1)';
+  sheet.innerHTML = `
+    <div style="width:36px;height:4px;border-radius:99px;background:var(--n200);margin:0 auto 18px"></div>
+    <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:14px">Comment est-ce calculé ?</div>
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;color:var(--n700);line-height:1.55">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:18px;flex-shrink:0">📍</span>
+        <div><strong>Avant le diagnostic — estimation géographique</strong><br>Les niveaux sont calculés à partir des données de votre secteur : zonage PPRI, historique météo, statistiques de sinistres locaux. C'est une estimation de zone, pas une analyse de votre logement.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:18px;flex-shrink:0">🏠</span>
+        <div><strong>Après le diagnostic — vue personnalisée</strong><br>Le diagnostic prend en compte les caractéristiques réelles de votre logement : équipements de protection, type de construction, ancienneté, environnement immédiat. Les niveaux peuvent s'améliorer ou se confirmer.</div>
+      </div>
+    </div>
+    <button id="zone-modal-close" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;margin-top:20px">Compris</button>`;
+  overlay.appendChild(sheet);
+  device.appendChild(overlay);
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; }));
+  function close() { sheet.style.transform = 'translateY(100%)'; setTimeout(() => overlay.remove(), 350); }
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  sheet.querySelector('#zone-modal-close').addEventListener('click', close);
+}
+
 /* ── DIAGNOSTIC MODAL (bottom sheet, 1ère visite Hub) ── */
 function showDiagModal() {
   const device = document.querySelector('.device');

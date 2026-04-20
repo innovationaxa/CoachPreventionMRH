@@ -3798,13 +3798,12 @@ function screenHub() {
   const allActions = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : [];
   const todoCount  = allActions.filter(a => !done.includes(a.id)).length;
 
-  /* ── HEADER redesigné : Coach Prévention + produit chip + tabs intégrés ── */
+  /* ── HEADER ── */
   const header = `
-    <div style="background:var(--axa);padding:18px var(--sp5) 0;position:relative;overflow:hidden">
+    <div style="background:var(--axa);padding:18px var(--sp5) 22px;position:relative;overflow:hidden">
       <div style="position:absolute;right:-20px;top:-20px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
       <div style="position:absolute;left:-30px;bottom:20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
 
-      <!-- Ligne 1 : service + produit chip + gift badge -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;position:relative">
         <div style="min-width:0">
           <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px">Coach Prévention</div>
@@ -3822,7 +3821,6 @@ function screenHub() {
         </button>
       </div>
 
-      <!-- Ligne 2 : localisation + contrat -->
       <div style="position:relative;margin-bottom:10px">
         <div style="font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:4px">
           ${sv(IC.pin,'width:10px;height:10px;fill:rgba(255,255,255,.55)')}${p.location} · ${p.propertyType}
@@ -3830,32 +3828,32 @@ function screenHub() {
         <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px">${p.contract.name} · ${p.contract.ref}</div>
       </div>
 
-      <!-- Ligne 3 : statut diagnostic -->
-      <div style="position:relative;margin-bottom:14px">
+      <div style="position:relative">
         <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.11);border-radius:99px;padding:4px 11px">
           ${diagDone
             ? `${sv(IC.check,'width:11px;height:11px;fill:var(--success-mid)')}<span style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">Diagnostic complété · Vue personnalisée</span>`
             : `${sv(IC.info,'width:11px;height:11px;fill:rgba(255,255,255,.55)')}<span style="font-size:11px;color:rgba(255,255,255,.7)">Vue de zone · Diagnostic recommandé</span>`}
         </div>
       </div>
+    </div>`;
 
-      <!-- Tabs intégrés au bas du header (indicateur section active) -->
-      <div style="display:flex;border-top:1px solid rgba(255,255,255,.1)">
-        <button onclick="switchHubTab('risques')" style="flex:1;padding:11px 8px;background:transparent;border:none;border-bottom:2.5px solid ${tab==='risques'?'white':'transparent'};color:${tab==='risques'?'white':'rgba(255,255,255,.5)'};font-size:12px;font-weight:${tab==='risques'?'700':'500'};font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s">
-          ${sv(IC.shield,'width:12px;height:12px;fill:currentColor')}Mes risques
+  /* ── TABS (pills séparées) ── */
+  const tabs = `
+    <div style="padding:12px var(--sp5) 0">
+      <div style="display:flex;background:var(--n100);border-radius:99px;padding:4px">
+        <button onclick="switchHubTab('risques')" style="flex:1;padding:9px 14px;background:${tab==='risques'?'var(--white)':'transparent'};color:${tab==='risques'?'var(--axa)':'var(--n500)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;box-shadow:${tab==='risques'?'0 1px 3px rgba(0,0,0,.08)':'none'};transition:all .2s">
+          Mes risques
         </button>
-        <button onclick="switchHubTab('actions')" style="flex:1;padding:11px 8px;background:transparent;border:none;border-bottom:2.5px solid ${tab==='actions'?'white':'transparent'};color:${tab==='actions'?'white':diagDone?'rgba(255,255,255,.5)':'rgba(255,255,255,.3)'};font-size:12px;font-weight:${tab==='actions'?'700':'500'};font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s">
-          ${sv(IC.bolt,'width:12px;height:12px;fill:currentColor')}Actions & Défis
-          ${!diagDone
-            ? `<span style="font-size:10px;opacity:.6">🔒</span>`
-            : todoCount > 0 ? `<span style="background:white;color:var(--axa);font-size:10px;font-weight:800;padding:1px 6px;border-radius:99px;line-height:1.5">${todoCount}</span>` : ''}
+        <button onclick="switchHubTab('actions')" style="flex:1;padding:9px 14px;background:${tab==='actions'?'var(--white)':'transparent'};color:${tab==='actions'?'var(--axa)':diagDone?'var(--n500)':'var(--n400)'};border:none;border-radius:99px;font-size:12px;font-weight:700;font-family:var(--font);cursor:${diagDone?'pointer':'not-allowed'};box-shadow:${tab==='actions'?'0 1px 3px rgba(0,0,0,.08)':'none'};display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+          Actions & Défis
+          ${!diagDone ? `<span style="font-size:11px">🔒</span>` : todoCount > 0 ? `<span style="background:var(--axa);color:white;font-size:10px;padding:1px 6px;border-radius:99px;font-weight:700">${todoCount}</span>` : ''}
         </button>
       </div>
     </div>`;
 
   const body = tab === 'risques' ? hubRisquesTab(p, diagDone) : hubActionsTab(p, diagDone);
 
-  return header + body + `<div style="height:24px"></div>`;
+  return header + tabs + body + `<div style="height:24px"></div>`;
 }
 
 /* ── HUB · Tab Risques ── */
@@ -3894,50 +3892,12 @@ function hubRisquesTab(p, diagDone) {
         </div>
       </div>`;
 
-  /* ─ Bloc explication pré-diagnostic : données géographiques ─ */
-  const zoneBlock = !diagDone ? `
-    <div style="background:var(--axa-xlight);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        ${sv(IC.pin,'width:13px;height:13px;fill:var(--axa)')}
-        <span style="font-size:12px;font-weight:700;color:var(--axa)">Analyse basée sur votre localisation</span>
-      </div>
-      <p style="font-size:12px;color:var(--n700);line-height:1.55;margin:0 0 10px">
-        Ces niveaux de risque sont estimés à partir des <strong>données géographiques de votre secteur</strong> : zone PPRI, historique météo, statistiques de sinistres locaux.<br><br>
-        Pour une analyse qui tient compte des <strong>caractéristiques réelles de votre logement</strong> — équipements de protection, type de construction, ancienneté — réalisez le diagnostic.
-      </p>
-      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--axa);font-weight:600">
-        ${sv(IC.bolt,'width:11px;height:11px;fill:var(--axa)')}
-        Le diagnostic débloque vos recommandations personnalisées et vos récompenses.
-      </div>
-    </div>` : '';
-
-  /* ─ Bloc impact post-diagnostic ─ */
-  const impactBlock = diagDone ? `
-    <div style="background:linear-gradient(135deg,#f0fdf6 0%,var(--success-bg) 100%);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        ${sv(IC.check,'width:13px;height:13px;fill:var(--success)')}
-        <span style="font-size:12px;font-weight:700;color:var(--success)">Analyse personnalisée · Indicateurs mis à jour</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:${improvedList.length?'10':'0'}px">
-        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center">
-          <div style="font-size:20px;font-weight:800;color:var(--n800)">${mainRisks.length}</div>
-          <div style="font-size:10px;color:var(--n500);line-height:1.3;margin-top:1px">risques<br>analysés</div>
-        </div>
-        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center">
-          <div style="font-size:20px;font-weight:800;color:${improvedList.length>0?'var(--success)':'var(--n500)'}">${improvedList.length}</div>
-          <div style="font-size:10px;color:var(--n500);line-height:1.3;margin-top:1px">niveau${improvedList.length!==1?'s':''}<br>${improvedList.length>0?'réduit':'confirmé'}${improvedList.length!==1?'s':''}</div>
-        </div>
-        <div style="background:rgba(255,255,255,.75);border-radius:8px;padding:8px 6px;text-align:center;cursor:pointer" onclick="switchHubTab('actions')">
-          <div style="font-size:20px;font-weight:800;color:var(--axa)">${actionsCount}</div>
-          <div style="font-size:10px;color:var(--axa);font-weight:600;line-height:1.3;margin-top:1px">actions<br>débloquées ↗</div>
-        </div>
-      </div>
-      ${improvedList.length > 0 ? `<div style="padding-top:10px;border-top:1px solid var(--success-light);font-size:11.5px;color:var(--success);font-weight:600;line-height:1.4">
-        ↓ Grâce aux équipements déclarés, ${improvedList.length} indicateur${improvedList.length>1?'s ont été réduits':' a été réduit'} par rapport à l'estimation géographique.
-      </div>` : `<div style="padding-top:10px;border-top:1px solid var(--success-light);font-size:11.5px;color:var(--n600);line-height:1.4">
-        ✓ Les niveaux de zone ont été confirmés par les caractéristiques de votre logement.
-      </div>`}
-    </div>` : '';
+  /* ─ Phrase discrète post-diagnostic ─ */
+  const impactNote = diagDone
+    ? (improvedList.length > 0
+        ? `<span style="font-size:11px;color:var(--success);font-weight:600">↓ ${improvedList.length} indicateur${improvedList.length>1?'s réduits':' réduit'} grâce aux équipements déclarés</span>`
+        : `<span style="font-size:11px;color:var(--n500)">✓ Niveaux de zone confirmés par votre diagnostic</span>`)
+    : '';
 
   /* ─ Cartes risques principaux ─ */
   const riskCards = mainRisks.slice(0, 3).map(rId => {
@@ -4019,13 +3979,14 @@ function hubRisquesTab(p, diagDone) {
   return `
     <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:14px">
       ${diagCard}
-      ${zoneBlock}
-      ${impactBlock}
       <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <div style="font-size:13px;font-weight:700;color:var(--n900)">Vos risques principaux</div>
-          <span style="font-size:11px;font-weight:600;color:${diagDone?'var(--success)':'var(--n400)'}">${diagDone?'✓ Personnalisé':'Estimation zone'}</span>
+          ${!diagDone
+            ? `<button onclick="showZoneInfoModal()" style="display:flex;align-items:center;gap:4px;background:none;border:none;padding:2px 0;cursor:pointer;font-family:var(--font)">${sv(IC.info,'width:12px;height:12px;fill:var(--n400)')}<span style="font-size:11px;color:var(--n500)">Comment est-ce calculé ?</span></button>`
+            : ''}
         </div>
+        ${impactNote ? `<div style="margin-bottom:10px">${impactNote}</div>` : `<div style="margin-bottom:10px"></div>`}
         <div style="display:flex;flex-direction:column;gap:8px">${riskCards}</div>
       </div>
       <div>
@@ -5381,6 +5342,37 @@ function generateBilan() {
 
 function mockSendBilan() {
   showToast('✉️ Bilan envoyé ! Vérifiez votre messagerie.', 'info');
+}
+
+/* ── MODAL : explication calcul niveaux de risque ── */
+function showZoneInfoModal() {
+  const device = document.querySelector('.device');
+  if (!device || device.querySelector('#zone-info-modal')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'zone-info-modal';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end';
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'width:100%;background:var(--white);border-radius:16px 16px 0 0;padding:20px 20px 28px;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,.61,.36,1)';
+  sheet.innerHTML = `
+    <div style="width:36px;height:4px;border-radius:99px;background:var(--n200);margin:0 auto 18px"></div>
+    <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:14px">Comment est-ce calculé ?</div>
+    <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;color:var(--n700);line-height:1.55">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:18px;flex-shrink:0">📍</span>
+        <div><strong>Avant le diagnostic — estimation géographique</strong><br>Les niveaux sont calculés à partir des données de votre secteur : zonage PPRI, historique météo, statistiques de sinistres locaux. C'est une estimation de zone, pas une analyse de votre logement.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:18px;flex-shrink:0">🏠</span>
+        <div><strong>Après le diagnostic — vue personnalisée</strong><br>Le diagnostic prend en compte les caractéristiques réelles de votre logement : équipements de protection, type de construction, ancienneté, environnement immédiat. Les niveaux peuvent s'améliorer ou se confirmer.</div>
+      </div>
+    </div>
+    <button id="zone-modal-close" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;margin-top:20px">Compris</button>`;
+  overlay.appendChild(sheet);
+  device.appendChild(overlay);
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; }));
+  function close() { sheet.style.transform = 'translateY(100%)'; setTimeout(() => overlay.remove(), 350); }
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  sheet.querySelector('#zone-modal-close').addEventListener('click', close);
 }
 
 /* ── DIAGNOSTIC MODAL (bottom sheet, 1ère visite Hub) ── */
