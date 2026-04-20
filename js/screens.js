@@ -802,6 +802,79 @@ function screenPlan() {
 /* ════════════════════════════════════════════
    S6 — V3-06 ACTIONS & DÉFIS
 ════════════════════════════════════════════ */
+function openCategoryModal(riskId) {
+  const p    = getProfile(window._ST.profileId);
+  const done = window._ST.completedActions || [];
+  const allA = getActionsForProfile(p, window._ST.diagAnswers);
+  const todo = allA.filter(a => !done.includes(a.id) && a.riskId === riskId);
+  const risk = RISKS[riskId] || {};
+  const cv   = RISK_CATEGORY_VERBS[riskId] || { verb: 'Agir', phrase: '' };
+
+  function modalActionRow(a) {
+    const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
+    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
+    return `
+      <div onclick="document.getElementById('cat-modal-bd').remove();openAction('${a.id}')"
+           style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100);cursor:pointer">
+        <div style="width:8px;height:8px;border-radius:50%;background:${effortColor};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--n900);line-height:1.3">${a.title}</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:2px">${effortLabel} · ${a.duration}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:700;color:var(--axa)">+${a.pts}</div>
+          <div style="font-size:9px;color:var(--n400)">pts</div>
+        </div>
+        <div style="color:var(--n300);font-size:16px">›</div>
+      </div>`;
+  }
+
+  const ptsTotal = todo.reduce((s,a) => s+a.pts, 0);
+  const emptyState = todo.length === 0
+    ? `<div style="text-align:center;padding:32px 0">
+         <div style="font-size:36px;margin-bottom:8px">✅</div>
+         <div style="font-size:14px;font-weight:700;color:var(--success)">Toutes les actions réalisées !</div>
+       </div>`
+    : todo.map(modalActionRow).join('');
+
+  const bd = document.createElement('div');
+  bd.id = 'cat-modal-bd';
+  bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:flex-end;justify-content:center';
+  bd.innerHTML = `
+    <div id="cat-modal-sheet" style="background:white;width:100%;max-width:430px;border-radius:20px 20px 0 0;padding:0 0 32px;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
+      <div style="display:flex;justify-content:center;padding:10px 0 4px">
+        <div style="width:36px;height:4px;border-radius:99px;background:var(--n200)"></div>
+      </div>
+      <div style="padding:14px 20px 16px;border-bottom:1px solid var(--n100)">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <div style="width:46px;height:46px;border-radius:12px;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${risk.icon || '⚡'}</div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px">${cv.verb}</div>
+            <div style="font-size:16px;font-weight:700;color:var(--n900)">${risk.label || riskId}</div>
+            <div style="font-size:12px;color:var(--n500);margin-top:1px">${cv.phrase}</div>
+          </div>
+          <button onclick="document.getElementById('cat-modal-bd').remove()" style="margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--n100);border:none;font-size:16px;cursor:pointer;flex-shrink:0">✕</button>
+        </div>
+        ${todo.length > 0 ? `<div style="font-size:11px;color:var(--n500)">${todo.length} action${todo.length>1?'s':''} · +${ptsTotal} pts à gagner</div>` : ''}
+      </div>
+      <div style="padding:0 20px">${emptyState}</div>
+    </div>`;
+
+  bd.addEventListener('click', e => { if (e.target === bd) bd.remove(); });
+  document.body.appendChild(bd);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('cat-modal-sheet').style.transform = 'translateY(0)';
+    });
+  });
+}
+
+function openDefi(id) {
+  window._ST.selectedDefi = id;
+  window._ST.selectedAction = null;
+  goTo(7);
+}
+
 function screenActions() {
   const p     = getProfile(window._ST.profileId);
   const done  = window._ST.completedActions || [];
@@ -809,56 +882,89 @@ function screenActions() {
   const allA  = getActionsForProfile(p, window._ST.diagAnswers);
   const todo  = allA.filter(a => !done.includes(a.id));
   const doneA = allA.filter(a => done.includes(a.id));
+  const ptsDone     = doneA.reduce((s, a) => s + a.pts, 0);
+  const ptsTotal    = allA.reduce((s, a) => s + a.pts, 0);
+  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
 
-  /* Defis saisonniers — tirés des actions seasonales */
-  const defis = todo.filter(a => a.momentDeVie === 'seasonal').slice(0, 3);
-  /* Actions autonomie */
-  const autonomie = todo.filter(a => a.momentDeVie !== 'seasonal' || !defis.includes(a)).slice(0, 5);
+  /* Actions groupées par risque principal */
+  const actionsByRisk = {};
+  p.mainRisks.forEach(r => actionsByRisk[r] = []);
+  todo.forEach(a => { if (actionsByRisk[a.riskId] !== undefined) actionsByRisk[a.riskId].push(a); });
 
-  /* Points total disponibles */
-  const ptsDisponibles = todo.reduce((s, a) => s + a.pts, 0);
-  const ptsDone        = doneA.reduce((s, a) => s + a.pts, 0);
-  const ptsTotal       = allA.reduce((s, a) => s + a.pts, 0);
-  const pctProgress    = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
+  /* Défi du moment actif */
+  const today = new Date().toISOString().slice(0,10);
+  const activeDefi = (typeof DEFIS_DU_MOMENT !== 'undefined')
+    ? DEFIS_DU_MOMENT.find(d => d.expiresAt > today && !(window._ST.completedDefis||[]).includes(d.id))
+    : null;
 
-  function actionCard(a) {
-    const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
-    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
-    const tags = a.tags || [];
+  function categoryCard(riskId) {
+    const risk  = RISKS[riskId] || {};
+    const cv    = RISK_CATEGORY_VERBS[riskId] || { verb: 'Agir', phrase: '' };
+    const acts  = actionsByRisk[riskId] || [];
+    const ptsCat = acts.reduce((s,a)=>s+a.pts,0);
+    const isDone = acts.length === 0;
+    const levelColor = risk.level==='high' ? 'var(--danger)' : risk.level==='medium' ? 'var(--warn)' : 'var(--success)';
     return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer">
+      <div onclick="${isDone ? '' : `openCategoryModal('${riskId}')`}"
+           style="background:var(--white);border:1.5px solid ${isDone?'var(--success-light, #d4f4e1)':'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:${isDone?'default':'pointer'};position:relative">
         <div style="display:flex;align-items:flex-start;gap:10px">
-          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon || '⚡'}</div>
+          <div style="width:40px;height:40px;border-radius:10px;background:${isDone?'var(--success-light, #d4f4e1)':'var(--axa-xlight)'};display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${risk.icon || '⚡'}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-            <div style="font-size:11px;color:var(--n500);margin-top:3px">${a.riskLabel} · ${effortLabel} · ${a.duration}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:12px;font-weight:700;color:${isDone?'var(--success)':'var(--n900)'}">${cv.verb} — ${risk.label || riskId}</div>
+              ${isDone ? '<span style="font-size:10px;background:var(--success);color:white;border-radius:99px;padding:1px 7px">✓ Fait</span>' : `<div style="width:7px;height:7px;border-radius:50%;background:${levelColor};flex-shrink:0"></div>`}
+            </div>
+            <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
+            ${isDone
+              ? '<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉</div>'
+              : `<div style="font-size:10px;color:var(--n400);margin-top:4px">${acts.length} action${acts.length>1?'s':''} · +${ptsCat} pts</div>`}
           </div>
-          <div style="flex-shrink:0;text-align:right">
-            <div style="font-size:14px;font-weight:700;color:var(--axa)">+${a.pts}</div>
-            <div style="font-size:10px;color:var(--n400)">pts</div>
-          </div>
+          ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
         </div>
-        ${tags.length ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          ${tags.map(t=>`<span style="font-size:10px;color:var(--n500);background:var(--n100);padding:3px 8px;border-radius:99px">${t}</span>`).join('')}
-        </div>` : ''}
       </div>`;
   }
 
-  function defiCard(a) {
+  /* Défi hero card */
+  function defiHeroCard(d) {
+    const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
     return `
-      <div onclick="openAction('${a.id}')" style="background:linear-gradient(135deg,var(--axa-xlight),var(--white));border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px;cursor:pointer;position:relative;overflow:hidden">
-        <div style="position:absolute;top:-10px;right:-10px;font-size:40px;opacity:.08">${RISKS[a.riskId]?.icon || '⚡'}</div>
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:10px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Défi · ${a.riskLabel}</div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-            <div style="font-size:12px;color:var(--n600);margin-top:4px;line-height:1.4">${a.benefit}</div>
-          </div>
-          <div style="background:var(--axa);color:white;border-radius:var(--r-sm);padding:8px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:16px;font-weight:700">+${a.pts}</div>
-            <div style="font-size:9px;opacity:.8">pts</div>
-          </div>
+      <div onclick="openDefi('${d.id}')"
+           style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:2px solid #d4a017;border-radius:var(--r-md);padding:18px;cursor:pointer;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-12px;top:-12px;font-size:64px;opacity:.1">${d.icon}</div>
+        <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 Défi du moment · ${d.period}</div>
+        <div style="font-size:15px;font-weight:700;color:white;line-height:1.35;margin-bottom:10px">${d.title}</div>
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:12px">
+          <span style="font-size:18px">${d.lotIcon}</span>
+          <span style="font-size:12px;font-weight:600;color:#fbbf24">${d.lot}</span>
         </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11px;color:rgba(255,255,255,.6)">🕐 Plus que ${daysLeft} jour${daysLeft>1?'s':''}</div>
+          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:13px;font-weight:700">🏆 +${d.pts} pts</div>
+        </div>
+      </div>`;
+  }
+
+  /* Items boost "Gagner plus de points" */
+  const diagDone = !!window._ST.diagCompleted;
+  const boosts = [
+    diagDone
+      ? { icon:'🔄', title:'Refaire mon diagnostic', sub:'Mettre à jour mon score', pts:10, onclick:'goTo(2)' }
+      : { icon:'🩺', title:'Faire mon diagnostic Prévention', sub:'5 min · personnalise vos actions', pts:50, onclick:'goTo(2)' },
+    { icon:'📸', title:'Ajouter une photo de mon logement', sub:'Inventaire visuel pour l\'assureur', pts:20, onclick:"alert('Bientôt disponible')" },
+    { icon:'👥', title:'Inviter un proche', sub:'Partagez votre Coach Prévention', pts:30, onclick:"alert('Bientôt disponible')" },
+    { icon:'📝', title:'Compléter mon profil', sub:'Ajoutez les détails de votre logement', pts:15, onclick:'goTo(0)' }
+  ];
+
+  function boostRow(b) {
+    return `
+      <div onclick="${b.onclick}" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100);cursor:pointer">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${b.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--n900)">${b.title}</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:1px">${b.sub}</div>
+        </div>
+        <div style="background:var(--axa-xlight);color:var(--axa);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0">+${b.pts} pts</div>
+        <div style="color:var(--n300);font-size:16px">›</div>
       </div>`;
   }
 
@@ -873,18 +979,17 @@ function screenActions() {
           <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
           <div style="font-size:17px;font-weight:700;color:white">Actions & Défis</div>
         </div>
-        <div style="margin-left:auto;flex-shrink:0" onclick="goTo(8)" style="cursor:pointer">
-          <div style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer" onclick="goTo(8)">
+        <div style="margin-left:auto;flex-shrink:0">
+          <div onclick="goTo(8)" style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer">
             <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
             <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
           </div>
         </div>
       </div>
-
       <div style="background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:10px 12px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <span style="font-size:11px;color:rgba(255,255,255,.7)">${ptsDone} pts gagnés</span>
-          <span style="font-size:11px;color:rgba(255,255,255,.5)">${ptsDisponibles} pts disponibles</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.5)">${ptsTotal - ptsDone} pts disponibles</span>
         </div>
         <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
           <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s ease"></div>
@@ -893,29 +998,45 @@ function screenActions() {
       </div>
     </div>
 
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:20px">
 
-      ${defis.length ? `
+      ${activeDefi ? `
         <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Défis en cours</div>
-            <span style="font-size:11px;color:var(--axa);background:var(--axa-xlight);padding:2px 8px;border-radius:99px;font-weight:600">${defis.length} actif${defis.length>1?'s':''}</span>
+          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">🔥 Défi du moment</div>
+          ${defiHeroCard(activeDefi)}
+        </div>` : ''}
+
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
+        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Gagnez des points en sécurisant votre logement</div>
+
+        <div onclick="alert('Quiz bientôt disponible ! +20 pts')"
+             style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:28px">🧠</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="font-size:13px;font-weight:700;color:white">Quiz de la semaine</div>
+              <span style="font-size:9px;background:#fbbf24;color:#1a1a00;border-radius:99px;padding:1px 6px;font-weight:700">NOUVEAU</span>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${defis.map(defiCard).join('')}</div>
-        </div>` : ''}
+          <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
+            <div style="font-size:13px;font-weight:700;color:white">+20</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
+          </div>
+        </div>
 
-      ${autonomie.length ? `
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Actions en autonomie</div>
-          <div style="display:flex;flex-direction:column;gap:8px">${autonomie.map(actionCard).join('')}</div>
-        </div>` : ''}
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${p.mainRisks.map(categoryCard).join('')}
+        </div>
+      </div>
 
-      ${!todo.length ? `
-        <div style="text-align:center;padding:32px 16px">
-          <div style="font-size:40px;margin-bottom:12px">🏆</div>
-          <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:6px">Toutes les actions réalisées !</div>
-          <p style="font-size:13px;color:var(--n500)">Consultez vos récompenses disponibles.</p>
-        </div>` : ''}
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Gagner plus de points</div>
+        <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
+          ${boosts.map(boostRow).join('')}
+        </div>
+      </div>
 
       <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
@@ -931,6 +1052,64 @@ function screenActions() {
 function screenDetailAction() {
   const p    = getProfile(window._ST.profileId);
   const done = window._ST.completedActions || [];
+
+  /* ── Mode défi du moment ── */
+  const dId = window._ST.selectedDefi;
+  if (dId && typeof DEFIS_DU_MOMENT !== 'undefined') {
+    const d = DEFIS_DU_MOMENT.find(x => x.id === dId);
+    if (d) {
+      const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
+      const stepsHtml = (d.steps||[]).map((s,i) =>
+        `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;${i<d.steps.length-1?'border-bottom:1px solid var(--n100)':''}">
+          <div style="width:22px;height:22px;border-radius:50%;background:#d4a017;color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${i+1}</div>
+          <div style="font-size:13px;color:var(--n700);line-height:1.5;padding-top:2px">${s}</div>
+        </div>`
+      ).join('');
+      return `
+        <div style="background:linear-gradient(135deg,#00008F,#1a1aaa);padding:16px var(--sp5) 22px;position:relative;overflow:hidden">
+          <div style="position:absolute;right:-16px;top:-16px;font-size:80px;opacity:.08">${d.icon}</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button onclick="goTo(6)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+              ${sv(IC.back,'width:18px;height:18px;fill:white')}
+            </button>
+            <div style="font-size:11px;color:rgba(255,255,255,.6)">Défi du moment</div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 ${d.period}</div>
+          <div style="font-size:18px;font-weight:700;color:white;line-height:1.3;margin-bottom:14px">${d.icon} ${d.title}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:14px">${d.subtitle}</div>
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(251,191,36,.15);border:1px solid rgba(212,160,23,.4);border-radius:var(--r-sm);padding:10px 12px">
+            <span style="font-size:20px">${d.lotIcon}</span>
+            <div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Lot à gagner</div>
+              <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
+            </div>
+            <div style="margin-left:auto;background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:14px;font-weight:700">+${d.pts} pts</div>
+          </div>
+        </div>
+        <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:14px">
+          <div style="background:var(--n50);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--n600);text-align:center">
+            🕐 Plus que ${daysLeft} jour${daysLeft>1?'s':''} pour relever ce défi
+          </div>
+          ${stepsHtml ? `
+            <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Comment participer ?</div>
+              ${stepsHtml}
+            </div>` : ''}
+          ${d.proof ? `
+            <div style="background:var(--n50);border:1px dashed var(--n300);border-radius:var(--r-md);padding:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:4px">Justificatif requis</div>
+              <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${d.proof}</div>
+              <button onclick="showToast('Upload disponible bientôt','info')" style="padding:9px 16px;background:#d4a017;color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">📎 Ajouter la preuve</button>
+            </div>` : ''}
+          <button onclick="showToast('Défi relevé ! +${d.pts} pts crédités 🏆','success')" style="width:100%;padding:14px;background:linear-gradient(135deg,#d4a017,#fbbf24);color:#1a1a00;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+            Relever le défi · +${d.pts} pts
+          </button>
+        </div>
+        <div style="height:24px"></div>`;
+    }
+  }
+
+  /* ── Mode action standard ── */
   const aId  = window._ST.selectedAction;
   const a    = ALL_ACTIONS.find(x => x.id === aId);
 

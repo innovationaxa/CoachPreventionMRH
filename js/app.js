@@ -13,11 +13,13 @@ window._ST = {
   completedActions: [],
   points:           0,
   selectedAction:   null,
+  selectedDefi:     null,
   selectedRisk:     null,
   proofUploaded:    {},
   hubTab:           'risques',
   diagHistory:      [],
-  hubModalShown:    false
+  hubModalShown:    false,
+  completedDefis:   []
 };
 
 function switchHubTab(tab) {
@@ -276,6 +278,7 @@ function openRisk(riskId) {
 /* ── ACTIONS ── */
 function openAction(id) {
   window._ST.selectedAction = id;
+  window._ST.selectedDefi = null;
   goTo(7);
 }
 

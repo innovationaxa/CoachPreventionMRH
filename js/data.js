@@ -726,6 +726,38 @@ const TUTORIALS_BY_RISK = {
   ]
 };
 
+/* ── DÉFIS DU MOMENT ── */
+const DEFIS_DU_MOMENT = [
+  {
+    id: 'defi-202604-photos',
+    title: 'Photographiez 3 pièces de votre logement',
+    subtitle: 'En cas de sinistre, ça vaut de l\'or',
+    riskId: 'incendie',
+    icon: '📸',
+    pts: 150,
+    lot: 'Carte cadeau Decathlon 30 €',
+    lotIcon: '🎁',
+    period: 'Avril 2026',
+    expiresAt: '2026-05-01',
+    steps: [
+      'Salon (vue large + meubles principaux)',
+      'Cuisine (électroménager visible)',
+      'Chambre (objets de valeur)'
+    ],
+    proof: 'Upload des 3 photos'
+  }
+];
+
+/* ── LIBELLÉS CATÉGORIES RISQUE ── */
+const RISK_CATEGORY_VERBS = {
+  'inondation': { verb: 'Anticiper', phrase: 'Protégez votre RDC avant les crues' },
+  'tempete':    { verb: 'Renforcer', phrase: 'Sécurisez toiture et fenêtres' },
+  'degat-eaux': { verb: 'Surveiller', phrase: 'Évitez la fuite invisible n°1 en MRH' },
+  'vol':        { verb: 'Sécuriser', phrase: 'Verrouillez vos accès, dissuadez les intrusions' },
+  'incendie':   { verb: 'Détecter', phrase: 'Détecteur, extincteur, gestes simples' },
+  'rga':        { verb: 'Stabiliser', phrase: 'Surveillez fissures et sécheresse' }
+};
+
 /* ── HELPERS ── */
 
 function getProfile(id) {
