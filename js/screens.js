@@ -336,7 +336,7 @@ function hubActionsTab(p, diagDone) {
   function actionRow(a) {
     const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
     return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+      <div onclick="openAction('${a.id}', 1)" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
         <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${RISKS[a.riskId]?.icon||'⚡'}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
@@ -693,7 +693,7 @@ function screenPlan() {
     const effortColor = a.effort==='low'?'var(--success)':a.effort==='medium'?'var(--warn)':'var(--danger)';
     const effortLabel = a.effort==='low'?'Facile':a.effort==='medium'?'Moyen':'Avancé';
     return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px">
+      <div onclick="openAction('${a.id}', 5)" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:10px">
         <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--n100);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon||'⚡'}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
@@ -803,124 +803,135 @@ function screenPlan() {
    S6 — V3-06 ACTIONS & DÉFIS
 ════════════════════════════════════════════ */
 function screenActions() {
-  const p     = getProfile(window._ST.profileId);
-  const done  = window._ST.completedActions || [];
-  const pts   = window._ST.points || 0;
-  const allA  = getActionsForProfile(p, window._ST.diagAnswers);
-  const todo  = allA.filter(a => !done.includes(a.id));
-  const doneA = allA.filter(a => done.includes(a.id));
+  const p        = getProfile(window._ST.profileId);
+  const pts      = window._ST.points || 0;
+  const done     = window._ST.completedActions || [];
+  const diagDone = window._ST.diagCompleted;
+  const allA     = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : ALL_ACTIONS;
 
-  /* Defis saisonniers — tirés des actions seasonales */
-  const defis = todo.filter(a => a.momentDeVie === 'seasonal').slice(0, 3);
-  /* Actions autonomie */
-  const autonomie = todo.filter(a => a.momentDeVie !== 'seasonal' || !defis.includes(a)).slice(0, 5);
+  const riskIds = [...new Set(allA.map(a => a.riskId))];
 
-  /* Points total disponibles */
-  const ptsDisponibles = todo.reduce((s, a) => s + a.pts, 0);
-  const ptsDone        = doneA.reduce((s, a) => s + a.pts, 0);
-  const ptsTotal       = allA.reduce((s, a) => s + a.pts, 0);
-  const pctProgress    = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
-
-  function actionCard(a) {
-    const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
-    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
-    const tags = a.tags || [];
-    return `
-      <div onclick="openAction('${a.id}')" style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:13px 14px;cursor:pointer">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${RISKS[a.riskId]?.icon || '⚡'}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-            <div style="font-size:11px;color:var(--n500);margin-top:3px">${a.riskLabel} · ${effortLabel} · ${a.duration}</div>
-          </div>
-          <div style="flex-shrink:0;text-align:right">
-            <div style="font-size:14px;font-weight:700;color:var(--axa)">+${a.pts}</div>
-            <div style="font-size:10px;color:var(--n400)">pts</div>
-          </div>
-        </div>
-        ${tags.length ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-          ${tags.map(t=>`<span style="font-size:10px;color:var(--n500);background:var(--n100);padding:3px 8px;border-radius:99px">${t}</span>`).join('')}
-        </div>` : ''}
-      </div>`;
+  function ptsRange(riskId) {
+    const acts = allA.filter(a => a.riskId === riskId);
+    if (!acts.length) return '';
+    const vals = acts.map(a => a.pts);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    return min === max ? `${min} pts` : `${min} – ${max} pts`;
   }
 
-  function defiCard(a) {
-    return `
-      <div onclick="openAction('${a.id}')" style="background:linear-gradient(135deg,var(--axa-xlight),var(--white));border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px;cursor:pointer;position:relative;overflow:hidden">
-        <div style="position:absolute;top:-10px;right:-10px;font-size:40px;opacity:.08">${RISKS[a.riskId]?.icon || '⚡'}</div>
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:10px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Défi · ${a.riskLabel}</div>
-            <div style="font-size:13px;font-weight:700;color:var(--n900);line-height:1.3">${a.title}</div>
-            <div style="font-size:12px;color:var(--n600);margin-top:4px;line-height:1.4">${a.benefit}</div>
-          </div>
-          <div style="background:var(--axa);color:white;border-radius:var(--r-sm);padding:8px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:16px;font-weight:700">+${a.pts}</div>
-            <div style="font-size:9px;opacity:.8">pts</div>
-          </div>
-        </div>
-      </div>`;
+  function categoryProgress(riskId) {
+    const acts = allA.filter(a => a.riskId === riskId);
+    const dc = acts.filter(a => done.includes(a.id)).length;
+    return { dc, total: acts.length };
   }
+
+  const categoryRows = riskIds.map(riskId => {
+    const c = RISK_CATEGORY_CONFIG[riskId];
+    if (!c) return '';
+    const { dc, total } = categoryProgress(riskId);
+    const allDone = dc === total && total > 0;
+    const progressText = allDone
+      ? '<span style="color:var(--success);font-weight:700">✓ Tout réalisé</span>'
+      : `<span style="color:var(--n400)">${dc > 0 ? `${dc}/${total} faites · ` : ''}${ptsRange(riskId)}</span>`;
+    return `
+      <div onclick="openActionCategory('${riskId}')" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);cursor:pointer">
+        <div style="width:44px;height:44px;border-radius:12px;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${c.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;color:var(--n900);line-height:1.2">${c.verb}</div>
+          <div style="font-size:11.5px;color:var(--n500);margin-top:2px">${c.desc}</div>
+          <div style="font-size:10px;margin-top:3px">${progressText}</div>
+        </div>
+        ${sv(IC.arrow,'width:18px;height:18px;fill:var(--axa);flex-shrink:0')}
+      </div>`;
+  }).join('');
 
   return `
-    <div style="background:var(--axa);padding:18px var(--sp5) 22px;position:relative;overflow:hidden">
-      <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.05)"></div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
-          ${sv(IC.back,'width:18px;height:18px;fill:white')}
+    <div style="background:var(--white);padding:18px var(--sp5) 14px;border-bottom:1px solid var(--n150)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="goTo(1)" style="width:34px;height:34px;border-radius:50%;background:var(--n100);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+          ${sv(IC.back,'width:18px;height:18px;fill:var(--n700)')}
         </button>
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.55)">Engagement</div>
-          <div style="font-size:17px;font-weight:700;color:white">Actions & Défis</div>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700;color:var(--n900)">Actions & Défis</div>
         </div>
-        <div style="margin-left:auto;flex-shrink:0" onclick="goTo(8)" style="cursor:pointer">
-          <div style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px;text-align:center;cursor:pointer" onclick="goTo(8)">
-            <div style="font-size:18px;font-weight:700;color:white">${pts}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
-          </div>
+        <div onclick="goTo(8)" style="background:var(--axa-xlight);border-radius:var(--r-sm);padding:7px 12px;text-align:center;cursor:pointer;min-width:52px">
+          <div style="font-size:16px;font-weight:700;color:var(--axa)">${pts}</div>
+          <div style="font-size:9px;color:var(--axa);opacity:.75">pts</div>
         </div>
-      </div>
-
-      <div style="background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:10px 12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:11px;color:rgba(255,255,255,.7)">${ptsDone} pts gagnés</span>
-          <span style="font-size:11px;color:rgba(255,255,255,.5)">${ptsDisponibles} pts disponibles</span>
-        </div>
-        <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s ease"></div>
-        </div>
-        <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;text-align:center">${doneA.length} action${doneA.length>1?'s':''} réalisée${doneA.length>1?'s':''} · ${todo.length} restante${todo.length>1?'s':''}</div>
       </div>
     </div>
 
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+    <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:22px">
 
-      ${defis.length ? `
-        <div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">Défis en cours</div>
-            <span style="font-size:11px;color:var(--axa);background:var(--axa-xlight);padding:2px 8px;border-radius:99px;font-weight:600">${defis.length} actif${defis.length>1?'s':''}</span>
+      <!-- DÉFI DU MOMENT -->
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Défi du moment</div>
+        <div onclick="showToast('🏆 Défi disponible prochainement !','info')" style="background:linear-gradient(135deg,#00008F 0%,#1919B0 100%);border-radius:var(--r-md);padding:16px;position:relative;overflow:hidden;cursor:pointer">
+          <div style="position:absolute;right:-14px;top:-14px;font-size:80px;opacity:.1">🏆</div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⏱️ 48h · AXA Prévention</div>
+              <div style="font-size:16px;font-weight:700;color:white;line-height:1.3">Vérifier votre installation électrique</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Proposé par AXA Prévention</div>
+            </div>
+            <div style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:9px 11px;text-align:center;flex-shrink:0">
+              <div style="font-size:17px;font-weight:700;color:white">50</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.55)">pts</div>
+            </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:8px">${defis.map(defiCard).join('')}</div>
-        </div>` : ''}
+          <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:center;gap:8px">
+            <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9)">+ 3 lots à gagner</span>
+            ${sv(IC.arrow,'width:14px;height:14px;fill:rgba(255,255,255,.7)')}
+          </div>
+        </div>
+      </div>
 
-      ${autonomie.length ? `
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Actions en autonomie</div>
-          <div style="display:flex;flex-direction:column;gap:8px">${autonomie.map(actionCard).join('')}</div>
-        </div>` : ''}
+      <!-- ACTIONS -->
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Actions</div>
 
-      ${!todo.length ? `
-        <div style="text-align:center;padding:32px 16px">
-          <div style="font-size:40px;margin-bottom:12px">🏆</div>
-          <div style="font-size:16px;font-weight:700;color:var(--n900);margin-bottom:6px">Toutes les actions réalisées !</div>
-          <p style="font-size:13px;color:var(--n500)">Consultez vos récompenses disponibles.</p>
-        </div>` : ''}
+        <!-- Quiz de la semaine -->
+        <div onclick="showToast('📝 Quiz disponible prochainement !','info')" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);cursor:pointer;margin-bottom:8px">
+          <div style="width:44px;height:44px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🧠</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:700;color:var(--n900)">Quiz de la semaine</div>
+            <div style="font-size:11.5px;color:var(--n500);margin-top:2px">Testez vos connaissances MRH</div>
+            <div style="font-size:10px;color:var(--n400);margin-top:3px">6 – 10 pts</div>
+          </div>
+          <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;flex-shrink:0;white-space:nowrap">Nouveau</span>
+          ${sv(IC.arrow,'width:18px;height:18px;fill:var(--axa);flex-shrink:0')}
+        </div>
 
-      <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
-        ${pts > 0 ? `<span style="background:var(--axa);color:white;border-radius:99px;padding:1px 8px;font-size:11px">${pts} pts</span>` : ''}
-      </button>
+        <!-- Catégories par risque -->
+        <div style="display:flex;flex-direction:column;gap:8px">${categoryRows}</div>
+      </div>
+
+      <!-- GAGNER PLUS DE POINTS -->
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:10px">Gagner plus de points</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${!diagDone ? `
+          <div onclick="showDiagModal()" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--axa-xlight);border:1.5px solid var(--axa-light);border-radius:var(--r-md);cursor:pointer">
+            <div style="width:44px;height:44px;border-radius:12px;background:var(--axa);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏠</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--axa)">Faire mon diagnostic Prévention</div>
+              <div style="font-size:11.5px;color:var(--n500);margin-top:2px">Personnalisez vos recommandations</div>
+              <div style="font-size:10px;color:var(--axa);font-weight:600;margin-top:3px">Jusqu'à 50 pts débloqués</div>
+            </div>
+            ${sv(IC.arrow,'width:18px;height:18px;fill:var(--axa);flex-shrink:0')}
+          </div>` : ''}
+          <div onclick="goTo(8)" style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);cursor:pointer">
+            <div style="width:44px;height:44px;border-radius:12px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎁</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--n900)">Voir mes récompenses</div>
+              <div style="font-size:11.5px;color:var(--n500);margin-top:2px">Avantages débloqués avec vos points</div>
+              ${pts > 0 ? `<div style="font-size:10px;color:var(--success);font-weight:700;margin-top:3px">${pts} pts disponibles</div>` : ''}
+            </div>
+            ${sv(IC.arrow,'width:18px;height:18px;fill:var(--axa);flex-shrink:0')}
+          </div>
+        </div>
+      </div>
+
     </div>
     <div style="height:24px"></div>`;
 }
@@ -942,7 +953,7 @@ function screenDetailAction() {
   const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
   const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
   const risk = RISKS[a.riskId] || {};
-  const fromScreen = window._ST.diagCompleted ? 5 : 6;
+  const fromScreen = window._ST.actionFromScreen != null ? window._ST.actionFromScreen : 6;
 
   const stepsHtml = (a.steps||[]).map((s,i) =>
     `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;${i<a.steps.length-1?'border-bottom:1px solid var(--n100)':''}">
