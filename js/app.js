@@ -16,7 +16,8 @@ window._ST = {
   selectedRisk:     null,
   proofUploaded:    {},
   hubTab:           'risques',
-  diagHistory:      []
+  diagHistory:      [],
+  hubModalShown:    false
 };
 
 function switchHubTab(tab) {
@@ -73,6 +74,10 @@ function goTo(idx) {
     return;
   }
   render(idx); updateNav(idx); updateTabBar(idx);
+  if (idx === 1 && !window._ST.diagCompleted && !window._ST.hubModalShown) {
+    window._ST.hubModalShown = true;
+    setTimeout(() => showDiagModal(), 380);
+  }
 }
 
 /* ── TAB BAR ── */
@@ -189,6 +194,7 @@ function selectProfile(id) {
   window._ST.selectedAction = null;
   window._ST.hubTab         = 'risques';
   window._ST.diagHistory    = [];
+  window._ST.hubModalShown  = false;
   render(0);
   updateNav(0);
 }
@@ -214,13 +220,29 @@ function selectDiagOpt(qid, val, el) {
   if (window._ST._diagAdvancing) return;
   window._ST.diagAnswers[qid] = val;
   const opts = el.closest('.option-list');
-  if (opts) opts.querySelectorAll('.opt-item').forEach(o => o.classList.remove('sel'));
+  if (opts) {
+    opts.querySelectorAll('.opt-item').forEach(o => {
+      o.classList.remove('sel');
+      o.style.background = 'var(--white)';
+      o.style.borderColor = 'var(--n200)';
+      const rb = o.querySelector('.radio-btn');
+      if (rb) { rb.style.background = 'transparent'; rb.style.borderColor = 'var(--n300)'; rb.innerHTML = ''; }
+      const lb = o.querySelector('.opt-label');
+      if (lb) { lb.style.color = 'var(--n800)'; lb.style.fontWeight = '400'; }
+    });
+  }
   el.classList.add('sel');
+  el.style.background = 'var(--axa-xlight)';
+  el.style.borderColor = 'var(--axa)';
+  const rb = el.querySelector('.radio-btn');
+  if (rb) { rb.style.background = 'var(--axa)'; rb.style.borderColor = 'var(--axa)'; rb.innerHTML = '<div style="width:6px;height:6px;border-radius:50%;background:white"></div>'; }
+  const lb = el.querySelector('.opt-label');
+  if (lb) { lb.style.color = 'var(--axa)'; lb.style.fontWeight = '600'; }
   window._ST._diagAdvancing = true;
   setTimeout(() => {
     window._ST._diagAdvancing = false;
     diagNext();
-  }, 280);
+  }, 320);
 }
 
 function diagNext() {
@@ -379,6 +401,50 @@ function generateBilan() {
 
 function mockSendBilan() {
   showToast('✉️ Bilan envoyé ! Vérifiez votre messagerie.', 'info');
+}
+
+/* ── DIAGNOSTIC MODAL (bottom sheet, 1ère visite Hub) ── */
+function showDiagModal() {
+  const device = document.querySelector('.device');
+  if (!device || device.querySelector('#diag-modal')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'diag-modal';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'width:100%;background:var(--white);border-radius:16px 16px 0 0;padding:20px 20px 28px;transform:translateY(100%);transition:transform .38s cubic-bezier(.22,.61,.36,1)';
+  sheet.innerHTML = `
+    <div style="width:36px;height:4px;border-radius:99px;background:var(--n200);margin:0 auto 18px"></div>
+    <div style="width:44px;height:44px;border-radius:12px;background:var(--axa);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <div style="font-size:18px;font-weight:700;color:var(--n900);line-height:1.3;margin-bottom:8px">Affinez votre exposition aux risques</div>
+    <p style="font-size:13px;color:var(--n600);line-height:1.55;margin-bottom:16px">En répondant à quelques questions sur votre logement, nous personnalisons votre diagnostic, vos recommandations — et débloquons vos récompenses.</p>
+    <div style="display:flex;gap:16px;margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n500)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>2 minutes
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--n500)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Sans impact sur la prime
+      </div>
+    </div>
+    <button id="diag-modal-start" style="width:100%;padding:14px;background:var(--axa);color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;margin-bottom:10px">
+      Démarrer le diagnostic
+    </button>
+    <button id="diag-modal-later" style="width:100%;padding:11px;background:transparent;color:var(--n500);border:none;font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer">
+      Plus tard
+    </button>`;
+
+  overlay.appendChild(sheet);
+  device.appendChild(overlay);
+
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; }));
+
+  function closeModal() { sheet.style.transform = 'translateY(100%)'; setTimeout(() => overlay.remove(), 380); }
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  sheet.querySelector('#diag-modal-start').addEventListener('click', () => { closeModal(); setTimeout(() => goTo(2), 380); });
+  sheet.querySelector('#diag-modal-later').addEventListener('click', closeModal);
 }
 
 /* ── INIT ── */

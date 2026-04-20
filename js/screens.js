@@ -221,26 +221,18 @@ function hubRisquesTab(p, diagDone) {
         </div>
       </div>`
     : `
-      <div style="background:linear-gradient(135deg,var(--axa-xlight) 0%,var(--white) 100%);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:18px 16px;position:relative;overflow:hidden">
-        <div style="position:absolute;right:-20px;top:-20px;width:80px;height:80px;border-radius:50%;background:var(--axa);opacity:.05"></div>
-        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;position:relative">
-          <div style="width:42px;height:42px;border-radius:var(--r-sm);background:var(--axa);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            ${sv(IC.shield,'width:22px;height:22px;fill:white')}
+      <div style="background:var(--white);border:1.5px solid var(--axa-light);border-radius:var(--r-md);padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;border-radius:var(--r-sm);background:var(--axa);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            ${sv(IC.shield,'width:18px;height:18px;fill:white')}
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:10px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">Étape recommandée</div>
-            <div style="font-size:15px;font-weight:700;color:var(--n900);line-height:1.3">Personnalisez votre diagnostic</div>
+            <div style="font-size:13px;font-weight:700;color:var(--n900)">Démarrer le diagnostic</div>
+            <div style="font-size:11px;color:var(--n500);margin-top:2px">${nQ} questions · 2 min · sans impact sur la prime</div>
           </div>
-        </div>
-        <p style="font-size:12.5px;color:var(--n700);margin-bottom:14px;line-height:1.5">Plus vous nous donnez d'informations sur votre logement (taille, équipements, environnement), plus nous pouvons affiner votre exposition réelle — et débloquer vos <strong>recommandations personnalisées</strong> et vos <strong>récompenses</strong>.</p>
-        <button onclick="goTo(2)" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-          ${sv(IC.shield,'width:16px;height:16px;fill:white')}
-          Démarrer le diagnostic
-        </button>
-        <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap">
-          <span style="font-size:11px;color:var(--n500);display:flex;align-items:center;gap:4px">${sv(IC.check,'width:11px;height:11px;fill:var(--success)')}${nQ} questions</span>
-          <span style="font-size:11px;color:var(--n500);display:flex;align-items:center;gap:4px">${sv(IC.check,'width:11px;height:11px;fill:var(--success)')}2 minutes</span>
-          <span style="font-size:11px;color:var(--n500);display:flex;align-items:center;gap:4px">${sv(IC.check,'width:11px;height:11px;fill:var(--success)')}Sans impact sur la prime</span>
+          <button onclick="goTo(2)" style="padding:8px 14px;background:var(--axa);color:white;border:none;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;flex-shrink:0">
+            Démarrer
+          </button>
         </div>
       </div>`;
 
@@ -396,10 +388,10 @@ function screenDiagnostic() {
 
   const options = q.options.map(o =>
     `<div class="opt-item${ans===o.v?' sel':''}" onclick="selectDiagOpt('${q.id}','${o.v}',this)" style="padding:13px 16px;border:1.5px solid ${ans===o.v?'var(--axa)':'var(--n200)'};border-radius:var(--r-md);background:${ans===o.v?'var(--axa-xlight)':'var(--white)'};cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .15s">
-      <div style="width:18px;height:18px;border-radius:50%;border:2px solid ${ans===o.v?'var(--axa)':'var(--n300)'};background:${ans===o.v?'var(--axa)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <div class="radio-btn" style="width:18px;height:18px;border-radius:50%;border:2px solid ${ans===o.v?'var(--axa)':'var(--n300)'};background:${ans===o.v?'var(--axa)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0">
         ${ans===o.v?`<div style="width:6px;height:6px;border-radius:50%;background:white"></div>`:''}
       </div>
-      <span style="font-size:14px;color:${ans===o.v?'var(--axa)':'var(--n800)'};font-weight:${ans===o.v?'600':'400'}">${o.l}</span>
+      <span class="opt-label" style="font-size:14px;color:${ans===o.v?'var(--axa)':'var(--n800)'};font-weight:${ans===o.v?'600':'400'}">${o.l}</span>
     </div>`
   ).join('');
 
