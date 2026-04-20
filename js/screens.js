@@ -296,8 +296,8 @@ function hubActionsTab(p, diagDone) {
   const allA  = getActionsForProfile(p, window._ST.diagAnswers);
   const todo  = allA.filter(a => !done.includes(a.id));
   const doneA = allA.filter(a => done.includes(a.id));
-  const now   = todo.filter(a => a.horizon === 'now').slice(0, 3);
-  const month = todo.filter(a => a.horizon === 'this_month').slice(0, 3);
+  const now   = todo.filter(a => a.horizon === 'now');
+  const month = todo.filter(a => a.horizon === 'this_month');
   const pts   = window._ST.points || 0;
   const ptsDispo = todo.reduce((s, a) => s + a.pts, 0);
 
@@ -363,10 +363,18 @@ function hubActionsTab(p, diagDone) {
           <div style="font-size:12px;color:var(--n500)">Consultez vos récompenses.</div>
         </div>` : ''}
 
-      <button onclick="goTo(5)" style="width:100%;padding:12px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        Voir tout le plan d'action
-        ${sv(IC.arrow,'width:14px;height:14px;fill:var(--n700)')}
-      </button>
+      ${doneA.length > 0 ? `
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Déjà réalisées (${doneA.length})</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            ${doneA.map(a => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--success-bg);border:1px solid var(--success-light);border-radius:var(--r-md);opacity:.85">
+                <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0">${sv(IC.check,'width:11px;height:11px;fill:white')}</div>
+                <div style="flex:1;font-size:12px;font-weight:600;color:var(--success)">${a.title}</div>
+                <span style="font-size:11px;font-weight:700;color:var(--success)">+${a.pts} pts</span>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
     </div>`;
 }
 

@@ -62,12 +62,13 @@ function goTo(idx) {
   if (idx === 3) {
     showLoadingThen(() => {
       window._ST.diagCompleted = true;
+      window._ST.hubTab = 'risques';
       if (!Array.isArray(window._ST.diagHistory)) window._ST.diagHistory = [];
       window._ST.diagHistory.push({
         date: new Date().toISOString(),
         answers: { ...window._ST.diagAnswers }
       });
-      render(3); updateNav(3); updateTabBar(3);
+      render(1); updateNav(1); updateTabBar(1);
     });
     return;
   }
@@ -264,7 +265,7 @@ function completeAction(id) {
   window._ST.completedActions.push(id);
   window._ST.points = (window._ST.points || 0) + a.pts;
   showToast(`+${a.pts} pts gagnés !`, 'success');
-  setTimeout(() => goTo(8), 600);
+  setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, 600);
 }
 
 /* ── PROOF UPLOAD (mocked) ── */
