@@ -305,6 +305,10 @@ function hubRisquesTab(p, diagDone) {
       </div>
       ${contextBlock}
       ${actionsCTA}
+      ${diagDone ? `
+        <button onclick="downloadBilan()" style="width:100%;padding:12px 14px;background:var(--white);border:1.5px solid var(--n200);color:var(--n700);border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          ${sv(IC.download,'width:15px;height:15px;fill:var(--n700)')} Télécharger mon bilan prévention
+        </button>` : ''}
     </div>`;
 }
 
@@ -329,9 +333,6 @@ function hubActionsTab(p, diagDone) {
   const todo  = allA.filter(a => !done.includes(a.id));
   const doneA = allA.filter(a => done.includes(a.id));
   const pts   = window._ST.points || 0;
-  const ptsDone  = doneA.reduce((s, a) => s + a.pts, 0);
-  const ptsTotal = allA.reduce((s, a) => s + a.pts, 0);
-  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
 
   /* Actions groupées par risque principal (todo uniquement pour les cartes ouvrables) */
   const actionsByRisk = {};
@@ -412,23 +413,14 @@ function hubActionsTab(p, diagDone) {
   return `
     <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:18px">
 
-      <div style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);border-radius:var(--r-md);padding:14px 16px;color:white">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div>
-            <div style="font-size:11px;opacity:.7">Points cumulés</div>
-            <div style="font-size:22px;font-weight:800">${pts} pts</div>
+      ${activeDefi ? `
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:700;color:var(--n900)">🔥 Défi du moment</div>
+            <span style="font-size:10px;color:var(--n400)">· ${activeDefi.period}</span>
           </div>
-          <button onclick="goTo(8)" style="padding:7px 12px;background:rgba(255,255,255,.18);color:white;border:none;border-radius:99px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:5px">
-            ${sv(IC.gift,'width:12px;height:12px;fill:white')} Récompenses
-          </button>
-        </div>
-        <div style="height:5px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px"></div>
-        </div>
-        <div style="font-size:10.5px;opacity:.7;margin-top:5px">${doneA.length} / ${allA.length} actions · ${ptsTotal - ptsDone} pts à gagner</div>
-      </div>
-
-      ${activeDefi ? defiHeroCard(activeDefi) : ''}
+          ${defiHeroCard(activeDefi)}
+        </div>` : ''}
 
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
@@ -1072,27 +1064,52 @@ function screenRewards() {
   const nextTarget = available.length > 0 ? available.sort((a,b)=>a.minActions-b.minActions)[0] : null;
   const ptsToNext  = nextTarget ? Math.max(0, nextTarget.minActions - completedCount) : 0;
 
-  return `<div class="screen-header" style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);padding:24px var(--sp5) 20px;color:white">
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7;margin-bottom:4px">Module Récompenses</div>
-    <div style="font-size:20px;font-weight:700">Vos avantages</div>
-    <div style="font-size:12px;opacity:.8;margin-top:2px">${profile.firstName} — ${completedCount} action${completedCount!==1?'s':''} réalisée${completedCount!==1?'s':''}</div>
+  const allActions = st.diagCompleted ? getActionsForProfile(profile, st.diagAnswers) : [];
+  const doneCount  = allActions.filter(a => completedCount && (st.completedActions||[]).includes(a.id)).length;
+  const ptsDone    = allActions.filter(a => (st.completedActions||[]).includes(a.id)).reduce((s,a)=>s+a.pts,0);
+  const ptsTotal   = allActions.reduce((s,a)=>s+a.pts,0);
+  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
+
+  return `<div class="screen-header" style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);padding:18px var(--sp5) 20px;color:white">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <button onclick="window._ST.hubTab='actions';goTo(1)" aria-label="Retour" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
+        ${sv(IC.back,'width:18px;height:18px;fill:white')}
+      </button>
+      <div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7">Module Récompenses</div>
+        <div style="font-size:20px;font-weight:700">Vos avantages</div>
+      </div>
+    </div>
+    <div style="font-size:12px;opacity:.8">${profile.firstName} — ${completedCount} action${completedCount!==1?'s':''} réalisée${completedCount!==1?'s':''}</div>
   </div>
 
   <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
 
-    <!-- Points counter -->
-    <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:16px;text-align:center">
-      <div style="font-size:32px;font-weight:800;color:var(--axa);line-height:1">${pts}</div>
-      <div style="font-size:12px;color:var(--n500);margin-top:2px">points de prévention</div>
+    <div style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);border-radius:var(--r-md);padding:14px 16px;color:white">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;opacity:.7">Points cumulés</div>
+          <div style="font-size:24px;font-weight:800">${pts} pts</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;opacity:.7">Actions réalisées</div>
+          <div style="font-size:16px;font-weight:700">${(st.completedActions||[]).length}${ptsTotal>0?` / ${allActions.length}`:''}</div>
+        </div>
+      </div>
+      ${ptsTotal > 0 ? `
+        <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s"></div>
+        </div>
+        <div style="font-size:10.5px;opacity:.7;margin-top:5px">${ptsTotal - ptsDone} pts encore à gagner</div>` : ''}
       ${nextTarget ? `
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--n100)">
-          <div style="font-size:11px;color:var(--n500);margin-bottom:6px">
-            Encore <strong style="color:var(--axa)">${ptsToNext} action${ptsToNext>1?'s':''}</strong> pour débloquer <em>${nextTarget.title}</em>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.15)">
+          <div style="font-size:11px;opacity:.85;margin-bottom:5px">
+            Encore <strong style="color:#fbbf24">${ptsToNext} action${ptsToNext>1?'s':''}</strong> pour débloquer <em>${nextTarget.title}</em>
           </div>
-          <div style="height:6px;background:var(--n100);border-radius:99px;overflow:hidden">
-            <div style="height:100%;width:${Math.min(100,Math.round(completedCount/nextTarget.minActions*100))}%;background:var(--axa);border-radius:99px;transition:width .4s"></div>
+          <div style="height:5px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(100,Math.round(completedCount/nextTarget.minActions*100))}%;background:#fbbf24;border-radius:99px;transition:width .4s"></div>
           </div>
-        </div>` : `<div style="margin-top:8px;font-size:11px;color:var(--success);font-weight:600">🎉 Toutes les récompenses disponibles sont débloquées !</div>`}
+        </div>` : `<div style="margin-top:8px;font-size:11px;color:#fbbf24;font-weight:600">🎉 Toutes les récompenses disponibles sont débloquées !</div>`}
     </div>
 
     ${unlocked.length > 0 ? `

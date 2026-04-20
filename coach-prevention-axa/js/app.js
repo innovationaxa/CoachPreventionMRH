@@ -293,6 +293,12 @@ function completeAction(id) {
   setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, 600);
 }
 
+/* ── BILAN PRÉVENTION (mocked) ── */
+function downloadBilan() {
+  showToast('📄 Génération du bilan prévention… (démo)', 'info');
+  setTimeout(() => showToast('✓ Bilan prévention prêt — téléchargement simulé', 'success'), 1200);
+}
+
 /* ── PROOF UPLOAD (mocked) ── */
 function mockUploadProof(actionId, fromScreen) {
   if (!window._ST.proofUploaded) window._ST.proofUploaded = {};
