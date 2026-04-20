@@ -274,9 +274,91 @@ function openRisk(riskId) {
 }
 
 /* ── ACTIONS ── */
-function openAction(id) {
+function openAction(id, from) {
   window._ST.selectedAction = id;
+  window._ST.actionFromScreen = from != null ? from : 6;
   goTo(7);
+}
+
+/* ── CATEGORY MODAL (bottom sheet) ── */
+function openActionCategory(riskId) {
+  const device = document.querySelector('.device');
+  if (!device || device.querySelector('#action-category-modal')) return;
+
+  const c = RISK_CATEGORY_CONFIG[riskId];
+  if (!c) return;
+
+  const p        = getProfile(window._ST.profileId);
+  const diagDone = window._ST.diagCompleted;
+  const allA     = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : ALL_ACTIONS;
+  const done     = window._ST.completedActions || [];
+  const catActions = allA.filter(a => a.riskId === riskId);
+
+  const arrowSvg  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--axa)"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`;
+  const checkSvg  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+
+  const actionRows = catActions.map(a => {
+    const isDone = done.includes(a.id);
+    return `
+      <div onclick="closeActionCategoryModal(); setTimeout(() => openAction('${a.id}', 6), 200)"
+           style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:${isDone ? 'var(--n50)' : 'var(--white)'};border:1.5px solid var(--n150);border-radius:var(--r-md);cursor:pointer">
+        <div style="font-size:24px;flex-shrink:0;width:36px;text-align:center">${RISKS[riskId]?.icon || '⚡'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:700;color:${isDone ? 'var(--n400)' : 'var(--n900)'};line-height:1.3;${isDone ? 'text-decoration:line-through' : ''}">${a.title}</div>
+          <div style="font-size:11px;color:var(--n400);margin-top:2px">${a.duration}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span style="font-size:13px;font-weight:700;color:${isDone ? 'var(--success)' : 'var(--axa)'}">+${a.pts}</span>
+          <span style="font-size:10px;color:var(--n400)">pts</span>
+          ${isDone ? checkSvg : arrowSvg}
+        </div>
+      </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'action-category-modal';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'width:100%;background:var(--white);border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,.61,.36,1);max-height:82vh;overflow-y:auto';
+  sheet.innerHTML = `
+    <div style="position:sticky;top:0;background:var(--white);padding:14px 16px 12px;border-bottom:1px solid var(--n100);display:flex;align-items:center;justify-content:space-between;z-index:1">
+      <div style="width:36px;height:4px;border-radius:99px;background:var(--n200);position:absolute;top:8px;left:50%;transform:translateX(-50%)"></div>
+      <div style="width:28px"></div>
+      <div style="font-size:14px;font-weight:700;color:var(--n700);margin-top:4px">${c.verb}</div>
+      <button onclick="closeActionCategoryModal()" style="width:28px;height:28px;border-radius:50%;background:var(--n100);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--n600)"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px 20px 32px">
+      <div style="font-size:38px;margin-bottom:10px">${c.emoji}</div>
+      <div style="font-size:22px;font-weight:800;color:var(--n900);margin-bottom:5px">${c.verb}</div>
+      <div style="font-size:13px;color:var(--n500);margin-bottom:18px;line-height:1.5">${c.desc}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${actionRows}</div>
+      ${!diagDone ? `
+      <div onclick="closeActionCategoryModal(); setTimeout(showDiagModal, 200)" style="margin-top:14px;padding:12px 14px;background:var(--axa-xlight);border-radius:var(--r-sm);display:flex;align-items:center;gap:10px;cursor:pointer">
+        <span style="font-size:18px">🎯</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--axa)">Personnalisez ces actions</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:1px">Faites le diagnostic pour des recommandations adaptées à votre logement</div>
+        </div>
+      </div>` : ''}
+    </div>`;
+
+  overlay.appendChild(sheet);
+  device.appendChild(overlay);
+
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; }));
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeActionCategoryModal(); });
+}
+
+function closeActionCategoryModal() {
+  const device  = document.querySelector('.device');
+  const overlay = device?.querySelector('#action-category-modal');
+  if (!overlay) return;
+  const sheet = overlay.querySelector('div');
+  sheet.style.transform = 'translateY(100%)';
+  setTimeout(() => overlay.remove(), 350);
 }
 
 function completeAction(id) {
