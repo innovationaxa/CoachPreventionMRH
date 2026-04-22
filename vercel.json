@@ -1,5 +1,5 @@
 {
-  "buildCommand": "mkdir -p dist && cp preview.html index.html dist/ && cp -r css js assets dist/",
+  "buildCommand": "bash build-preview.sh && mkdir -p dist && cp preview.html index.html dist/ && cp -r css js assets dist/",
   "outputDirectory": "dist",
   "headers": [
     {
