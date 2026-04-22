@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Build self-contained preview.html bundle from index.html + css/ + js/
+set -e
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$ROOT"
+
+OUT="$ROOT/preview.html"
+
+{
+  cat <<'HEAD'
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Coach Prévention MRH V3 — Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+HEAD
+  cat css/tokens.css css/base.css css/components.css css/screens.css css/animations.css
+  cat <<'MIDH'
+  </style>
+</head>
+<body>
+  <div class="app-stage">
+    <div class="device">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true">
+            <rect x="0" y="3" width="3" height="9" rx="1" fill="white" opacity="0.4"/>
+            <rect x="4.5" y="2" width="3" height="10" rx="1" fill="white" opacity="0.6"/>
+            <rect x="9" y="1" width="3" height="11" rx="1" fill="white" opacity="0.8"/>
+            <rect x="13.5" y="0" width="3" height="12" rx="1" fill="white"/>
+          </svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+            <path d="M8 3C10.5 3 12.7 4.1 14.2 5.9L15.5 4.4C13.6 2.3 10.9 1 8 1C5.1 1 2.4 2.3 0.5 4.4L1.8 5.9C3.3 4.1 5.5 3 8 3Z" fill="white" opacity="0.4"/>
+            <path d="M8 6C9.7 6 11.2 6.8 12.2 8L13.5 6.5C12.1 4.9 10.2 4 8 4C5.8 4 3.9 4.9 2.5 6.5L3.8 8C4.8 6.8 6.3 6 8 6Z" fill="white" opacity="0.7"/>
+            <circle cx="8" cy="10.5" r="1.5" fill="white"/>
+          </svg>
+          <div class="battery"><div class="battery-fill"></div><div class="battery-nub"></div></div>
+        </div>
+      </div>
+      <div class="screen-wrap" id="app"></div>
+      <nav class="tab-bar" id="tabBar" aria-label="Navigation principale">
+        <div class="tab-main">
+          <button class="tab-item" data-tab="accueil" onclick="tabMock('Accueil')" aria-label="Accueil">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span class="tab-label">Accueil</span>
+          </button>
+          <button class="tab-item" data-tab="contrats" onclick="tabMock('Mes contrats')" aria-label="Mes contrats">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <span class="tab-label">Contrats</span>
+          </button>
+          <button class="tab-item" data-tab="prevention" onclick="goTo(1)" aria-label="Coach Prévention">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            <span class="tab-label">Prévention</span>
+          </button>
+          <button class="tab-item" data-tab="compte" onclick="tabMock('Mon Compte')" aria-label="Mon Compte">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span class="tab-label">Mon Compte</span>
+          </button>
+        </div>
+        <button class="tab-angel" onclick="tabMock('Angel — IA AXA')" aria-label="Angel, assistant IA">
+          <div class="tab-angel-circle">
+            <img class="tab-angel-stars" src="assets/Vector.svg" alt="">
+            <span class="tab-angel-name">Angel</span>
+          </div>
+        </button>
+      </nav>
+    </div>
+    <nav class="step-nav" id="stepNav" aria-label="Étapes">
+      <button class="step-btn active" data-step="0" onclick="goTo(0)"><span class="step-num">1</span><span class="step-lbl">Profil</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="1" onclick="goTo(1)"><span class="step-num">2</span><span class="step-lbl">Hub</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="2" onclick="goTo(2)"><span class="step-num">3</span><span class="step-lbl">Diagnostic</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="3" onclick="goTo(3)"><span class="step-num">4</span><span class="step-lbl">Risques</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="4" onclick="goTo(4)"><span class="step-num">5</span><span class="step-lbl">Deep dive</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="5" onclick="goTo(5)"><span class="step-num">6</span><span class="step-lbl">Plan</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="6" onclick="goTo(6)"><span class="step-num">7</span><span class="step-lbl">Actions</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="7" onclick="goTo(7)"><span class="step-num">8</span><span class="step-lbl">Détail</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="8" onclick="goTo(8)"><span class="step-num">9</span><span class="step-lbl">Rewards</span></button>
+      <div class="step-sep"></div>
+      <button class="step-btn" data-step="9" onclick="goTo(9)"><span class="step-num">10</span><span class="step-lbl">Historique</span></button>
+    </nav>
+  </div>
+  <script>
+MIDH
+  cat js/data.js js/screens.js js/app.js
+  cat <<'FOOT'
+  </script>
+</body>
+</html>
+FOOT
+} > "$OUT"
+
+echo "Built: $OUT ($(wc -l < "$OUT") lines, $(wc -c < "$OUT") bytes)"

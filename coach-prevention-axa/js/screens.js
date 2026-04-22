@@ -100,11 +100,12 @@ function screenSelection() {
    S1 — V3-01 HUB PRÉVENTION (navigation interne : Risques / Actions)
 ════════════════════════════════════════════ */
 function screenHub() {
-  const p        = getProfile(window._ST.profileId);
-  const diagDone = window._ST.diagCompleted;
-  const tab      = (window._ST.hubTab === 'actions' && diagDone) ? 'actions' : 'risques';
-  const pts      = window._ST.points || 0;
-  const done     = window._ST.completedActions || [];
+  const p          = getProfile(window._ST.profileId);
+  const diagDone   = window._ST.diagCompleted;
+  const tab        = (window._ST.hubTab === 'actions' && diagDone) ? 'actions' : 'risques';
+  const done       = window._ST.completedActions || [];
+  const unlockedBadges = window._ST.unlockedBadges || [];
+  const badgeCount = unlockedBadges.length;
   const allActions = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : [];
   const todoCount  = allActions.filter(a => !done.includes(a.id)).length;
 
@@ -127,7 +128,7 @@ function screenHub() {
         </div>
         <button onclick="${diagDone?`goTo(8)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" aria-label="Mes récompenses" style="position:relative;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:${diagDone?'pointer':'not-allowed'};opacity:${diagDone?1:.5};flex-shrink:0;margin-top:2px">
           ${sv(IC.gift,'width:18px;height:18px;fill:white')}
-          ${pts > 0 ? `<span style="position:absolute;top:-3px;right:-3px;background:var(--success-mid);color:white;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;font-family:var(--font);min-width:16px;text-align:center;line-height:1.4">${pts}</span>` : ''}
+          ${badgeCount > 0 ? `<span style="position:absolute;top:-3px;right:-3px;background:#D97706;color:white;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;font-family:var(--font);min-width:16px;text-align:center;line-height:1.4">${badgeCount}</span>` : ''}
         </button>
       </div>
 
@@ -138,12 +139,13 @@ function screenHub() {
         <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px">${p.contract.name} · ${p.contract.ref}</div>
       </div>
 
-      <div style="position:relative">
+      <div style="position:relative;display:flex;align-items:center;gap:8px">
         <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.11);border-radius:99px;padding:4px 11px">
           ${diagDone
             ? `${sv(IC.check,'width:11px;height:11px;fill:var(--success-mid)')}<span style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">Diagnostic complété · Vue personnalisée</span>`
             : `${sv(IC.info,'width:11px;height:11px;fill:rgba(255,255,255,.55)')}<span style="font-size:11px;color:rgba(255,255,255,.7)">Vue de zone · Diagnostic recommandé</span>`}
         </div>
+        ${badgeCount > 0 ? `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.25);border:1px solid rgba(251,191,36,.35);border-radius:99px;padding:4px 10px"><span style="font-size:12px">🏅</span><span style="font-size:11px;font-weight:700;color:#fbbf24">${badgeCount} badge${badgeCount>1?'s':''}</span></div>` : ''}
       </div>
     </div>`;
 
@@ -332,7 +334,8 @@ function hubActionsTab(p, diagDone) {
   const allA  = getActionsForProfile(p, window._ST.diagAnswers);
   const todo  = allA.filter(a => !done.includes(a.id));
   const doneA = allA.filter(a => done.includes(a.id));
-  const pts   = window._ST.points || 0;
+  const unlockedBadges = window._ST.unlockedBadges || [];
+  const badgeCount     = unlockedBadges.length;
 
   /* Actions groupées par risque principal (todo uniquement pour les cartes ouvrables) */
   const actionsByRisk = {};
@@ -349,9 +352,12 @@ function hubActionsTab(p, diagDone) {
     const risk  = RISKS[riskId] || {};
     const cv    = (typeof RISK_CATEGORY_VERBS !== 'undefined' && RISK_CATEGORY_VERBS[riskId]) || { verb: 'Agir', phrase: '' };
     const acts  = actionsByRisk[riskId] || [];
-    const ptsCat = acts.reduce((s,a)=>s+a.pts,0);
     const isDone = acts.length === 0;
     const levelColor = risk.level==='high' ? 'var(--danger)' : risk.level==='medium' ? 'var(--warn)' : 'var(--success)';
+    const linkedBadge = (typeof BADGES !== 'undefined')
+      ? BADGES.find(b => b.condition && b.condition.type === 'risk_complete' && b.condition.riskId === riskId)
+      : null;
+    const badgeEarned = linkedBadge && unlockedBadges.includes(linkedBadge.id);
     return `
       <div onclick="${isDone ? '' : `openCategoryModal('${riskId}')`}"
            style="background:var(--white);border:1.5px solid ${isDone?'var(--success-light, #d4f4e1)':'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:${isDone?'default':'pointer'};position:relative">
@@ -364,8 +370,8 @@ function hubActionsTab(p, diagDone) {
             </div>
             <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
             ${isDone
-              ? '<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉</div>'
-              : `<div style="font-size:10px;color:var(--n400);margin-top:4px">${acts.length} action${acts.length>1?'s':''} · +${ptsCat} pts</div>`}
+              ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉${badgeEarned ? ' · 🏅 Badge débloqué !' : ''}</div>`
+              : `<div style="display:flex;align-items:center;gap:5px;margin-top:5px">${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}<span style="font-size:10px;color:var(--n400)">${acts.length} action${acts.length>1?'s':''}</span></div>`}
           </div>
           ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
         </div>
@@ -385,16 +391,16 @@ function hubActionsTab(p, diagDone) {
             <div style="font-size:13px;font-weight:700;color:white;line-height:1.25">${d.title}</div>
             <div style="font-size:10.5px;color:rgba(255,255,255,.55);margin-top:3px">${d.lotIcon} ${d.lot} · 🕐 ${daysLeft}j</div>
           </div>
-          <div style="background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:5px 9px;font-size:12px;font-weight:700;flex-shrink:0">+${d.pts}</div>
+          <div style="background:rgba(251,191,36,.2);border-radius:var(--r-sm);padding:5px 9px;font-size:18px;flex-shrink:0">🏅</div>
         </div>
       </div>`;
   }
 
   const boosts = [
-    { icon:'🔄', title:'Refaire mon diagnostic', sub:'Mettre à jour mon score', pts:10, onclick:'goTo(2)' },
-    { icon:'📸', title:'Ajouter une photo de mon logement', sub:'Inventaire visuel pour l\'assureur', pts:20, onclick:"showToast('Bientôt disponible','info')" },
-    { icon:'👥', title:'Inviter un proche', sub:'Partagez votre Coach Prévention', pts:30, onclick:"showToast('Bientôt disponible','info')" },
-    { icon:'📝', title:'Compléter mon profil', sub:'Ajoutez les détails de votre logement', pts:15, onclick:'goTo(0)' }
+    { icon:'🔄', title:'Refaire mon diagnostic', sub:'Contribue aux badges de progression', onclick:'goTo(2)' },
+    { icon:'📸', title:'Ajouter une photo de mon logement', sub:'Inventaire visuel pour l\'assureur', onclick:"showToast('Bientôt disponible','info')" },
+    { icon:'👥', title:'Inviter un proche', sub:'Partagez votre Coach Prévention', onclick:"showToast('Bientôt disponible','info')" },
+    { icon:'📝', title:'Compléter mon profil', sub:'Ajoutez les détails de votre logement', onclick:'goTo(0)' }
   ];
 
   function boostRow(b) {
@@ -405,7 +411,6 @@ function hubActionsTab(p, diagDone) {
           <div style="font-size:13px;font-weight:600;color:var(--n900)">${b.title}</div>
           <div style="font-size:11px;color:var(--n500);margin-top:1px">${b.sub}</div>
         </div>
-        <div style="background:var(--axa-xlight);color:var(--axa);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;flex-shrink:0">+${b.pts} pts</div>
         <div style="color:var(--n300);font-size:16px">›</div>
       </div>`;
   }
@@ -424,9 +429,9 @@ function hubActionsTab(p, diagDone) {
 
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
-        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Gagnez des points en sécurisant votre logement</div>
+        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Sécurisez votre logement et débloquez des badges</div>
 
-        <div onclick="showToast('Quiz bientôt disponible ! +5 pts','info')"
+        <div onclick="showToast('Quiz bientôt disponible !','info')"
              style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
           <div style="font-size:28px">🧠</div>
           <div style="flex:1">
@@ -436,10 +441,7 @@ function hubActionsTab(p, diagDone) {
             </div>
             <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
           </div>
-          <div style="background:rgba(255,255,255,.2);border-radius:var(--r-sm);padding:5px 10px;text-align:center;flex-shrink:0">
-            <div style="font-size:13px;font-weight:700;color:white">+5</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.6)">pts</div>
-          </div>
+          <div style="font-size:22px;flex-shrink:0">🏅</div>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -458,13 +460,13 @@ function hubActionsTab(p, diagDone) {
                   <div style="font-size:12.5px;font-weight:600;color:var(--success);line-height:1.3">${a.title}</div>
                   <div style="font-size:10.5px;color:var(--n500);margin-top:1px">${a.riskLabel}</div>
                 </div>
-                <span style="font-size:11px;font-weight:700;color:var(--success);flex-shrink:0">+${a.pts} pts</span>
+                <span style="font-size:16px;flex-shrink:0">✓</span>
               </div>`).join('')}
           </div>
         </div>` : ''}
 
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Gagner plus de points</div>
+        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Progresser davantage</div>
         <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
           ${boosts.map(boostRow).join('')}
         </div>
@@ -472,7 +474,7 @@ function hubActionsTab(p, diagDone) {
 
       <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
-        ${pts > 0 ? `<span style="background:var(--axa);color:white;border-radius:99px;padding:1px 8px;font-size:11px">${pts} pts</span>` : ''}
+        ${badgeCount > 0 ? `<span style="background:#D97706;color:white;border-radius:99px;padding:1px 8px;font-size:11px">🏅 ${badgeCount}</span>` : ''}
       </button>
     </div>`;
 }
@@ -776,15 +778,10 @@ function openCategoryModal(riskId) {
           <div style="font-size:13px;font-weight:600;color:var(--n900);line-height:1.3">${a.title}</div>
           <div style="font-size:11px;color:var(--n500);margin-top:2px">${effortLabel} · ${a.duration}</div>
         </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-size:13px;font-weight:700;color:var(--axa)">+${a.pts}</div>
-          <div style="font-size:9px;color:var(--n400)">pts</div>
-        </div>
         <div style="color:var(--n300);font-size:16px">›</div>
       </div>`;
   }
 
-  const ptsTotal = todo.reduce((s,a) => s+a.pts, 0);
   const emptyState = todo.length === 0
     ? `<div style="text-align:center;padding:32px 0">
          <div style="font-size:36px;margin-bottom:8px">✅</div>
@@ -811,7 +808,7 @@ function openCategoryModal(riskId) {
           </div>
           <button onclick="document.getElementById('cat-modal-bd').remove()" style="margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--n100);border:none;font-size:16px;cursor:pointer;flex-shrink:0">✕</button>
         </div>
-        ${todo.length > 0 ? `<div style="font-size:11px;color:var(--n500)">${todo.length} action${todo.length>1?'s':''} · +${ptsTotal} pts à gagner</div>` : ''}
+        ${todo.length > 0 ? `<div style="font-size:11px;color:var(--n500)">${todo.length} action${todo.length>1?'s':''} à réaliser</div>` : ''}
       </div>
       <div style="padding:0 20px">${emptyState}</div>
     </div>`;
@@ -874,7 +871,7 @@ function screenDetailAction() {
               <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Récompense</div>
               <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
             </div>
-            <div style="margin-left:auto;background:#fbbf24;color:#1a1a00;border-radius:var(--r-sm);padding:6px 12px;font-size:14px;font-weight:700">+${d.pts} pts</div>
+            <div style="margin-left:auto;background:rgba(251,191,36,.2);border-radius:var(--r-sm);padding:6px 10px;font-size:22px">🏅</div>
           </div>
         </div>
         <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:14px">
@@ -892,8 +889,8 @@ function screenDetailAction() {
               <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${d.proof}</div>
               <button onclick="showToast('Upload disponible bientôt','info')" style="padding:9px 16px;background:#d4a017;color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">📎 Ajouter la preuve</button>
             </div>` : ''}
-          <button onclick="showToast('Défi relevé ! +${d.pts} pts crédités 🏆','success')" style="width:100%;padding:14px;background:linear-gradient(135deg,#d4a017,#fbbf24);color:#1a1a00;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
-            Relever le défi · +${d.pts} pts
+          <button onclick="showToast('Défi relevé ! Badge 🏅 Défi relevé débloqué','success')" style="width:100%;padding:14px;background:linear-gradient(135deg,#d4a017,#fbbf24);color:#1a1a00;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+            Relever le défi — débloquer le badge 🏅
           </button>
         </div>
         <div style="height:24px"></div>`;
@@ -928,6 +925,16 @@ function screenDetailAction() {
   const tuto = (TUTORIALS_BY_RISK[a.riskId]||[]).find(t => t.type==='video');
   const svcs = (SERVICES_BY_RISK[a.riskId]||[]).slice(0,2);
 
+  const _ub = window._ST.unlockedBadges || [];
+  const _riskBadge = (typeof BADGES !== 'undefined')
+    ? BADGES.find(b => b.condition && b.condition.type === 'risk_complete' && b.condition.riskId === a.riskId)
+    : null;
+  const _nextCountBadge = (typeof BADGES !== 'undefined')
+    ? BADGES.filter(b => b.condition && b.condition.type === 'action_count' && !_ub.includes(b.id))
+            .sort((x,y) => x.condition.value - y.condition.value)[0]
+    : null;
+  const contributingBadge = !isDone ? (_riskBadge || _nextCountBadge) : null;
+
   return `
     <div style="background:${isDone?'var(--success)':'var(--axa)'};padding:16px var(--sp5) 22px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -949,11 +956,19 @@ function screenDetailAction() {
     <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:14px">
 
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:700;color:var(--axa);background:var(--axa-xlight);padding:5px 12px;border-radius:99px">+${a.pts} pts</span>
         <span style="font-size:12px;color:${effortColor};background:${effortColor==='var(--success)'?'var(--success-light)':effortColor==='var(--warn)'?'var(--warn-light)':'var(--danger-light)'};padding:5px 12px;border-radius:99px;font-weight:600">${effortLabel}</span>
         <span style="font-size:12px;color:var(--n600);background:var(--n100);padding:5px 12px;border-radius:99px">${a.duration}</span>
         ${tags}
       </div>
+
+      ${contributingBadge ? `
+        <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${contributingBadge.icon}</span>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.3px">Contribue au badge</div>
+            <div style="font-size:12px;font-weight:600;color:#78350F">${contributingBadge.label}</div>
+          </div>
+        </div>` : ''}
 
       <div style="background:var(--success-bg);border-left:3px solid var(--success);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px">
         <div style="font-size:11px;font-weight:700;color:var(--success);margin-bottom:3px">Bénéfice</div>
@@ -1010,11 +1025,10 @@ function screenDetailAction() {
         ? `<div style="background:var(--success-bg);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:16px;text-align:center">
             <div style="font-size:28px;margin-bottom:8px">✅</div>
             <div style="font-size:15px;font-weight:700;color:var(--success)">Action réalisée !</div>
-            <div style="font-size:12px;color:var(--n600);margin-top:4px">+${a.pts} pts ajoutés à votre compteur</div>
+            <div style="font-size:12px;color:var(--n600);margin-top:4px">Progression badges mise à jour</div>
            </div>`
         : `<button onclick="completeAction('${a.id}')" style="width:100%;padding:14px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
             ${sv(IC.check,'width:18px;height:18px;fill:white')} Marquer comme réalisée
-            <span style="background:rgba(255,255,255,.2);border-radius:99px;padding:2px 8px;font-size:12px">+${a.pts} pts</span>
            </button>`
       }
 
@@ -1029,105 +1043,93 @@ function screenDetailAction() {
 function screenRewards() {
   const st = window._ST;
   const profile = getProfile(st.profileId);
-  const completedCount = st.completedActions.length;
-  const rewards = getRewardsForProfile(profile, completedCount);
-  const pts = st.points;
+  const unlockedBadgeIds = st.unlockedBadges || [];
+  const activatedRewards = st.activatedRewards || [];
+  const rewards = getRewardsForProfile(profile, unlockedBadgeIds);
+  const badgeCount  = unlockedBadgeIds.length;
+  const actionCount = (st.completedActions || []).length;
 
-  const unlocked = rewards.filter(r => r.computedStatus === 'unlocked');
-  const available = rewards.filter(r => r.computedStatus === 'available');
-  const teaser = rewards.filter(r => r.computedStatus === 'teaser');
+  const readyList     = rewards.filter(r => r.badgeUnlocked && !activatedRewards.includes(r.id));
+  const activatedList = rewards.filter(r => activatedRewards.includes(r.id));
+  const lockedList    = rewards.filter(r => !r.badgeUnlocked);
 
-  function rewardCard(r) {
-    const isUnlocked = r.computedStatus === 'unlocked';
-    const isTeaser   = r.computedStatus === 'teaser';
-    const statusLabel = isUnlocked ? '✓ Débloqué' : isTeaser ? r.teaser : `${r.minActions} action${r.minActions>1?'s':''} requise${r.minActions>1?'s':''}`;
-    const statusColor = isUnlocked ? 'var(--success)' : isTeaser ? 'var(--warn)' : 'var(--n400)';
-    const statusBg    = isUnlocked ? 'var(--success-bg)' : isTeaser ? 'var(--warn-light)' : 'var(--n100)';
+  function rewardCard(r, state) {
+    const isActivated = state === 'activated';
+    const isReady     = state === 'ready';
+    const badge       = r.requiredBadge;
 
-    return `<div style="background:var(--white);border:1.5px solid ${isUnlocked?'var(--success-light)':'var(--n150)'};border-radius:var(--r-md);padding:14px;display:flex;gap:12px;align-items:flex-start;${isTeaser?'opacity:.7':''}">
-      <div style="width:44px;height:44px;border-radius:var(--r-sm);background:${r.iconBg};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${r.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-          <span style="font-size:13px;font-weight:700;color:var(--n800)">${r.title}</span>
-          <span style="font-size:11px;font-weight:700;color:var(--axa);background:var(--axa-xlight);padding:2px 7px;border-radius:99px">${r.subtitle}</span>
+    return `<div style="background:var(--white);border:1.5px solid ${isActivated?'var(--success-light)':isReady?'#FCD34D':'var(--n150)'};border-radius:var(--r-md);padding:14px;${state==='locked'?'opacity:.72':''}">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;font-weight:700;color:${r.partnerColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${r.partner}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--n900);line-height:1.3">${r.title}</div>
         </div>
-        <div style="font-size:11px;color:var(--n500);line-height:1.45;margin-bottom:8px">${r.desc}</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <span style="font-size:11px;font-weight:600;color:${statusColor};background:${statusBg};padding:3px 9px;border-radius:99px">${statusLabel}</span>
-          ${isUnlocked ? `<button onclick="tabMock('Activer : ${r.title}')" style="padding:7px 12px;background:var(--success);color:white;border:none;border-radius:var(--r-sm);font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer">Activer</button>` : ''}
-        </div>
-        ${isUnlocked && r.disclaimer ? `<div style="font-size:10px;color:var(--n400);margin-top:5px">${r.disclaimer}</div>` : ''}
+        ${isActivated ? `<span style="font-size:10px;font-weight:700;color:var(--success);background:var(--success-light);padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">✓ Activé</span>` : ''}
+        ${isReady ? `<span style="font-size:10px;font-weight:700;color:#92400E;background:#FEF3C7;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">🏅 Prêt !</span>` : ''}
+        ${state==='locked' ? `<span style="font-size:10px;color:var(--n400);background:var(--n100);padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">🔒 Verrouillé</span>` : ''}
       </div>
+      <div style="background:${isActivated?'var(--success-bg)':isReady?'#FFFBEB':'var(--n50)'};border-radius:var(--r-sm);padding:9px 12px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:${isActivated?'var(--success)':isReady?'#B45309':'var(--n400)'}">${r.offer}</div>
+        ${isActivated && r.code ? `<div style="font-size:11px;color:var(--n600);margin-top:4px">Code : <strong style="font-family:monospace;background:var(--n100);padding:2px 6px;border-radius:4px;font-size:12px;letter-spacing:.5px">${r.code}</strong></div>` : ''}
+        ${isActivated && !r.code ? `<div style="font-size:11px;color:var(--n600);margin-top:4px">Votre conseiller AXA vous contactera sous 48h.</div>` : ''}
+      </div>
+      ${badge ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:${isReady?'10px':'0'}">
+        <span style="font-size:15px">${badge.icon}</span>
+        <span style="font-size:11px;color:var(--n600)">Badge requis : <strong>${badge.label}</strong></span>
+        ${isActivated||isReady ? `<span style="font-size:11px;color:var(--success);font-weight:700">✓</span>` : ''}
+      </div>` : ''}
+      ${isReady ? `<button onclick="activateReward('${r.id}')" style="width:100%;padding:10px;background:linear-gradient(135deg,#D97706,#fbbf24);color:#1a1a00;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer">
+        Activer mon avantage${r.code ? ' & obtenir mon code' : ''}
+      </button>` : ''}
     </div>`;
   }
 
-  const nextTarget = available.length > 0 ? available.sort((a,b)=>a.minActions-b.minActions)[0] : null;
-  const ptsToNext  = nextTarget ? Math.max(0, nextTarget.minActions - completedCount) : 0;
-
-  const allActions = st.diagCompleted ? getActionsForProfile(profile, st.diagAnswers) : [];
-  const doneCount  = allActions.filter(a => completedCount && (st.completedActions||[]).includes(a.id)).length;
-  const ptsDone    = allActions.filter(a => (st.completedActions||[]).includes(a.id)).reduce((s,a)=>s+a.pts,0);
-  const ptsTotal   = allActions.reduce((s,a)=>s+a.pts,0);
-  const pctProgress = ptsTotal > 0 ? Math.round((ptsDone / ptsTotal) * 100) : 0;
-
   return `<div class="screen-header" style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);padding:18px var(--sp5) 20px;color:white">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <button onclick="window._ST.hubTab='actions';goTo(1)" aria-label="Retour" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
         ${sv(IC.back,'width:18px;height:18px;fill:white')}
       </button>
       <div>
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7">Module Récompenses</div>
-        <div style="font-size:20px;font-weight:700">Vos avantages</div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7">Avantages Partenaires</div>
+        <div style="font-size:20px;font-weight:700">Mes Récompenses</div>
       </div>
     </div>
-    <div style="font-size:12px;opacity:.8">${profile.firstName} — ${completedCount} action${completedCount!==1?'s':''} réalisée${completedCount!==1?'s':''}</div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px 12px">
+      <div style="font-size:24px">🏅</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:white">${badgeCount} badge${badgeCount!==1?'s':''} débloqué${badgeCount!==1?'s':''}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.65)">${actionCount} action${actionCount!==1?'s':''} réalisée${actionCount!==1?'s':''} · ${profile.firstName}</div>
+      </div>
+      ${readyList.length > 0 ? `<span style="background:#fbbf24;color:#1a1a00;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0">${readyList.length} à activer</span>` : ''}
+    </div>
   </div>
 
   <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
 
-    <div style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);border-radius:var(--r-md);padding:14px 16px;color:white">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;opacity:.7">Points cumulés</div>
-          <div style="font-size:24px;font-weight:800">${pts} pts</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:11px;opacity:.7">Actions réalisées</div>
-          <div style="font-size:16px;font-weight:700">${(st.completedActions||[]).length}${ptsTotal>0?` / ${allActions.length}`:''}</div>
-        </div>
-      </div>
-      ${ptsTotal > 0 ? `
-        <div style="height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${pctProgress}%;background:var(--success-mid);border-radius:99px;transition:width .4s"></div>
-        </div>
-        <div style="font-size:10.5px;opacity:.7;margin-top:5px">${ptsTotal - ptsDone} pts encore à gagner</div>` : ''}
-      ${nextTarget ? `
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.15)">
-          <div style="font-size:11px;opacity:.85;margin-bottom:5px">
-            Encore <strong style="color:#fbbf24">${ptsToNext} action${ptsToNext>1?'s':''}</strong> pour débloquer <em>${nextTarget.title}</em>
-          </div>
-          <div style="height:5px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
-            <div style="height:100%;width:${Math.min(100,Math.round(completedCount/nextTarget.minActions*100))}%;background:#fbbf24;border-radius:99px;transition:width .4s"></div>
-          </div>
-        </div>` : `<div style="margin-top:8px;font-size:11px;color:#fbbf24;font-weight:600">🎉 Toutes les récompenses disponibles sont débloquées !</div>`}
-    </div>
-
-    ${unlocked.length > 0 ? `
+    ${readyList.length > 0 ? `
       <div>
-        <div style="font-size:11px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">✓ Débloquées (${unlocked.length})</div>
-        <div style="display:flex;flex-direction:column;gap:8px">${unlocked.map(rewardCard).join('')}</div>
+        <div style="font-size:11px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">🏅 Prêt à activer (${readyList.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${readyList.map(r=>rewardCard(r,'ready')).join('')}</div>
       </div>` : ''}
 
-    ${available.length > 0 ? `
+    ${activatedList.length > 0 ? `
       <div>
-        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">À débloquer (${available.length})</div>
-        <div style="display:flex;flex-direction:column;gap:8px">${available.map(rewardCard).join('')}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">✓ Activés (${activatedList.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${activatedList.map(r=>rewardCard(r,'activated')).join('')}</div>
       </div>` : ''}
 
-    ${teaser.length > 0 ? `
+    ${lockedList.length > 0 ? `
       <div>
-        <div style="font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Bientôt disponible (${teaser.length})</div>
-        <div style="display:flex;flex-direction:column;gap:8px">${teaser.map(rewardCard).join('')}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">À débloquer (${lockedList.length})</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${lockedList.map(r=>rewardCard(r,'locked')).join('')}</div>
+      </div>` : ''}
+
+    ${readyList.length === 0 && activatedList.length === 0 ? `
+      <div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:28px 20px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">🏅</div>
+        <div style="font-size:15px;font-weight:700;color:var(--n700);margin-bottom:6px">Complétez des actions pour débloquer vos avantages</div>
+        <p style="font-size:12px;color:var(--n500);line-height:1.5;margin-bottom:16px">Chaque badge débloqué vous donne accès à un avantage partenaire exclusif : remises Leroy Merlin, alarme Verisure, détecteur Netatmo…</p>
+        <button onclick="window._ST.hubTab='actions';goTo(1)" style="padding:10px 20px;background:var(--axa);color:white;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">Voir mes actions</button>
       </div>` : ''}
 
     <div style="height:12px"></div>
