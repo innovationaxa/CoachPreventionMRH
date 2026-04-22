@@ -550,6 +550,7 @@ function showDiagModal() {
 window.checkAndUnlockBadges = checkAndUnlockBadges;
 window.showBadgeUnlock      = showBadgeUnlock;
 window.activateReward       = activateReward;
+window.openBadgesModal      = openBadgesModal;
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {

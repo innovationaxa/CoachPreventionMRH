@@ -1052,6 +1052,54 @@ function screenDetailAction() {
     <div style="height:24px"></div>`;
 }
 
+/* ── Modal : tous les badges ──────────────────────────────────────────── */
+function openBadgesModal() {
+  const device      = document.querySelector('.device') || document.body;
+  const unlockedIds = window._ST.unlockedBadges || [];
+  const allBadges   = typeof BADGES !== 'undefined' ? BADGES : [];
+  const tierColors  = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
+  const tierBg      = { bronze: '#FDF3E3', silver: '#F3F4F6', gold: '#FFFBEB' };
+  const tierLabel   = { bronze: 'Bronze', silver: 'Argent', gold: 'Or' };
+
+  function cardHtml(badge) {
+    const unlocked = unlockedIds.includes(badge.id);
+    const color = tierColors[badge.tier] || '#6B7280';
+    const bg    = tierBg[badge.tier]    || '#F3F4F6';
+    const lbl   = tierLabel[badge.tier] || '';
+    if (unlocked) {
+      return `<div style="background:${bg};border:1.5px solid ${color};border-radius:12px;padding:14px 10px;text-align:center;position:relative">
+        <div style="position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;color:${color};background:white;border:1px solid ${color};border-radius:99px;padding:1px 5px">${lbl}</div>
+        <div style="font-size:30px;margin-bottom:6px">${badge.icon}</div>
+        <div style="font-size:11px;font-weight:700;color:#111118;line-height:1.3">${badge.label}</div>
+        <div style="font-size:10px;color:var(--n500);line-height:1.3;margin-top:3px">${badge.desc}</div>
+        <div style="margin-top:7px;font-size:10px;color:${color};font-weight:700">✓ Débloqué</div>
+      </div>`;
+    }
+    return `<div style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 10px;text-align:center">
+      <div style="font-size:30px;margin-bottom:6px;opacity:.18">${badge.icon}</div>
+      <div style="font-size:11px;font-weight:600;color:#9CA3AF;line-height:1.3">${badge.label}</div>
+      <div style="margin-top:7px;font-size:10px;color:#9CA3AF">🔒 À débloquer</div>
+    </div>`;
+  }
+
+  const el = document.createElement('div');
+  el.id = 'badges-all-modal';
+  el.style.cssText = 'position:absolute;inset:0;z-index:700;background:white;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  el.innerHTML = `
+    <div style="position:sticky;top:0;background:white;border-bottom:1px solid #F3F4F6;padding:16px 20px 14px;display:flex;align-items:center;gap:12px;z-index:1">
+      <button onclick="document.getElementById('badges-all-modal').remove()"
+              style="width:34px;height:34px;border-radius:50%;background:#F3F4F6;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
+      <div>
+        <div style="font-size:16px;font-weight:700;color:#111118">Tous mes badges</div>
+        <div style="font-size:11px;color:#6B7280">${unlockedIds.length} débloqué${unlockedIds.length !== 1 ? 's' : ''} sur ${allBadges.length}</div>
+      </div>
+    </div>
+    <div style="padding:16px 20px 32px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${allBadges.map(cardHtml).join('')}
+    </div>`;
+  device.appendChild(el);
+}
+
 /* ── S8 — Récompenses ─────────────────────────────────────────────────── */
 function screenRewards() {
   const st = window._ST;
@@ -1066,26 +1114,18 @@ function screenRewards() {
   const activatedList = rewards.filter(r => activatedRewards.includes(r.id));
   const lockedList    = rewards.filter(r => !r.badgeUnlocked);
 
-  function badgeCard(badge) {
-    const isUnlocked = unlockedBadgeIds.includes(badge.id);
-    const tierColors = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
-    const tierBg     = { bronze: '#FDF3E3', silver: '#F3F4F6', gold: '#FFFBEB' };
-    const tierLabel  = { bronze: 'Bronze', silver: 'Argent', gold: 'Or' };
-    const color = tierColors[badge.tier] || '#6B7280';
-    const bg    = tierBg[badge.tier]    || '#F3F4F6';
-    const lbl   = tierLabel[badge.tier] || '';
-    if (isUnlocked) {
-      return `<div style="background:${bg};border:1.5px solid ${color};border-radius:var(--r-md);padding:12px 10px;text-align:center;position:relative">
-        <div style="position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;color:${color};background:white;border:1px solid ${color};border-radius:99px;padding:1px 5px">${lbl}</div>
-        <div style="font-size:26px;margin-bottom:5px">${badge.icon}</div>
-        <div style="font-size:10px;font-weight:700;color:#111118;line-height:1.3">${badge.label}</div>
-        <div style="margin-top:5px;font-size:9px;color:${color};font-weight:700">✓ Débloqué</div>
-      </div>`;
-    }
-    return `<div style="background:var(--n50);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:12px 10px;text-align:center">
-      <div style="font-size:26px;margin-bottom:5px;opacity:.2">${badge.icon}</div>
-      <div style="font-size:10px;font-weight:600;color:var(--n400);line-height:1.3">${badge.label}</div>
-      <div style="margin-top:5px;font-size:9px;color:var(--n400)">🔒 À débloquer</div>
+  function badgeCarouselItem(badge) {
+    const isUnlocked  = unlockedBadgeIds.includes(badge.id);
+    const tierColors  = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
+    const tierBg      = { bronze: '#FEF3C7', silver: '#F3F4F6', gold: '#FEF9C3' };
+    const color    = isUnlocked ? (tierColors[badge.tier] || '#6B7280') : '#D1D5DB';
+    const circleBg = isUnlocked ? (tierBg[badge.tier]    || '#F3F4F6') : '#F3F4F6';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;width:78px">
+      <div style="width:62px;height:62px;border-radius:50%;background:${circleBg};border:2px solid ${color};display:flex;align-items:center;justify-content:center;position:relative">
+        <span style="font-size:27px;${isUnlocked ? '' : 'filter:grayscale(1);opacity:.25'}">${badge.icon}</span>
+        ${isUnlocked ? `<div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:${color};border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white">✓</div>` : ''}
+      </div>
+      <div style="font-size:9.5px;font-weight:${isUnlocked ? '700' : '500'};color:${isUnlocked ? '#111118' : '#9CA3AF'};text-align:center;line-height:1.3;width:78px">${badge.label}</div>
     </div>`;
   }
 
@@ -1142,13 +1182,17 @@ function screenRewards() {
 
   <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
 
-    <!-- Badge gallery -->
+    <!-- Badge carousel -->
     <div>
-      <div style="font-size:11px;font-weight:700;color:var(--n700);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
-        🏅 Mes Badges (${unlockedBadgeIds.length}/${typeof BADGES !== 'undefined' ? BADGES.length : 0})
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900)">🏅 Mes Badges</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:1px">${unlockedBadgeIds.length} débloqué${unlockedBadgeIds.length !== 1 ? 's' : ''} sur ${typeof BADGES !== 'undefined' ? BADGES.length : 0}</div>
+        </div>
+        <button onclick="openBadgesModal()" style="font-size:12px;font-weight:600;color:var(--axa);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 0;white-space:nowrap">Voir tout →</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${(typeof BADGES !== 'undefined' ? BADGES : []).map(badgeCard).join('')}
+      <div style="display:flex;gap:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:none;-ms-overflow-style:none">
+        ${(typeof BADGES !== 'undefined' ? BADGES : []).map(badgeCarouselItem).join('')}
       </div>
     </div>
 
