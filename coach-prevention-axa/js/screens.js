@@ -381,7 +381,7 @@ function hubActionsTab(p, diagDone) {
   function defiHeroCard(d) {
     const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt)-new Date())/(1000*60*60*24)));
     return `
-      <div onclick="openDefi('${d.id}')"
+      <div onclick="openDefiModal('${d.id}')"
            style="background:linear-gradient(135deg,#00008F,#1a1aaa);border:1.5px solid #d4a017;border-radius:var(--r-md);padding:12px 14px;cursor:pointer;position:relative;overflow:hidden">
         <div style="position:absolute;right:-8px;top:-8px;font-size:44px;opacity:.1">${d.icon}</div>
         <div style="display:flex;align-items:center;gap:10px;position:relative">
@@ -425,8 +425,16 @@ function hubActionsTab(p, diagDone) {
           <div style="font-size:11px;color:var(--n500)">Animations saisonnières · ponctuelles · engageantes</div>
         </div>
 
-        <div onclick="showToast('Quiz bientôt disponible !','info')"
-             style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        ${activeDefi
+          ? defiHeroCard(activeDefi)
+          : `<div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:20px;text-align:center;margin-bottom:10px">
+               <div style="font-size:28px;opacity:.35;margin-bottom:8px">🏆</div>
+               <div style="font-size:13px;font-weight:600;color:var(--n500);margin-bottom:3px">Aucun défi actif ce mois-ci</div>
+               <div style="font-size:11px;color:var(--n400)">Revenez bientôt pour relever un nouveau défi saisonnier</div>
+             </div>`}
+
+        <div onclick="openQuizModal()"
+             style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-top:10px">
           <div style="font-size:28px">🧠</div>
           <div style="flex:1">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
@@ -435,16 +443,8 @@ function hubActionsTab(p, diagDone) {
             </div>
             <div style="font-size:11px;color:rgba(255,255,255,.7)">Les bons gestes anti-cambriolage · 5 questions · 2 min</div>
           </div>
-          <div style="font-size:22px;flex-shrink:0">🏅</div>
+          <div style="font-size:22px;flex-shrink:0">▶</div>
         </div>
-
-        ${activeDefi
-          ? defiHeroCard(activeDefi)
-          : `<div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:20px;text-align:center">
-               <div style="font-size:28px;opacity:.35;margin-bottom:8px">🏆</div>
-               <div style="font-size:13px;font-weight:600;color:var(--n500);margin-bottom:3px">Aucun défi actif ce mois-ci</div>
-               <div style="font-size:11px;color:var(--n400)">Revenez bientôt pour relever un nouveau défi saisonnier</div>
-             </div>`}
       </div>
 
       <div style="border-top:2px solid var(--n100)"></div>
@@ -452,7 +452,7 @@ function hubActionsTab(p, diagDone) {
       <!-- SECTION 2 : Plan d'actions personnalisé (permanent) -->
       <div>
         <div style="margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mon plan d'actions</div>
+          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mes actions recommandées</div>
           <div style="font-size:11px;color:var(--n500)">Permanent · personnalisé pour votre profil et vos risques</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -834,6 +834,102 @@ function openDefi(id) {
   goTo(7);
 }
 
+function openDefiModal(id) {
+  const device = document.querySelector('.device') || document.body;
+  const d = (typeof DEFIS_DU_MOMENT !== 'undefined' ? DEFIS_DU_MOMENT : []).find(x => x.id === id);
+  if (!d) return;
+  const daysLeft = Math.max(0, Math.round((new Date(d.expiresAt) - new Date()) / (1000*60*60*24)));
+  const done = window._ST.completedActions || [];
+  const actionIds = d.actionIds || [];
+  const completedCount = actionIds.filter(aid => done.includes(aid)).length;
+  const allDone = completedCount === actionIds.length && actionIds.length > 0;
+  const defiActions = (typeof ALL_ACTIONS !== 'undefined' ? ALL_ACTIONS : []).filter(a => actionIds.includes(a.id));
+
+  const actionsHtml = defiActions.map(a => {
+    const isDone = done.includes(a.id);
+    const effortLabel = a.effort === 'low' ? 'Facile' : a.effort === 'medium' ? 'Moyen' : 'Avancé';
+    return `<div onclick="${isDone ? '' : `document.getElementById('defi-modal-overlay').remove();openAction('${a.id}')`}"
+         style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:${isDone ? 'var(--success-bg)' : 'var(--white)'};border:1.5px solid ${isDone ? 'var(--success-light)' : 'var(--n150)'};border-radius:var(--r-md);cursor:${isDone ? 'default' : 'pointer'}">
+      <div style="width:30px;height:30px;border-radius:50%;background:${isDone ? 'var(--success)' : 'var(--n100)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${isDone ? '14px' : '16px'}">
+        ${isDone ? '<span style="color:white">✓</span>' : (a.icon || '💧')}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:${isDone ? 'var(--success)' : 'var(--n900)'};line-height:1.3">${a.title}</div>
+        <div style="font-size:11px;color:var(--n500);margin-top:2px">${a.duration} · ${effortLabel}</div>
+      </div>
+      ${!isDone ? '<span style="color:var(--n300);font-size:20px;flex-shrink:0">›</span>' : ''}
+    </div>`;
+  }).join('');
+
+  const el = document.createElement('div');
+  el.id = 'defi-modal-overlay';
+  el.style.cssText = 'position:absolute;inset:0;z-index:700;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#00008F,#1a1aaa);padding:20px var(--sp5) 24px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-16px;top:-16px;font-size:100px;opacity:.06">${d.icon}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="document.getElementById('defi-modal-overlay').remove()"
+                style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:white">←</button>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)">Défi du moment</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 ${d.period}</div>
+      <div style="font-size:20px;font-weight:700;color:white;line-height:1.3;margin-bottom:6px">${d.icon} ${d.title}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:16px">${d.subtitle}</div>
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(251,191,36,.15);border:1px solid rgba(212,160,23,.4);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px">
+        <span style="font-size:22px">${d.lotIcon}</span>
+        <div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Récompense</div>
+          <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:6px">
+        ⏰ Plus que <strong style="color:white;margin:0 2px">${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> pour relever ce défi
+      </div>
+    </div>
+
+    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+      <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--n700)">Votre progression</div>
+          <div style="font-size:12px;font-weight:700;color:var(--axa)">${completedCount} / ${actionIds.length} actions</div>
+        </div>
+        <div style="height:6px;background:var(--n100);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(completedCount / Math.max(actionIds.length, 1) * 100)}%;background:var(--axa);border-radius:99px"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${actionIds.length} actions pour compléter ce défi</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${actionsHtml}</div>
+      </div>
+
+      ${d.proof ? `
+      <div style="background:var(--n50);border:1px dashed var(--n300);border-radius:var(--r-md);padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:4px">Justificatif requis</div>
+        <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${d.proof}</div>
+        <button onclick="showToast('Upload disponible bientôt','info')"
+                style="padding:9px 16px;background:var(--n700);color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">
+          📎 Ajouter la preuve
+        </button>
+      </div>` : ''}
+
+      ${allDone
+        ? `<div style="background:var(--success-bg);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:18px;text-align:center">
+             <div style="font-size:28px;margin-bottom:8px">🏆</div>
+             <div style="font-size:15px;font-weight:700;color:var(--success)">Défi complété !</div>
+             <div style="font-size:12px;color:var(--n600);margin-top:4px">Toutes les actions ont été réalisées</div>
+           </div>`
+        : `<button onclick="document.getElementById('defi-modal-overlay').remove();openAction('${defiActions.find(a => !done.includes(a.id))?.id || defiActions[0]?.id}')"
+                  style="width:100%;padding:14px;background:linear-gradient(135deg,#00008F,#1a1aaa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+             Commencer — ${d.icon} ${d.title}
+           </button>`}
+
+      <div style="height:12px"></div>
+    </div>`;
+  device.appendChild(el);
+}
+
 function screenActions() {
   window._ST.hubTab = 'actions';
   setTimeout(() => goTo(1), 0);
@@ -1043,6 +1139,151 @@ function screenDetailAction() {
       </button>
     </div>
     <div style="height:24px"></div>`;
+}
+
+/* ── Quiz de la semaine ───────────────────────────────────────────────── */
+const QUIZ_CONTENT = {
+  title: 'Les bons gestes anti-cambriolage',
+  questions: [
+    {
+      q: 'À quelle heure ont lieu la majorité des cambriolages en France ?',
+      options: ['La nuit (22h – 5h)', 'En journée (14h – 18h)', 'Le matin (7h – 9h)'],
+      correct: 1,
+      explication: '70 % des cambriolages surviennent de jour, quand les logements sont vides. Les cambrioleurs évitent la confrontation et agissent rapidement.'
+    },
+    {
+      q: 'Quel équipement est le plus dissuasif contre les cambrioleurs ?',
+      options: ["Un autocollant d'alarme seul", 'Une alarme visible avec détecteur de mouvement', 'Un verrou de sécurité basique'],
+      correct: 1,
+      explication: "60 % des cambrioleurs renoncent face à une alarme visible. La combinaison alarme + détecteur de mouvement est l'équipement le plus efficace pour dissuader."
+    },
+    {
+      q: 'Combien de temps dure en moyenne un cambriolage ?',
+      options: ['Moins de 5 minutes', 'Entre 15 et 30 minutes', "Plus d'une heure"],
+      correct: 0,
+      explication: "La majorité des cambriolages durent moins de 5 minutes. Chaque obstacle supplémentaire — serrure renforcée, volet, alarme — décourage l'intrusion."
+    },
+    {
+      q: 'Quelle est la meilleure précaution avant de partir en vacances ?',
+      options: ['Laisser une lumière allumée 24h/24', 'Demander à un voisin de relever le courrier et simuler des présences', 'Fermer tous les volets plusieurs jours avant'],
+      correct: 1,
+      explication: "Un courrier qui s'accumule est le signal d'absence le plus visible. Un voisin qui passe régulièrement simule l'activité du logement bien mieux qu'une lumière fixe."
+    },
+    {
+      q: 'Par où les cambrioleurs s\'introduisent-ils le plus souvent ?',
+      options: ["La porte d'entrée principale", 'Les fenêtres et portes-fenêtres de plain-pied', 'La porte de service ou de cave'],
+      correct: 1,
+      explication: "44 % des entrées par effraction se font par des fenêtres ou portes-fenêtres. Un volet verrouillé ou une vitrerie feuilletée change radicalement votre niveau de risque."
+    }
+  ]
+};
+
+function openQuizModal() {
+  const device = document.querySelector('.device') || document.body;
+  window._quizST = { step: 0, selected: null, score: 0 };
+  const total = QUIZ_CONTENT.questions.length;
+  const el = document.createElement('div');
+  el.id = 'quiz-modal';
+  el.style.cssText = 'position:absolute;inset:0;z-index:700;background:white;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#6b21a8,#7c3aed);padding:20px var(--sp5) 22px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <button onclick="document.getElementById('quiz-modal').remove()"
+                style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:white">←</button>
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Quiz · 5 questions · 2 min</div>
+          <div style="font-size:17px;font-weight:700;color:white">${QUIZ_CONTENT.title}</div>
+        </div>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden">
+        <div id="quiz-progress-bar" style="height:100%;width:0%;background:#fbbf24;border-radius:99px;transition:width .35s"></div>
+      </div>
+      <div id="quiz-progress-label" style="font-size:10px;color:rgba(255,255,255,.5);margin-top:6px">Question 1 sur ${total}</div>
+    </div>
+    <div id="quiz-step-content" style="padding:20px var(--sp5) 32px"></div>`;
+  device.appendChild(el);
+  renderQuizStep();
+}
+
+function renderQuizStep() {
+  const st = window._quizST;
+  const quiz = QUIZ_CONTENT;
+  const total = quiz.questions.length;
+  const container = document.getElementById('quiz-step-content');
+  const progressBar = document.getElementById('quiz-progress-bar');
+  const progressLabel = document.getElementById('quiz-progress-label');
+  if (!container) return;
+
+  if (st.step >= total) {
+    if (progressBar) progressBar.style.width = '100%';
+    if (progressLabel) progressLabel.textContent = 'Terminé !';
+    const msg = st.score === total ? 'Expert !' : st.score >= 3 ? 'Très bien !' : 'Bonne initiative !';
+    const emoji = st.score === total ? '🏆' : st.score >= 3 ? '🎯' : '📚';
+    container.innerHTML = `
+      <div style="text-align:center;padding:16px 0 24px">
+        <div style="font-size:52px;margin-bottom:12px">${emoji}</div>
+        <div style="font-size:24px;font-weight:800;color:#111118;margin-bottom:4px">${st.score}/${total}</div>
+        <div style="font-size:15px;font-weight:700;color:#6b21a8;margin-bottom:10px">${msg}</div>
+        <div style="font-size:12px;color:var(--n500);line-height:1.65;margin-bottom:24px">En appliquant ces conseils, vous réduisez significativement le risque de cambriolage dans votre logement.</div>
+        <div style="background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:var(--r-md);padding:14px;margin-bottom:20px;text-align:left">
+          <div style="font-size:11px;font-weight:700;color:#6b21a8;margin-bottom:4px">🔐 Passez à l'action</div>
+          <div style="font-size:12px;color:var(--n700);line-height:1.5">Retrouvez les actions concrètes de sécurisation dans votre plan de prévention personnalisé.</div>
+        </div>
+        <button onclick="document.getElementById('quiz-modal').remove();window._ST.hubTab='actions';goTo(1)"
+                style="width:100%;padding:13px;background:linear-gradient(135deg,#6b21a8,#7c3aed);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+          Retour à mes actions
+        </button>
+      </div>`;
+    return;
+  }
+
+  if (progressBar) progressBar.style.width = Math.round(st.step / total * 100) + '%';
+  if (progressLabel) progressLabel.textContent = `Question ${st.step + 1} sur ${total}`;
+
+  const q = quiz.questions[st.step];
+  const answered = st.selected !== null;
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let bg = 'var(--white)', border = 'var(--n200)', color = 'var(--n800)', prefix = '';
+    if (answered) {
+      if (i === q.correct)        { bg = '#F0FDF4'; border = '#86EFAC'; color = '#166534'; prefix = '✓ '; }
+      else if (i === st.selected) { bg = '#FEF2F2'; border = '#FECACA'; color = '#991B1B'; prefix = '✗ '; }
+      else                        { bg = 'var(--n50)'; border = 'var(--n150)'; color = 'var(--n400)'; }
+    }
+    return `<button onclick="${answered ? '' : `selectQuizAnswer(${i})`}"
+       style="width:100%;padding:13px 14px;background:${bg};border:1.5px solid ${border};color:${color};border-radius:var(--r-md);text-align:left;font-size:13px;font-weight:500;font-family:var(--font);cursor:${answered ? 'default' : 'pointer'};line-height:1.4;display:block;margin-bottom:8px">
+      ${prefix}${opt}
+    </button>`;
+  }).join('');
+
+  const explanationHtml = answered ? `
+    <div style="background:${st.selected === q.correct ? '#F0FDF4' : '#FFFBEB'};border-left:3px solid ${st.selected === q.correct ? '#22C55E' : '#F59E0B'};border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:${st.selected === q.correct ? '#166534' : '#92400E'};margin-bottom:5px">${st.selected === q.correct ? '✓ Bonne réponse !' : '💡 Le saviez-vous ?'}</div>
+      <div style="font-size:12px;color:var(--n700);line-height:1.6">${q.explication}</div>
+    </div>
+    <button onclick="nextQuizStep()"
+            style="width:100%;padding:13px;background:linear-gradient(135deg,#6b21a8,#7c3aed);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+      ${st.step < total - 1 ? 'Question suivante →' : 'Voir mon score →'}
+    </button>` : '';
+
+  container.innerHTML = `
+    <div style="font-size:16px;font-weight:700;color:#111118;line-height:1.45;margin-bottom:20px">${q.q}</div>
+    ${optionsHtml}
+    ${explanationHtml}`;
+}
+
+function selectQuizAnswer(idx) {
+  if (window._quizST.selected !== null) return;
+  const q = QUIZ_CONTENT.questions[window._quizST.step];
+  window._quizST.selected = idx;
+  if (idx === q.correct) window._quizST.score++;
+  renderQuizStep();
+}
+
+function nextQuizStep() {
+  window._quizST.step++;
+  window._quizST.selected = null;
+  renderQuizStep();
 }
 
 /* ── Modal : tous les badges ──────────────────────────────────────────── */

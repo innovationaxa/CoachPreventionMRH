@@ -551,6 +551,11 @@ window.checkAndUnlockBadges = checkAndUnlockBadges;
 window.showBadgeUnlock      = showBadgeUnlock;
 window.activateReward       = activateReward;
 window.openBadgesModal      = openBadgesModal;
+window.openDefiModal        = openDefiModal;
+window.openQuizModal        = openQuizModal;
+window.renderQuizStep       = renderQuizStep;
+window.selectQuizAnswer     = selectQuizAnswer;
+window.nextQuizStep         = nextQuizStep;
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
