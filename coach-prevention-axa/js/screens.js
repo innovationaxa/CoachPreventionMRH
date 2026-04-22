@@ -416,20 +416,14 @@ function hubActionsTab(p, diagDone) {
   }
 
   return `
-    <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:18px">
+    <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:20px">
 
-      ${activeDefi ? `
-        <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-            <div style="font-size:13px;font-weight:700;color:var(--n900)">🔥 Défi du moment</div>
-            <span style="font-size:10px;color:var(--n400)">· ${activeDefi.period}</span>
-          </div>
-          ${defiHeroCard(activeDefi)}
-        </div>` : ''}
-
+      <!-- SECTION 1 : Plan d'actions personnalisé (permanent) -->
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">🎯 Actions</div>
-        <div style="font-size:12px;color:var(--n500);margin-bottom:12px">Sécurisez votre logement et débloquez des badges</div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mon plan d'actions</div>
+          <div style="font-size:11px;color:var(--n500)">Permanent · personnalisé pour votre profil et vos risques</div>
+        </div>
 
         <div onclick="showToast('Quiz bientôt disponible !','info')"
              style="background:linear-gradient(135deg,#6b21a8,#7c3aed);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:10px">
@@ -449,6 +443,25 @@ function hubActionsTab(p, diagDone) {
         </div>
       </div>
 
+      <div style="border-top:2px solid var(--n100)"></div>
+
+      <!-- SECTION 2 : Défis du moment (ponctuel / saisonnier) -->
+      <div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">🔥 Défis du moment</div>
+          <div style="font-size:11px;color:var(--n500)">Animations saisonnières · ponctuelles · engageantes</div>
+        </div>
+        ${activeDefi
+          ? defiHeroCard(activeDefi)
+          : `<div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:20px;text-align:center">
+               <div style="font-size:28px;opacity:.35;margin-bottom:8px">🏆</div>
+               <div style="font-size:13px;font-weight:600;color:var(--n500);margin-bottom:3px">Aucun défi actif ce mois-ci</div>
+               <div style="font-size:11px;color:var(--n400)">Revenez bientôt pour relever un nouveau défi saisonnier</div>
+             </div>`}
+      </div>
+
+      <div style="border-top:2px solid var(--n100)"></div>
+
       ${doneA.length > 0 ? `
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--n500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Déjà réalisées (${doneA.length})</div>
@@ -466,7 +479,7 @@ function hubActionsTab(p, diagDone) {
         </div>` : ''}
 
       <div>
-        <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Progresser davantage</div>
+        <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Progresser davantage</div>
         <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
           ${boosts.map(boostRow).join('')}
         </div>
@@ -1053,6 +1066,29 @@ function screenRewards() {
   const activatedList = rewards.filter(r => activatedRewards.includes(r.id));
   const lockedList    = rewards.filter(r => !r.badgeUnlocked);
 
+  function badgeCard(badge) {
+    const isUnlocked = unlockedBadgeIds.includes(badge.id);
+    const tierColors = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
+    const tierBg     = { bronze: '#FDF3E3', silver: '#F3F4F6', gold: '#FFFBEB' };
+    const tierLabel  = { bronze: 'Bronze', silver: 'Argent', gold: 'Or' };
+    const color = tierColors[badge.tier] || '#6B7280';
+    const bg    = tierBg[badge.tier]    || '#F3F4F6';
+    const lbl   = tierLabel[badge.tier] || '';
+    if (isUnlocked) {
+      return `<div style="background:${bg};border:1.5px solid ${color};border-radius:var(--r-md);padding:12px 10px;text-align:center;position:relative">
+        <div style="position:absolute;top:6px;right:6px;font-size:9px;font-weight:700;color:${color};background:white;border:1px solid ${color};border-radius:99px;padding:1px 5px">${lbl}</div>
+        <div style="font-size:26px;margin-bottom:5px">${badge.icon}</div>
+        <div style="font-size:10px;font-weight:700;color:#111118;line-height:1.3">${badge.label}</div>
+        <div style="margin-top:5px;font-size:9px;color:${color};font-weight:700">✓ Débloqué</div>
+      </div>`;
+    }
+    return `<div style="background:var(--n50);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:12px 10px;text-align:center">
+      <div style="font-size:26px;margin-bottom:5px;opacity:.2">${badge.icon}</div>
+      <div style="font-size:10px;font-weight:600;color:var(--n400);line-height:1.3">${badge.label}</div>
+      <div style="margin-top:5px;font-size:9px;color:var(--n400)">🔒 À débloquer</div>
+    </div>`;
+  }
+
   function rewardCard(r, state) {
     const isActivated = state === 'activated';
     const isReady     = state === 'ready';
@@ -1105,6 +1141,16 @@ function screenRewards() {
   </div>
 
   <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
+
+    <!-- Badge gallery -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--n700);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+        🏅 Mes Badges (${unlockedBadgeIds.length}/${typeof BADGES !== 'undefined' ? BADGES.length : 0})
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${(typeof BADGES !== 'undefined' ? BADGES : []).map(badgeCard).join('')}
+      </div>
+    </div>
 
     ${readyList.length > 0 ? `
       <div>

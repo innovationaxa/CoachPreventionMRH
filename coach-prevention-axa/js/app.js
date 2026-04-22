@@ -296,8 +296,8 @@ function completeAction(id) {
     setTimeout(() => showBadgeUnlock(newBadges[0]), 400);
   } else {
     showToast('✓ Action réalisée !', 'success');
+    setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, 600);
   }
-  setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, newBadges.length > 0 ? 2200 : 600);
 }
 
 /* ── BADGE UNLOCK LOGIC ── */
@@ -315,16 +315,25 @@ function showBadgeUnlock(badge) {
   const device = document.querySelector('.device');
   if (!device) return;
   const tierColors = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
+  const tierBg     = { bronze: '#FDF3E3', silver: '#F3F4F6', gold: '#FFFBEB' };
   const color = tierColors[badge.tier] || '#00008F';
+  const bg    = tierBg[badge.tier]    || '#F8F8F8';
   const el = document.createElement('div');
-  el.id = 'badge-unlock-toast';
-  el.style.cssText = `position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;pointer-events:none`;
+  el.id = 'badge-unlock-overlay';
+  el.style.cssText = `position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:24px`;
   el.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:20px 24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-width:260px;animation:badgePop .35s cubic-bezier(0.34,1.56,0.64,1)">
-      <div style="font-size:44px;margin-bottom:8px">${badge.icon}</div>
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${color};margin-bottom:4px">Badge débloqué !</div>
-      <div style="font-size:15px;font-weight:700;color:#111118;margin-bottom:6px">${badge.label}</div>
-      <div style="font-size:11px;color:#6B6B85;line-height:1.5">${badge.desc}</div>
+    <div style="background:white;border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.3);width:100%;animation:badgePop .35s cubic-bezier(0.34,1.56,0.64,1)">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:${color};margin-bottom:16px">🎉 Félicitations !</div>
+      <div style="background:${bg};border:2px solid ${color};width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px">
+        ${badge.icon}
+      </div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:6px">Badge débloqué !</div>
+      <div style="font-size:17px;font-weight:700;color:#111118;margin-bottom:8px">${badge.label}</div>
+      <div style="font-size:12px;color:#6B6B85;line-height:1.55;margin-bottom:22px">${badge.desc}</div>
+      <button onclick="document.getElementById('badge-unlock-overlay').remove();window._ST.hubTab='actions';goTo(1);"
+              style="width:100%;padding:13px;background:${color};color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+        Super ! 🎊
+      </button>
     </div>`;
   if (!document.getElementById('badge-anim-style')) {
     const s = document.createElement('style');
@@ -333,7 +342,6 @@ function showBadgeUnlock(badge) {
     document.head.appendChild(s);
   }
   device.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
 }
 
 function activateReward(rewardId) {
