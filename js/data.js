@@ -890,22 +890,23 @@ const TUTORIALS_BY_RISK = {
 /* ── DÉFIS DU MOMENT ── */
 const DEFIS_DU_MOMENT = [
   {
-    id: 'defi-202604-photos',
-    title: 'Photographiez 3 pièces de votre logement',
-    subtitle: 'En cas de sinistre, ça vaut de l\'or',
-    riskId: 'incendie',
-    icon: '📸',
-    pts: 150,
-    lot: 'Lots exclusifs à gagner',
+    id: 'defi-202604-fuites',
+    title: 'Fuyez les fuites',
+    subtitle: '3 actions pour réduire votre risque dégât des eaux n°1 en MRH',
+    riskId: 'degat-eaux',
+    icon: '💧',
+    pts: 120,
+    lot: 'Détecteur Netatmo offert',
     lotIcon: '🎁',
     period: 'Avril 2026',
-    expiresAt: '2026-05-01',
+    expiresAt: '2026-05-31',
     steps: [
-      'Salon (vue large + meubles principaux)',
-      'Cuisine (électroménager visible)',
-      'Chambre (objets de valeur)'
+      'Réviser les joints de salle de bain et cuisine',
+      'Installer un détecteur de fuite sous l\'évier ou derrière le lave-linge',
+      'Repérer et noter l\'emplacement de votre robinet d\'arrêt général'
     ],
-    proof: 'Upload des 3 photos'
+    proof: 'Photo du détecteur installé',
+    actionIds: ['dde-joints', 'dde-detection-fuite', 'dde-couper-eau-vacances']
   }
 ];
 

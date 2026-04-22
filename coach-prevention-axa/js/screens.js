@@ -418,11 +418,11 @@ function hubActionsTab(p, diagDone) {
   return `
     <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:20px">
 
-      <!-- SECTION 1 : Plan d'actions personnalisé (permanent) -->
+      <!-- SECTION 1 : Défis du moment (éphémère — en premier) -->
       <div>
         <div style="margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mon plan d'actions</div>
-          <div style="font-size:11px;color:var(--n500)">Permanent · personnalisé pour votre profil et vos risques</div>
+          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">🔥 Défis du moment</div>
+          <div style="font-size:11px;color:var(--n500)">Animations saisonnières · ponctuelles · engageantes</div>
         </div>
 
         <div onclick="showToast('Quiz bientôt disponible !','info')"
@@ -438,19 +438,6 @@ function hubActionsTab(p, diagDone) {
           <div style="font-size:22px;flex-shrink:0">🏅</div>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${p.mainRisks.map(categoryCard).join('')}
-        </div>
-      </div>
-
-      <div style="border-top:2px solid var(--n100)"></div>
-
-      <!-- SECTION 2 : Défis du moment (ponctuel / saisonnier) -->
-      <div>
-        <div style="margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">🔥 Défis du moment</div>
-          <div style="font-size:11px;color:var(--n500)">Animations saisonnières · ponctuelles · engageantes</div>
-        </div>
         ${activeDefi
           ? defiHeroCard(activeDefi)
           : `<div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:20px;text-align:center">
@@ -458,6 +445,19 @@ function hubActionsTab(p, diagDone) {
                <div style="font-size:13px;font-weight:600;color:var(--n500);margin-bottom:3px">Aucun défi actif ce mois-ci</div>
                <div style="font-size:11px;color:var(--n400)">Revenez bientôt pour relever un nouveau défi saisonnier</div>
              </div>`}
+      </div>
+
+      <div style="border-top:2px solid var(--n100)"></div>
+
+      <!-- SECTION 2 : Plan d'actions personnalisé (permanent) -->
+      <div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mon plan d'actions</div>
+          <div style="font-size:11px;color:var(--n500)">Permanent · personnalisé pour votre profil et vos risques</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${p.mainRisks.map(categoryCard).join('')}
+        </div>
       </div>
 
       <div style="border-top:2px solid var(--n100)"></div>
@@ -477,13 +477,6 @@ function hubActionsTab(p, diagDone) {
               </div>`).join('')}
           </div>
         </div>` : ''}
-
-      <div>
-        <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:4px">⚡ Progresser davantage</div>
-        <div style="background:var(--white);border:1.5px solid var(--n150);border-radius:var(--r-md);padding:0 16px">
-          ${boosts.map(boostRow).join('')}
-        </div>
-      </div>
 
       <button onclick="goTo(8)" style="width:100%;padding:13px;background:var(--n100);color:var(--n700);border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
         ${sv(IC.gift,'width:15px;height:15px;fill:var(--n700)')} Voir mes récompenses
