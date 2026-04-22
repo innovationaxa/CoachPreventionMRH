@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════
-   APP.JS v3 — Coach Prévention MRH
-   State · Navigation · Interactions
+   APP.JS v4 — Coach Prévention MRH
+   State · Navigation · Interactions · Badges
 ═══════════════════════════════════════════════ */
 
 /* ── GLOBAL STATE ── */
@@ -11,7 +11,8 @@ window._ST = {
   questions:        [],
   diagCompleted:    false,
   completedActions: [],
-  points:           0,
+  unlockedBadges:   [],
+  activatedRewards: [],
   selectedAction:   null,
   selectedDefi:     null,
   selectedRisk:     null,
@@ -71,7 +72,9 @@ function goTo(idx) {
         date: new Date().toISOString(),
         answers: { ...window._ST.diagAnswers }
       });
+      const newBadges = checkAndUnlockBadges();
       render(1); updateNav(1); updateTabBar(1);
+      if (newBadges.length > 0) setTimeout(() => showBadgeUnlock(newBadges[0]), 500);
     });
     return;
   }
@@ -288,9 +291,57 @@ function completeAction(id) {
   const a = ALL_ACTIONS.find(x => x.id === id);
   if (!a) return;
   window._ST.completedActions.push(id);
-  window._ST.points = (window._ST.points || 0) + a.pts;
-  showToast(`+${a.pts} pts gagnés !`, 'success');
-  setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, 600);
+  const newBadges = checkAndUnlockBadges();
+  if (newBadges.length > 0) {
+    setTimeout(() => showBadgeUnlock(newBadges[0]), 400);
+  } else {
+    showToast('✓ Action réalisée !', 'success');
+  }
+  setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, newBadges.length > 0 ? 2200 : 600);
+}
+
+/* ── BADGE UNLOCK LOGIC ── */
+function checkAndUnlockBadges() {
+  const st  = window._ST;
+  const p   = getProfile(st.profileId);
+  const prev = st.unlockedBadges || [];
+  const current = getUnlockedBadgeIds(p, st.diagAnswers, st.completedActions, st.completedDefis);
+  const newOnes = current.filter(id => !prev.includes(id));
+  st.unlockedBadges = current;
+  return newOnes.map(id => getBadgeById(id)).filter(Boolean);
+}
+
+function showBadgeUnlock(badge) {
+  const device = document.querySelector('.device');
+  if (!device) return;
+  const tierColors = { bronze: '#C47A27', silver: '#6B7280', gold: '#D97706' };
+  const color = tierColors[badge.tier] || '#00008F';
+  const el = document.createElement('div');
+  el.id = 'badge-unlock-toast';
+  el.style.cssText = `position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;pointer-events:none`;
+  el.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:20px 24px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-width:260px;animation:badgePop .35s cubic-bezier(0.34,1.56,0.64,1)">
+      <div style="font-size:44px;margin-bottom:8px">${badge.icon}</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${color};margin-bottom:4px">Badge débloqué !</div>
+      <div style="font-size:15px;font-weight:700;color:#111118;margin-bottom:6px">${badge.label}</div>
+      <div style="font-size:11px;color:#6B6B85;line-height:1.5">${badge.desc}</div>
+    </div>`;
+  if (!document.getElementById('badge-anim-style')) {
+    const s = document.createElement('style');
+    s.id = 'badge-anim-style';
+    s.textContent = '@keyframes badgePop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}';
+    document.head.appendChild(s);
+  }
+  device.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+function activateReward(rewardId) {
+  if (!window._ST.activatedRewards) window._ST.activatedRewards = [];
+  if (!window._ST.activatedRewards.includes(rewardId)) {
+    window._ST.activatedRewards.push(rewardId);
+  }
+  render(8); updateNav(8); updateTabBar(8);
 }
 
 /* ── BILAN PRÉVENTION (mocked) ── */
@@ -486,6 +537,11 @@ function showDiagModal() {
   sheet.querySelector('#diag-modal-start').addEventListener('click', () => { closeModal(); setTimeout(() => goTo(2), 380); });
   sheet.querySelector('#diag-modal-later').addEventListener('click', closeModal);
 }
+
+/* ── EXPOSE GLOBALS V4 ── */
+window.checkAndUnlockBadges = checkAndUnlockBadges;
+window.showBadgeUnlock      = showBadgeUnlock;
+window.activateReward       = activateReward;
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {

@@ -610,50 +610,201 @@ const ALL_ACTIONS = [
     tags:['Gratuit','10 min'] }
 ];
 
-/* ── RÉCOMPENSES ── */
+/* ── BADGES V4 ── */
+const BADGES = [
+  /* — Progression — */
+  {
+    id: 'diagnostic-complete',
+    label: 'Diagnostic complété',
+    desc: 'Vous avez évalué vos risques et personnalisé votre Coach.',
+    icon: '🔍', tier: 'bronze',
+    condition: { type: 'diag_done' },
+    unlocksRewardId: 'netatmo-detecteur'
+  },
+  {
+    id: 'premiers-reflexes',
+    label: 'Premiers réflexes',
+    desc: 'Vous avez réalisé votre première action de prévention.',
+    icon: '🛡️', tier: 'bronze',
+    condition: { type: 'action_count', value: 1 },
+    unlocksRewardId: 'leroy-merlin-15'
+  },
+  {
+    id: 'trio-actions',
+    label: '3 actions réalisées',
+    desc: 'Votre logement est déjà mieux protégé qu\'avant.',
+    icon: '⚡', tier: 'silver',
+    condition: { type: 'action_count', value: 3 },
+    unlocksRewardId: 'verisure-alarme'
+  },
+  {
+    id: 'maison-preparee',
+    label: 'Maison préparée',
+    desc: 'Vous avez sécurisé votre logement sur plusieurs fronts.',
+    icon: '🏠', tier: 'silver',
+    condition: { type: 'action_count', value: 5 },
+    unlocksRewardId: 'somfy-domotique'
+  },
+  /* — Par risque — */
+  {
+    id: 'risque-inondation-maitrise',
+    label: 'Risque inondation maîtrisé',
+    desc: 'Toutes les actions inondation de votre profil sont réalisées.',
+    icon: '🌊', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'inondation' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  {
+    id: 'risque-incendie-maitrise',
+    label: 'Risque incendie maîtrisé',
+    desc: 'Votre logement est protégé contre les départs de feu.',
+    icon: '🔥', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'incendie' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  {
+    id: 'risque-dde-maitrise',
+    label: 'Risque DDE maîtrisé',
+    desc: 'Les fuites silencieuses n\'ont plus de prise sur vous.',
+    icon: '💧', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'degat-eaux' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  {
+    id: 'risque-vol-maitrise',
+    label: 'Risque vol maîtrisé',
+    desc: 'Vos accès sont sécurisés et votre logement dissuasif.',
+    icon: '🔐', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'vol' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  {
+    id: 'risque-tempete-maitrise',
+    label: 'Risque tempête maîtrisé',
+    desc: 'Toiture, gouttières et ouvertures sont préparées.',
+    icon: '🌪️', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'tempete' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  {
+    id: 'risque-rga-maitrise',
+    label: 'Risque RGA maîtrisé',
+    desc: 'Vos fondations sont protégées contre les argiles.',
+    icon: '🏚️', tier: 'gold',
+    condition: { type: 'risk_complete', riskId: 'rga' },
+    unlocksRewardId: 'capeb-artisan'
+  },
+  /* — Spéciaux — */
+  {
+    id: 'defi-releve',
+    label: 'Défi relevé',
+    desc: 'Vous avez complété un défi du moment AXA.',
+    icon: '🏆', tier: 'bronze',
+    condition: { type: 'defi_done' },
+    unlocksRewardId: null
+  },
+  {
+    id: 'expert-prevention',
+    label: 'Expert prévention',
+    desc: 'Vous maîtrisez tous les risques de votre profil. Chapeau.',
+    icon: '🎓', tier: 'gold',
+    condition: { type: 'all_risks_complete' },
+    unlocksRewardId: 'axa-expert-diagnostic'
+  }
+];
+
+/* ── RÉCOMPENSES V4 — Marketplace partenaires ── */
 const ALL_REWARDS = [
-  { id:'lmqc-mois', icon:'🎁', iconBg:'#E6F5ED',
-    title:'1 mois d\'assurance complémentaire offert', subtitle:'~46 € offerts',
-    desc:'Un mois de garantie MRH supplémentaire sur votre contrat — offert par AXA en récompense de vos actions de prévention.',
-    type:'lmqc', priority:1, minActions:3,
-    scenarios:['subscription'], conditions:['all','maison','maison_rdc'],
-    status:'available', disclaimer:'Activé au prochain renouvellement.' },
-  { id:'batardeau-offert', icon:'🛡️', iconBg:'#DBEAFE',
-    title:'Kit batardeaux co-financé AXA', subtitle:'Jusqu\'à 150 €',
-    desc:'AXA co-finance l\'achat de batardeaux pour votre logement exposé.',
-    type:'dispositif', priority:1, minActions:2,
-    scenarios:['subscription','seasonal'], conditions:['maison_rdc'],
-    status:'available', disclaimer:'Sur devis validé par AXA Prévention.' },
-  { id:'detecteur-dde', icon:'💧', iconBg:'#CFFAFE',
-    title:'Détecteur de fuite offert', subtitle:'~50 €',
-    desc:'AXA vous offre un détecteur de fuite d\'eau connecté.',
-    type:'dispositif', priority:1, minActions:2,
-    scenarios:['subscription'], conditions:['all','maison','maison_rdc'],
-    status:'available', disclaimer:'Livraison sous 10 jours ouvrés.' },
-  { id:'diagnostic-offert', icon:'🔍', iconBg:'#EDE9FE',
-    title:'1er diagnostic prévention offert', subtitle:'~120 €',
-    desc:'Un expert AXA se déplace pour un diagnostic complet de votre logement.',
-    type:'service_offert', priority:1, minActions:1,
-    scenarios:['subscription'], conditions:['maison','maison_rdc'],
-    status:'available', disclaimer:'Sur rendez-vous — délai 2 semaines.' },
-  { id:'cheque-leroy-merlin', icon:'🛒', iconBg:'#FEF3C7',
-    title:'Bon d\'achat Leroy Merlin', subtitle:'20 €',
-    desc:'À valoir sur tout équipement de prévention en magasin ou en ligne.',
-    type:'cheque_cadeau', priority:2, minActions:1,
-    scenarios:['subscription','seasonal'], conditions:['all','maison','maison_rdc'],
-    status:'teaser', teaser:'Bientôt disponible' },
-  { id:'taux-bonifie', icon:'🏦', iconBg:'#EDE9FE',
-    title:'Taux bonifié crédit travaux', subtitle:'-0,1 %',
-    desc:'Conditions préférentielles sur votre crédit habitat AXA Banque pour travaux de prévention.',
-    type:'cheque_cadeau', priority:2, minActions:5,
-    scenarios:['subscription'], conditions:['maison','maison_rdc'],
-    status:'teaser', teaser:'En cours d\'étude' },
-  { id:'kit-prevention-saisonnier', icon:'🌿', iconBg:'#FEF3C7',
-    title:'Kit prévention saisonnière offert', subtitle:'~80 €',
-    desc:'Bâche de protection, produit ignifuge pour végétation et guide de débroussaillage — co-financé par AXA.',
-    type:'dispositif', priority:1, minActions:2,
-    scenarios:['seasonal'], conditions:['maison','maison_rdc'],
-    status:'available', disclaimer:'Livraison sous 10 jours ouvrés.' }
+  {
+    id: 'netatmo-detecteur',
+    partner: 'Netatmo',
+    partnerLogo: '💧',
+    partnerColor: '#0EA5E9',
+    icon: '💧', iconBg: '#CFFAFE',
+    title: 'Détecteur de fuite connecté',
+    offer: '−25 % tarif partenaire',
+    code: 'AXA-NETATMO25',
+    codeLink: '#',
+    desc: 'Le détecteur Netatmo Smart Water Leak Sensor alerté dès les premières gouttes, compatible Apple Home & Google Home.',
+    requiredBadgeId: 'diagnostic-complete',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['all', 'maison', 'maison_rdc']
+  },
+  {
+    id: 'leroy-merlin-15',
+    partner: 'Leroy Merlin',
+    partnerLogo: '🏗️',
+    partnerColor: '#22C55E',
+    icon: '🛒', iconBg: '#F0FAF5',
+    title: 'Équipements prévention',
+    offer: '−15 % en magasin et en ligne',
+    code: 'AXA-LM15',
+    codeLink: '#',
+    desc: 'Valable sur toute la gamme prévention : détecteurs, serrures, batardeaux, matériaux d\'entretien.',
+    requiredBadgeId: 'premiers-reflexes',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['all', 'maison', 'maison_rdc']
+  },
+  {
+    id: 'verisure-alarme',
+    partner: 'Verisure',
+    partnerLogo: '🔐',
+    partnerColor: '#6366F1',
+    icon: '🔐', iconBg: '#EDE9FE',
+    title: 'Alarme télésurveillée',
+    offer: '3 mois de surveillance offerts',
+    code: 'AXA-VERISURE3M',
+    codeLink: '#',
+    desc: 'Offre réservée aux assurés AXA : installation offerte + 3 mois de télésurveillance 24h/24 sans engagement.',
+    requiredBadgeId: 'trio-actions',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['all', 'maison', 'maison_rdc']
+  },
+  {
+    id: 'somfy-domotique',
+    partner: 'Somfy',
+    partnerLogo: '🏠',
+    partnerColor: '#F59E0B',
+    icon: '🏠', iconBg: '#FEF3C7',
+    title: 'Volets & domotique connectée',
+    offer: '−10 % tarif partenaire',
+    code: 'AXA-SOMFY10',
+    codeLink: '#',
+    desc: 'Volets roulants connectés, détecteurs d\'ouverture et automatisations — sécurisez et pilotez votre maison à distance.',
+    requiredBadgeId: 'maison-preparee',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['maison', 'maison_rdc']
+  },
+  {
+    id: 'capeb-artisan',
+    partner: 'CAPEB',
+    partnerLogo: '🔧',
+    partnerColor: '#DC2626',
+    icon: '🔧', iconBg: '#FEE2E2',
+    title: 'Artisan certifié garanti 48h',
+    offer: 'Devis prioritaire sous 48h',
+    code: null,
+    codeLink: '#',
+    desc: 'Accès au réseau CAPEB d\'artisans certifiés (plombiers, couvreurs, serruriers, électriciens) avec devis garanti sous 48h et tarif négocié AXA.',
+    requiredBadgeId: 'risque-inondation-maitrise',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['all', 'maison', 'maison_rdc']
+  },
+  {
+    id: 'axa-expert-diagnostic',
+    partner: 'AXA Prévention',
+    partnerLogo: '🎓',
+    partnerColor: '#00008F',
+    icon: '🎓', iconBg: '#E8E8F8',
+    title: 'Diagnostic habitat à domicile',
+    offer: 'Offert — valeur 120 €',
+    code: null,
+    codeLink: '#',
+    desc: 'Un expert AXA Prévention se déplace pour un audit complet de votre logement et vous remet un rapport personnalisé avec plan d\'action chiffré.',
+    requiredBadgeId: 'expert-prevention',
+    scenarios: ['subscription', 'seasonal'],
+    conditions: ['maison', 'maison_rdc']
+  }
 ];
 
 /* ── SERVICES PAR RISQUE ── */
@@ -839,25 +990,55 @@ function getActionsForProfile(profile, diagAnswers) {
   });
 }
 
-function getRewardsForProfile(profile, completedCount) {
+/* ── HELPERS BADGES V4 ── */
+
+function checkBadgeCondition(badge, profile, diagAnswers, completedActionIds, completedDefis) {
+  const c = badge.condition;
+  const allProfileActions = getActionsForProfile(profile, diagAnswers || {});
+  switch (c.type) {
+    case 'diag_done':
+      return Object.keys(diagAnswers || {}).length > 0;
+    case 'action_count':
+      return completedActionIds.length >= c.value;
+    case 'risk_complete': {
+      const riskActions = allProfileActions.filter(a => a.riskId === c.riskId);
+      return riskActions.length > 0 && riskActions.every(a => completedActionIds.includes(a.id));
+    }
+    case 'all_risks_complete':
+      return profile.mainRisks.every(rId => {
+        const ra = allProfileActions.filter(a => a.riskId === rId);
+        return ra.length > 0 && ra.every(a => completedActionIds.includes(a.id));
+      });
+    case 'defi_done':
+      return (completedDefis || []).length > 0;
+    default:
+      return false;
+  }
+}
+
+function getUnlockedBadgeIds(profile, diagAnswers, completedActionIds, completedDefis) {
+  return BADGES
+    .filter(b => checkBadgeCondition(b, profile, diagAnswers, completedActionIds, completedDefis))
+    .map(b => b.id);
+}
+
+function getBadgeById(id) {
+  return BADGES.find(b => b.id === id);
+}
+
+function getRewardsForProfile(profile, unlockedBadgeIds) {
   const eligible = ['all'];
   if (profile.condition === 'maison' || profile.condition === 'maison_rdc') {
     eligible.push('maison');
     if (profile.condition === 'maison_rdc') eligible.push('maison_rdc');
   }
-
-  return ALL_REWARDS.map(r => {
-    const okScenario  = r.scenarios.includes(profile.scenario);
-    const okCondition = r.conditions.some(c => eligible.includes(c));
-    if (!okScenario || !okCondition) return { ...r, computedStatus: 'locked' };
-    if (r.status === 'teaser') return { ...r, computedStatus: 'teaser' };
-    if (completedCount >= r.minActions) return { ...r, computedStatus: 'unlocked' };
-    return { ...r, computedStatus: 'available' };
-  }).filter(r => {
-    const okScenario  = r.scenarios.includes(profile.scenario);
-    const okCondition = r.conditions.some(c => eligible.includes(c));
-    return okScenario && okCondition;
-  });
+  return ALL_REWARDS
+    .filter(r => r.scenarios.includes(profile.scenario) && r.conditions.some(c => eligible.includes(c)))
+    .map(r => {
+      const badgeUnlocked = (unlockedBadgeIds || []).includes(r.requiredBadgeId);
+      const requiredBadge = getBadgeById(r.requiredBadgeId);
+      return { ...r, badgeUnlocked, requiredBadge };
+    });
 }
 
 function computeScore(profile, completedIds) {
