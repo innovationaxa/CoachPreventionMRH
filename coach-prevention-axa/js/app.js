@@ -10,6 +10,7 @@ window._ST = {
   diagAnswers:      {},
   questions:        [],
   diagCompleted:    false,
+  diagInProgress:   false,
   completedActions: [],
   unlockedBadges:   [],
   activatedRewards: [],
@@ -54,18 +55,22 @@ function render(idx) {
 
 /* ── NAVIGATION ── */
 function goTo(idx) {
-  if (idx < 0 || idx > 9) return;
+  if (idx < 0 || idx > 10) return;
   if (idx === 2) {
-    /* Reset diagnostic on entry */
     const p = getProfile(window._ST.profileId);
-    window._ST.questions  = getQuestionsForProfile(p);
-    window._ST.diagStep   = 0;
-    window._ST.diagAnswers = {};
-    window._ST.diagCompleted = false;
+    if (!window._ST.diagInProgress) {
+      /* Fresh start — reset everything */
+      window._ST.questions   = getQuestionsForProfile(p);
+      window._ST.diagStep    = 0;
+      window._ST.diagAnswers = {};
+      window._ST.diagCompleted = false;
+    }
+    window._ST.diagInProgress = true;
   }
   if (idx === 3) {
     showLoadingThen(() => {
       window._ST.diagCompleted = true;
+      window._ST.diagInProgress = false;
       window._ST.hubTab = 'risques';
       if (!Array.isArray(window._ST.diagHistory)) window._ST.diagHistory = [];
       window._ST.diagHistory.push({
@@ -81,7 +86,7 @@ function goTo(idx) {
   render(idx); updateNav(idx); updateTabBar(idx);
   if (idx === 1 && !window._ST.diagCompleted && !window._ST.hubModalShown) {
     window._ST.hubModalShown = true;
-    setTimeout(() => showDiagModal(), 380);
+    setTimeout(() => showDiagModal(), 2500);
   }
 }
 
@@ -96,7 +101,7 @@ function updateTabBar(idx) {
   const bar    = document.getElementById('tabBar');
   const device = document.querySelector('.device');
   if (!bar) return;
-  if (idx === 0) {
+  if (idx === 0 || idx === 10) {
     bar.style.display = 'none';
     device && device.classList.remove('has-tabbar');
     return;
@@ -192,7 +197,10 @@ function selectProfile(id) {
   window._ST.diagAnswers    = {};
   window._ST.diagStep       = 0;
   window._ST.diagCompleted  = false;
+  window._ST.diagInProgress = false;
   window._ST.completedActions = [];
+  window._ST.unlockedBadges = [];
+  window._ST.activatedRewards = [];
   window._ST.points         = 0;
   window._ST.proofUploaded  = {};
   window._ST.selectedRisk   = null;
@@ -200,15 +208,18 @@ function selectProfile(id) {
   window._ST.hubTab         = 'risques';
   window._ST.diagHistory    = [];
   window._ST.hubModalShown  = false;
+  window._ST.completedDefis = [];
   render(0);
   updateNav(0);
+  updateTabBar(0);
 }
 
 function restartDiagnostic() {
   const p = getProfile(window._ST.profileId);
-  window._ST.questions   = getQuestionsForProfile(p);
-  window._ST.diagStep    = 0;
-  window._ST.diagAnswers = {};
+  window._ST.questions      = getQuestionsForProfile(p);
+  window._ST.diagStep       = 0;
+  window._ST.diagAnswers    = {};
+  window._ST.diagInProgress = false;
   render(2);
   updateNav(2);
   updateTabBar(2);
@@ -216,7 +227,7 @@ function restartDiagnostic() {
 
 function startFromSelection() {
   if (!window._ST.profileId) return;
-  goTo(1);
+  goTo(10);
 }
 
 /* ── DIAGNOSTIC ── */
