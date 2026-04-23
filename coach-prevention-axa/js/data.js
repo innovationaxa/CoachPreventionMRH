@@ -331,87 +331,114 @@ const RISK_CATEGORY_CONFIG = {
 
 /* ── QUESTIONS DIAGNOSTIQUES ── */
 /* 3 options : yes (+max) / partial (+mid) / no (+0 ou +inverse) */
+/* level 1 = Votre environnement (habitudes, entretien, sensibilisation)
+   level 2 = Votre équipement (dispositifs installés, travaux réalisés) */
 const ALL_QUESTIONS = [
-  /* INONDATION — condition: maison_rdc */
-  { id:'inondation-clapets', riskId:'inondation', condition:'maison_rdc',
-    text:'Des clapets anti-retours sont-ils installés sur vos canalisations d\'eaux usées ?',
-    hint:'Valves unidirectionnelles placées sur les canalisations pour empêcher les eaux d\'égout de refluer dans le logement lors d\'une crue.',
-    options:[{v:'yes',l:'Oui, installés',pts:12},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non, pas encore',pts:0}] },
-  { id:'inondation-batardeaux', riskId:'inondation', condition:'maison_rdc',
+  /* ── INONDATION — maison_rdc ── */
+  { id:'inondation-batardeaux', riskId:'inondation', condition:'maison_rdc', level:1,
     text:'Disposez-vous de batardeaux pour protéger vos portes et accès ?',
     hint:'Plaques amovibles (plastique ou métal) que l\'on fixe devant les portes, fenêtres basses et soupiraux pour bloquer l\'eau en cas d\'inondation.',
     options:[{v:'yes',l:'Oui, prêts à poser',pts:10},{v:'partial',l:'Pour certaines ouvertures',pts:5},{v:'no',l:'Non',pts:0}] },
-  /* TEMPÊTE — condition: maison */
-  { id:'tempete-toiture', riskId:'tempete', condition:'maison',
-    text:'Votre toiture a-t-elle été contrôlée par un professionnel ces 3 dernières années ?',
-    options:[{v:'yes',l:'Oui, contrôlée récemment',pts:8},{v:'partial',l:'Il y a plus de 3 ans',pts:3},{v:'no',l:'Non / Je ne sais pas',pts:0}] },
-  { id:'tempete-goutieres', riskId:'tempete', condition:'maison',
-    text:'Vos gouttières et chéneaux ont-ils été nettoyés dans les 12 derniers mois ?',
-    hint:'Des gouttières obstruées causent des refoulements sous la toiture et des infiltrations — principal dégât tempête évitable.',
-    options:[{v:'yes',l:'Oui, nettoyés',pts:8},{v:'partial',l:'Il y a plus d\'un an',pts:4},{v:'no',l:'Non',pts:0}] },
-  /* DÉGÂT DES EAUX — condition: all */
-  { id:'dde-joints', riskId:'degat-eaux', condition:'all',
-    text:'Les joints de salle de bain, cuisine et WC ont-ils été refaits ces 5 dernières années ?',
-    hint:'Joints décollés ou noircis = infiltration silencieuse. 1ère cause de dégât des eaux détectable visuellement.',
-    options:[{v:'yes',l:'Oui, refaits',pts:6},{v:'partial',l:'Certains seulement',pts:3},{v:'no',l:'Non ou plus de 5 ans',pts:0}] },
-  { id:'dde-detection-fuite', riskId:'degat-eaux', condition:'all',
-    text:'Avez-vous un détecteur de fuite d\'eau (sonde ou capteur) ?',
-    hint:'Petit dispositif placé sous les éviers ou derrière les machines — alerte dès les premières gouttes, avant que les dégâts s\'aggravent.',
-    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:0}] },
-  /* INCENDIE — condition: all */
-  { id:'incendie-detecteur-fumee', riskId:'incendie', condition:'all',
-    text:'Avez-vous un détecteur de fumée fonctionnel à chaque niveau du logement ?',
-    options:[{v:'yes',l:'Oui, à chaque étage',pts:8},{v:'partial',l:'Dans certaines pièces seulement',pts:4},{v:'no',l:'Non',pts:0}] },
-  { id:'incendie-chaudiere', riskId:'incendie', condition:'all',
-    text:'Votre chaudière bénéficie-t-elle d\'une révision annuelle par un professionnel ?',
-    hint:'Obligatoire pour les chaudières gaz et fioul. Si votre logement est tout-électrique ou sans chaudière, choisissez la dernière option.',
-    options:[{v:'yes',l:'Oui — contrat d\'entretien',pts:6},{v:'partial',l:'Pas chaque année',pts:2},{v:'no',l:'Non ou pas de chaudière',pts:3}] },
-  /* VOL — condition: all */
-  { id:'vol-telesurveillance', riskId:'vol', condition:'all',
-    text:'Disposez-vous d\'un système de surveillance ou d\'alarme pour votre logement ?',
-    options:[{v:'yes',l:'Alarme + télésurveillance',pts:10},{v:'partial',l:'Caméra ou alarme seule',pts:5},{v:'no',l:'Aucun système',pts:0}] },
-  { id:'vol-serrure-3pts', riskId:'vol', condition:'all',
-    text:'Votre porte d\'entrée est-elle équipée d\'une serrure 3 points (ou certifiée A2P) ?',
-    hint:'Une serrure 3 points résiste 3× plus longtemps à l\'effraction. Obligatoire pour activer certaines garanties vol.',
-    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non, serrure simple',pts:0}] },
-  /* INONDATION — questions supplémentaires */
-  { id:'inondation-obturateurs', riskId:'inondation', condition:'maison_rdc',
-    text:'Vos ouvertures basses (soupiraux, aérations de cave) sont-elles protégeables ?',
-    hint:'Soupiraux, grilles de ventilation et aérations en sous-sol — points d\'entrée de l\'eau souvent oubliés lors des inondations.',
-    options:[{v:'yes',l:'Oui, toutes protégeables',pts:8},{v:'partial',l:'Partiellement',pts:4},{v:'no',l:'Non',pts:0}] },
-  { id:'inondation-electrique', riskId:'inondation', condition:'maison_rdc',
+  { id:'inondation-electrique', riskId:'inondation', condition:'maison_rdc', level:1,
     text:'Votre tableau électrique et vos prises sont-ils situés à plus de 1,5 m du sol ?',
     hint:'En cas de crue, l\'eau peut atteindre 50 cm à 1 m. Un tableau électrique bas = risque de court-circuit et d\'électrocution.',
     options:[{v:'yes',l:'Oui',pts:10},{v:'partial',l:'En partie',pts:5},{v:'no',l:'Non / Je ne sais pas',pts:0}] },
-  /* DÉGÂT DES EAUX — question supplémentaire */
-  { id:'dde-canalisation-tableau', riskId:'degat-eaux', condition:'all',
+  { id:'inondation-clapets', riskId:'inondation', condition:'maison_rdc', level:2,
+    text:'Des clapets anti-retours sont-ils installés sur vos canalisations d\'eaux usées ?',
+    hint:'Valves unidirectionnelles placées sur les canalisations pour empêcher les eaux d\'égout de refluer dans le logement lors d\'une crue.',
+    options:[{v:'yes',l:'Oui, installés',pts:12},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non, pas encore',pts:0}] },
+  { id:'inondation-obturateurs', riskId:'inondation', condition:'maison_rdc', level:2,
+    text:'Vos ouvertures basses (soupiraux, aérations de cave) sont-elles protégeables ?',
+    hint:'Soupiraux, grilles de ventilation et aérations en sous-sol — points d\'entrée de l\'eau souvent oubliés lors des inondations.',
+    options:[{v:'yes',l:'Oui, toutes protégeables',pts:8},{v:'partial',l:'Partiellement',pts:4},{v:'no',l:'Non',pts:0}] },
+
+  /* ── TEMPÊTE — maison ── */
+  { id:'tempete-toiture', riskId:'tempete', condition:'maison', level:1,
+    text:'Votre toiture a-t-elle été contrôlée par un professionnel ces 3 dernières années ?',
+    options:[{v:'yes',l:'Oui, contrôlée récemment',pts:8},{v:'partial',l:'Il y a plus de 3 ans',pts:3},{v:'no',l:'Non / Je ne sais pas',pts:0}] },
+  { id:'tempete-goutieres', riskId:'tempete', condition:'maison', level:1,
+    text:'Vos gouttières et chéneaux ont-ils été nettoyés dans les 12 derniers mois ?',
+    hint:'Des gouttières obstruées causent des refoulements sous la toiture et des infiltrations — principal dégât tempête évitable.',
+    options:[{v:'yes',l:'Oui, nettoyés',pts:8},{v:'partial',l:'Il y a plus d\'un an',pts:4},{v:'no',l:'Non',pts:0}] },
+  { id:'tempete-jardin', riskId:'tempete', condition:'maison', level:1,
+    text:'Avez-vous identifié les éléments extérieurs à sécuriser en cas d\'alerte tempête ?',
+    hint:'Mobilier de jardin, barbecue, pots de fleurs, abris de jardin — projectiles potentiels par vents forts. Un plan simple suffit.',
+    options:[{v:'yes',l:'Oui, j\'ai un plan',pts:5},{v:'partial',l:'En partie',pts:2},{v:'no',l:'Non',pts:0}] },
+  { id:'tempete-volets', riskId:'tempete', condition:'maison', level:2,
+    text:'Vos volets et fermetures résistent-ils à des vents de plus de 90 km/h ?',
+    hint:'Volets roulants PVC ou alu, persiennes renforcées — la norme de résistance aux vents est souvent précisée dans les CGV de pose.',
+    options:[{v:'yes',l:'Oui, renforcés',pts:8},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non ou volets légers',pts:0}] },
+
+  /* ── DÉGÂT DES EAUX — all ── */
+  { id:'dde-robinet-arret', riskId:'degat-eaux', condition:'all', level:1,
+    text:'Connaissez-vous l\'emplacement du robinet d\'arrêt général de l\'eau dans votre logement ?',
+    hint:'Ce robinet permet de couper l\'eau en quelques secondes. Souvent sous l\'évier de cuisine ou dans la cave / gaine technique.',
+    options:[{v:'yes',l:'Oui, je le connais',pts:5},{v:'partial',l:'Je l\'ai cherché mais je ne sais pas',pts:1},{v:'no',l:'Non, je ne sais pas où il est',pts:0}] },
+  { id:'dde-joints', riskId:'degat-eaux', condition:'all', level:1,
+    text:'Les joints de salle de bain, cuisine et WC ont-ils été refaits ces 5 dernières années ?',
+    hint:'Joints décollés ou noircis = infiltration silencieuse. 1ère cause de dégât des eaux détectable visuellement.',
+    options:[{v:'yes',l:'Oui, refaits',pts:6},{v:'partial',l:'Certains seulement',pts:3},{v:'no',l:'Non ou plus de 5 ans',pts:0}] },
+  { id:'dde-detection-fuite', riskId:'degat-eaux', condition:'all', level:2,
+    text:'Avez-vous un détecteur de fuite d\'eau (sonde ou capteur) ?',
+    hint:'Petit dispositif placé sous les éviers ou derrière les machines — alerte dès les premières gouttes, avant que les dégâts s\'aggravent.',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:0}] },
+  { id:'dde-canalisation-tableau', riskId:'degat-eaux', condition:'all', level:2,
     text:'Des canalisations passent-elles à proximité immédiate de votre tableau électrique ?',
     hint:'Une fuite à proximité du tableau peut provoquer un court-circuit, voire un départ d\'incendie — risque double à surveiller.',
     options:[{v:'yes',l:'Oui',pts:0},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non',pts:6}] },
-  /* INCENDIE — questions supplémentaires */
-  { id:'incendie-ramonage', riskId:'incendie', condition:'maison',
-    text:'Faites-vous ramoner vos conduits de cheminée ou d\'insert chaque année ?',
-    options:[{v:'yes',l:'Oui, chaque année',pts:6},{v:'partial',l:'Pas tous les ans',pts:2},{v:'no',l:'Non ou pas de cheminée',pts:4}] },
-  { id:'incendie-extincteur', riskId:'incendie', condition:'all',
+
+  /* ── INCENDIE — all ── */
+  { id:'incendie-detecteur-fumee', riskId:'incendie', condition:'all', level:1,
+    text:'Avez-vous un détecteur de fumée fonctionnel à chaque niveau du logement ?',
+    options:[{v:'yes',l:'Oui, à chaque étage',pts:8},{v:'partial',l:'Dans certaines pièces seulement',pts:4},{v:'no',l:'Non',pts:0}] },
+  { id:'incendie-evacuation', riskId:'incendie', condition:'all', level:1,
+    text:'Avez-vous un plan d\'évacuation connu de tous les membres de votre foyer ?',
+    hint:'Itinéraire de sortie, point de rassemblement, numéros d\'urgence affichés — quelques minutes de préparation peuvent tout changer.',
+    options:[{v:'yes',l:'Oui, on l\'a défini ensemble',pts:5},{v:'partial',l:'Partiellement',pts:2},{v:'no',l:'Non',pts:0}] },
+  { id:'incendie-chaudiere', riskId:'incendie', condition:'all', level:1,
+    text:'Votre chaudière bénéficie-t-elle d\'une révision annuelle par un professionnel ?',
+    hint:'Obligatoire pour les chaudières gaz et fioul. Si votre logement est tout-électrique ou sans chaudière, choisissez la dernière option.',
+    options:[{v:'yes',l:'Oui — contrat d\'entretien',pts:6},{v:'partial',l:'Pas chaque année',pts:2},{v:'no',l:'Non ou pas de chaudière',pts:3}] },
+  { id:'incendie-extincteur', riskId:'incendie', condition:'all', level:2,
     text:'Avez-vous un extincteur et savez-vous l\'utiliser ?',
     options:[{v:'yes',l:'Oui, et je sais l\'utiliser',pts:6},{v:'partial',l:'Oui, mais sans formation',pts:3},{v:'no',l:'Non',pts:0}] },
-  { id:'incendie-electricite', riskId:'incendie', condition:'all',
+  { id:'incendie-electricite', riskId:'incendie', condition:'all', level:2,
     text:'Votre installation électrique a-t-elle été refaite il y a moins de 15 ans ?',
     hint:'Une installation vieillissante (câbles, disjoncteurs usés) est la 2ème cause d\'incendie domestique en France.',
     options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:3},{v:'no',l:'Non',pts:0}] },
-  /* VOL — question supplémentaire */
-  { id:'vol-volets', riskId:'vol', condition:'maison_rdc',
+  { id:'incendie-ramonage', riskId:'incendie', condition:'maison', level:2,
+    text:'Faites-vous ramoner vos conduits de cheminée ou d\'insert chaque année ?',
+    options:[{v:'yes',l:'Oui, chaque année',pts:6},{v:'partial',l:'Pas tous les ans',pts:2},{v:'no',l:'Non ou pas de cheminée',pts:4}] },
+
+  /* ── VOL — all ── */
+  { id:'vol-inventaire', riskId:'vol', condition:'all', level:1,
+    text:'Avez-vous listé et photographié vos objets de valeur (mobilier, bijoux, électronique) ?',
+    hint:'Un inventaire photo facilite grandement les démarches de déclaration de sinistre — et peut éviter des refus d\'indemnisation.',
+    options:[{v:'yes',l:'Oui, inventaire à jour',pts:5},{v:'partial',l:'Partiellement',pts:2},{v:'no',l:'Non',pts:0}] },
+  { id:'vol-serrure-3pts', riskId:'vol', condition:'all', level:2,
+    text:'Votre porte d\'entrée est-elle équipée d\'une serrure 3 points (ou certifiée A2P) ?',
+    hint:'Une serrure 3 points résiste 3× plus longtemps à l\'effraction. Obligatoire pour activer certaines garanties vol.',
+    options:[{v:'yes',l:'Oui',pts:8},{v:'partial',l:'Je ne sais pas',pts:2},{v:'no',l:'Non, serrure simple',pts:0}] },
+  { id:'vol-telesurveillance', riskId:'vol', condition:'all', level:2,
+    text:'Disposez-vous d\'un système de surveillance ou d\'alarme pour votre logement ?',
+    options:[{v:'yes',l:'Alarme + télésurveillance',pts:10},{v:'partial',l:'Caméra ou alarme seule',pts:5},{v:'no',l:'Aucun système',pts:0}] },
+  { id:'vol-simulateur', riskId:'vol', condition:'all', level:2,
+    text:'Utilisez-vous des minuteries ou simulateurs de présence lors de vos absences ?',
+    hint:'Ampoules connectées ou prises à minuterie simulant une occupation — dissuadent efficacement les cambriolages d\'opportunité.',
+    options:[{v:'yes',l:'Oui',pts:6},{v:'partial',l:'Parfois',pts:3},{v:'no',l:'Non',pts:0}] },
+  { id:'vol-volets', riskId:'vol', condition:'maison_rdc', level:1,
     text:'Fermez-vous systématiquement vos volets la nuit et lors de vos absences ?',
     options:[{v:'yes',l:'Oui, systématiquement',pts:6},{v:'partial',l:'Parfois seulement',pts:3},{v:'no',l:'Non ou pas de volets',pts:0}] },
-  /* RGA — condition: maison */
-  { id:'rga-trottoir', riskId:'rga', condition:'maison',
-    text:'Y a-t-il un trottoir ou une dalle périphérique autour de votre maison ?',
-    hint:'Dalle béton ou pavés longeant les façades — éloigne l\'eau de pluie des fondations et réduit les variations d\'humidité du sol argileux.',
-    options:[{v:'yes',l:'Oui, complet',pts:8},{v:'partial',l:'Partiellement',pts:4},{v:'no',l:'Non',pts:0}] },
-  { id:'rga-vegetation', riskId:'rga', condition:'maison',
+
+  /* ── RGA — maison ── */
+  { id:'rga-vegetation', riskId:'rga', condition:'maison', level:1,
     text:'Y a-t-il des arbres ou grands arbustes à moins de 5 m de vos façades ?',
     hint:'Les arbres et haies absorbent l\'eau du sol — ils accentuent le retrait des argiles en été et les pressions sur les fondations en hiver.',
-    options:[{v:'yes',l:'Oui, plusieurs',pts:0},{v:'partial',l:'Un ou deux',pts:3},{v:'no',l:'Non',pts:8}] }
+    options:[{v:'yes',l:'Oui, plusieurs',pts:0},{v:'partial',l:'Un ou deux',pts:3},{v:'no',l:'Non',pts:8}] },
+  { id:'rga-trottoir', riskId:'rga', condition:'maison', level:2,
+    text:'Y a-t-il un trottoir ou une dalle périphérique autour de votre maison ?',
+    hint:'Dalle béton ou pavés longeant les façades — éloigne l\'eau de pluie des fondations et réduit les variations d\'humidité du sol argileux.',
+    options:[{v:'yes',l:'Oui, complet',pts:8},{v:'partial',l:'Partiellement',pts:4},{v:'no',l:'Non',pts:0}] }
 ];
 
 /* ── MAPPING QUESTION → ACTION ── */
@@ -946,7 +973,9 @@ function getQuestionsForProfile(profile) {
 
   const result = [];
   profile.mainRisks.forEach(r => {
-    (byRisk[r] || []).slice(0, 2).forEach(q => result.push(q));
+    /* Trier L1 avant L2, puis prendre au max 4 par risque */
+    const sorted = (byRisk[r] || []).sort((a, b) => (a.level || 1) - (b.level || 1));
+    sorted.slice(0, 4).forEach(q => result.push(q));
   });
   return result;
 }

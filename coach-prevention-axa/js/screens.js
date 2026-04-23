@@ -306,9 +306,50 @@ function hubRisquesTab(p, diagDone) {
       </div>
     </div>` : '';
 
+  /* ─ Bloc "Ce que votre diagnostic révèle" (post-diag uniquement) ─ */
+  const diagImpactBlock = diagDone ? (() => {
+    const rows = mainRisks.slice(0, 3).map(rId => {
+      const lv  = levels[rId] || {};
+      const r   = RISKS[rId];
+      const li  = lv.levelInfo || getRiskLevelInfo('modere');
+      if (lv.improved) {
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(34,197,94,.15)">
+          <span style="font-size:14px">${r.icon}</span>
+          <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
+          <span style="font-size:11px;font-weight:700;color:var(--success);background:var(--success-bg);padding:2px 8px;border-radius:99px">↓ Réduit</span>
+        </div>`;
+      }
+      if (lv.degraded) {
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(239,68,68,.12)">
+          <span style="font-size:14px">${r.icon}</span>
+          <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
+          <span style="font-size:11px;font-weight:700;color:var(--danger);background:#FEF2F2;padding:2px 8px;border-radius:99px">↑ Point d'attention</span>
+        </div>`;
+      }
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--n100)">
+        <span style="font-size:14px">${r.icon}</span>
+        <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
+        <span style="font-size:11px;color:var(--n400);background:var(--n50);padding:2px 8px;border-radius:99px">${levelChip(li.id,'sm')}</span>
+      </div>`;
+    }).join('');
+
+    const headline = improvedList.length > 0
+      ? `${improvedList.length} risque${improvedList.length > 1 ? 's réduits' : ' réduit'} grâce à vos équipements`
+      : degradedList.length > 0
+        ? `${degradedList.length} point${degradedList.length > 1 ? 's' : ''} d'attention identifié${degradedList.length > 1 ? 's' : ''}`
+        : 'Exposition de zone confirmée par votre déclaration';
+
+    return `<div style="background:var(--white);border:1.5px solid var(--n200);border-radius:var(--r-md);padding:13px 14px">
+      <div style="font-size:11px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">🔍 Ce que votre diagnostic révèle</div>
+      <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${headline}</div>
+      ${rows}
+    </div>`;
+  })() : '';
+
   return `
     <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:14px">
       ${diagCard}
+      ${diagImpactBlock}
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <div style="font-size:13px;font-weight:700;color:var(--n900)">Vos risques principaux</div>
@@ -377,18 +418,13 @@ function hubActionsTab(p, diagDone) {
       : null;
     const badgeEarned = linkedBadge && unlockedBadges.includes(linkedBadge.id);
 
-    /* Niveau breakdown (calculé avant le template) */
+    /* Résumé des actions (hiérarchie visible uniquement dans la modale) */
+    const actCount = acts.length;
     const n1 = acts.filter(a => a.effort === 'low').length;
-    const n2 = acts.filter(a => a.effort === 'medium').length;
-    const n3 = acts.filter(a => a.effort === 'high').length;
-    const lvTags = [
-      n1 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:1px 6px;border-radius:99px">N1×${n1}</span>` : '',
-      n2 > 0 ? `<span style="font-size:9px;font-weight:700;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:1px 6px;border-radius:99px">N2×${n2}</span>` : '',
-      n3 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;padding:1px 6px;border-radius:99px">N3×${n3}</span>` : ''
-    ].filter(Boolean).join('');
-    const lvHtml = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px">
+    const quickHint = n1 > 0 ? `dont ${n1} geste${n1 > 1 ? 's' : ''} simple${n1 > 1 ? 's' : ''}` : '';
+    const lvHtml = `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px">
       ${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}
-      ${lvTags}
+      <span style="font-size:10.5px;color:var(--n400)">${actCount} action${actCount > 1 ? 's' : ''}${quickHint ? ' · ' + quickHint : ''}</span>
     </div>`;
 
     return `
@@ -454,8 +490,7 @@ function hubActionsTab(p, diagDone) {
       <!-- SECTION 1 : Défis du moment (éphémère — en premier) -->
       <div>
         <div style="margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">🔥 Défis du moment</div>
-          <div style="font-size:11px;color:var(--n500)">Animations saisonnières · ponctuelles · engageantes</div>
+          <div style="font-size:14px;font-weight:700;color:var(--n900)">🔥 Défis du moment</div>
         </div>
 
         ${activeDefi
@@ -485,8 +520,7 @@ function hubActionsTab(p, diagDone) {
       <!-- SECTION 2 : Plan d'actions personnalisé (permanent) -->
       <div>
         <div style="margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700;color:var(--n900);margin-bottom:3px">📋 Mes actions recommandées</div>
-          <div style="font-size:11px;color:var(--n500)">Permanent · personnalisé pour votre profil et vos risques</div>
+          <div style="font-size:14px;font-weight:700;color:var(--n900)">📋 Mes actions recommandées</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           ${p.mainRisks.map(categoryCard).join('')}
@@ -543,6 +577,12 @@ function screenDiagnostic() {
     </div>`
   ).join('');
 
+  const qLevel    = q.level || 1;
+  const levelLabel = qLevel === 1 ? 'Votre environnement' : 'Votre équipement';
+  const levelDot   = qLevel === 1
+    ? '<div style="width:7px;height:7px;border-radius:50%;background:#60a5fa;flex-shrink:0"></div>'
+    : '<div style="width:7px;height:7px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div>';
+
   return `
     <div style="background:var(--axa);padding:16px var(--sp5) 20px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
@@ -550,7 +590,10 @@ function screenDiagnostic() {
           ${sv(IC.back,'width:18px;height:18px;fill:white')}
         </button>
         <div style="flex:1">
-          <div style="font-size:11px;color:rgba(255,255,255,.55)">Diagnostic logement</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px">
+            ${levelDot}
+            Niveau ${qLevel} — ${levelLabel}
+          </div>
           <div style="font-size:14px;font-weight:600;color:white">Question ${step+1} sur ${qs.length}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">

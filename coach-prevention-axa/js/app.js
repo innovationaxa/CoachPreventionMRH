@@ -341,7 +341,7 @@ function showBadgeUnlock(badge) {
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:6px">Badge débloqué !</div>
       <div style="font-size:17px;font-weight:700;color:#111118;margin-bottom:8px">${badge.label}</div>
       <div style="font-size:12px;color:#6B6B85;line-height:1.55;margin-bottom:22px">${badge.desc}</div>
-      <button onclick="document.getElementById('badge-unlock-overlay').remove();window._ST.hubTab='actions';goTo(1);"
+      <button onclick="document.getElementById('badge-unlock-overlay').remove();goTo(1);"
               style="width:100%;padding:13px;background:${color};color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
         Super ! 🎊
       </button>
