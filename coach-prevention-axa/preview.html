@@ -4273,6 +4273,21 @@ function hubActionsTab(p, diagDone) {
       ? BADGES.find(b => b.condition && b.condition.type === 'risk_complete' && b.condition.riskId === riskId)
       : null;
     const badgeEarned = linkedBadge && unlockedBadges.includes(linkedBadge.id);
+
+    /* Niveau breakdown (calculé avant le template) */
+    const n1 = acts.filter(a => a.effort === 'low').length;
+    const n2 = acts.filter(a => a.effort === 'medium').length;
+    const n3 = acts.filter(a => a.effort === 'high').length;
+    const lvTags = [
+      n1 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:1px 6px;border-radius:99px">N1×${n1}</span>` : '',
+      n2 > 0 ? `<span style="font-size:9px;font-weight:700;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:1px 6px;border-radius:99px">N2×${n2}</span>` : '',
+      n3 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;padding:1px 6px;border-radius:99px">N3×${n3}</span>` : ''
+    ].filter(Boolean).join('');
+    const lvHtml = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px">
+      ${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}
+      ${lvTags}
+    </div>`;
+
     return `
       <div onclick="${isDone ? '' : `openCategoryModal('${riskId}')`}"
            style="background:var(--white);border:1.5px solid ${isDone?'var(--success-light, #d4f4e1)':'var(--n150)'};border-radius:var(--r-md);padding:14px;cursor:${isDone?'default':'pointer'};position:relative">
@@ -4286,20 +4301,7 @@ function hubActionsTab(p, diagDone) {
             <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
             ${isDone
               ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉${badgeEarned ? ' · 🏅 Badge débloqué !' : ''}</div>`
-              : (() => {
-                  const n1 = acts.filter(a => a.effort === 'low').length;
-                  const n2 = acts.filter(a => a.effort === 'medium').length;
-                  const n3 = acts.filter(a => a.effort === 'high').length;
-                  const lvTags = [
-                    n1 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:1px 6px;border-radius:99px">N1×${n1}</span>` : '',
-                    n2 > 0 ? `<span style="font-size:9px;font-weight:700;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:1px 6px;border-radius:99px">N2×${n2}</span>` : '',
-                    n3 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;padding:1px 6px;border-radius:99px">N3×${n3}</span>` : ''
-                  ].filter(Boolean).join('');
-                  return `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px">
-                    ${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}
-                    ${lvTags}
-                  </div>`;
-                })()
+              : lvHtml}
           </div>
           ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
         </div>
