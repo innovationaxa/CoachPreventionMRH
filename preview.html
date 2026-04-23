@@ -3707,8 +3707,9 @@ const DEFIS_DU_MOMENT = [
     riskId: 'degat-eaux',
     icon: '💧',
     pts: 120,
-    lot: 'Détecteur Netatmo offert',
+    lot: 'Lots à gagner',
     lotIcon: '🎁',
+    lotLink: 'https://www.axa.fr/conseils-prevention.html',
     period: 'Avril 2026',
     expiresAt: '2026-05-31',
     steps: [
@@ -4285,7 +4286,20 @@ function hubActionsTab(p, diagDone) {
             <div style="font-size:11px;color:var(--n500);line-height:1.4">${cv.phrase}</div>
             ${isDone
               ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600">Toutes les actions réalisées 🎉${badgeEarned ? ' · 🏅 Badge débloqué !' : ''}</div>`
-              : `<div style="display:flex;align-items:center;gap:5px;margin-top:5px">${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}<span style="font-size:10px;color:var(--n400)">${acts.length} action${acts.length>1?'s':''}</span></div>`}
+              : (() => {
+                  const n1 = acts.filter(a => a.effort === 'low').length;
+                  const n2 = acts.filter(a => a.effort === 'medium').length;
+                  const n3 = acts.filter(a => a.effort === 'high').length;
+                  const lvTags = [
+                    n1 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;padding:1px 6px;border-radius:99px">N1×${n1}</span>` : '',
+                    n2 > 0 ? `<span style="font-size:9px;font-weight:700;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;padding:1px 6px;border-radius:99px">N2×${n2}</span>` : '',
+                    n3 > 0 ? `<span style="font-size:9px;font-weight:700;background:#F5F3FF;color:#5B21B6;border:1px solid #DDD6FE;padding:1px 6px;border-radius:99px">N3×${n3}</span>` : ''
+                  ].filter(Boolean).join('');
+                  return `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px">
+                    ${linkedBadge ? `<span style="font-size:10px;color:#92400E;background:#FEF3C7;padding:1px 7px;border-radius:99px">${linkedBadge.icon} ${linkedBadge.label}</span>` : ''}
+                    ${lvTags}
+                  </div>`;
+                })()
           </div>
           ${!isDone ? '<div style="color:var(--n300);font-size:20px;align-self:center">›</div>' : ''}
         </div>
@@ -4687,50 +4701,81 @@ function openCategoryModal(riskId) {
   const risk = RISKS[riskId] || {};
   const cv   = RISK_CATEGORY_VERBS[riskId] || { verb: 'Agir', phrase: '' };
 
+  /* ── Niveaux de difficulté ── */
+  const LEVELS = [
+    { key: 'low',    num: 1, label: 'Geste simple',      tagBg: '#F0FDF4', tagColor: '#166534', borderColor: '#BBF7D0' },
+    { key: 'medium', num: 2, label: 'Petit équipement',  tagBg: '#FFFBEB', tagColor: '#92400E', borderColor: '#FDE68A' },
+    { key: 'high',   num: 3, label: 'Gros travaux',      tagBg: '#F5F3FF', tagColor: '#5B21B6', borderColor: '#DDD6FE' }
+  ];
+
+  function levelOf(effort) { return LEVELS.find(l => l.key === effort) || LEVELS[0]; }
+
   function modalActionRow(a) {
-    const effortColor = a.effort==='low' ? 'var(--success)' : a.effort==='medium' ? 'var(--warn)' : 'var(--danger)';
-    const effortLabel = a.effort==='low' ? 'Facile' : a.effort==='medium' ? 'Moyen' : 'Avancé';
+    const lv = levelOf(a.effort);
     return `
       <div onclick="document.getElementById('cat-modal-bd').remove();openAction('${a.id}')"
-           style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100);cursor:pointer">
-        <div style="width:8px;height:8px;border-radius:50%;background:${effortColor};flex-shrink:0"></div>
+           style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:white;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer;margin-bottom:8px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--n900);line-height:1.3">${a.title}</div>
-          <div style="font-size:11px;color:var(--n500);margin-top:2px">${effortLabel} · ${a.duration}</div>
+          <div style="font-size:13px;font-weight:600;color:#111118;line-height:1.35;margin-bottom:5px">${a.title}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:10px;font-weight:700;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:2px 7px;border-radius:99px">N${lv.num} · ${lv.label}</span>
+            <span style="font-size:10px;color:#9CA3AF">${a.duration}</span>
+          </div>
         </div>
-        <div style="color:var(--n300);font-size:16px">›</div>
+        <div style="color:#D1D5DB;font-size:18px">›</div>
       </div>`;
   }
 
-  const emptyState = todo.length === 0
-    ? `<div style="text-align:center;padding:32px 0">
-         <div style="font-size:36px;margin-bottom:8px">✅</div>
-         <div style="font-size:14px;font-weight:700;color:var(--success)">Toutes les actions réalisées !</div>
-       </div>`
-    : todo.map(modalActionRow).join('');
+  let contentHtml;
+  if (todo.length === 0) {
+    contentHtml = `<div style="text-align:center;padding:32px 0">
+      <div style="font-size:36px;margin-bottom:8px">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#22C55E">Toutes les actions réalisées !</div>
+    </div>`;
+  } else {
+    contentHtml = LEVELS.map(lv => {
+      const lvActions = todo.filter(a => a.effort === lv.key);
+      if (lvActions.length === 0) return '';
+      return `
+        <div style="margin-top:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:11px;font-weight:700;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:3px 9px;border-radius:99px">Niveau ${lv.num}</span>
+            <span style="font-size:12px;font-weight:600;color:#374151">${lv.label}</span>
+            <div style="flex:1;height:1px;background:#F3F4F6"></div>
+            <span style="font-size:10px;color:#9CA3AF">${lvActions.length} action${lvActions.length > 1 ? 's' : ''}</span>
+          </div>
+          ${lvActions.map(modalActionRow).join('')}
+        </div>`;
+    }).join('');
+  }
 
   const device = document.querySelector('.device') || document.body;
   const bd = document.createElement('div');
   bd.id = 'cat-modal-bd';
   bd.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:400;display:flex;align-items:flex-end;justify-content:center';
   bd.innerHTML = `
-    <div id="cat-modal-sheet" style="background:white;width:100%;border-radius:20px 20px 0 0;padding:0 0 24px;max-height:85%;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
+    <div id="cat-modal-sheet" style="background:#F5F7FA;width:100%;border-radius:20px 20px 0 0;padding:0 0 28px;max-height:88%;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)">
       <div style="display:flex;justify-content:center;padding:10px 0 4px">
-        <div style="width:36px;height:4px;border-radius:99px;background:var(--n200)"></div>
+        <div style="width:36px;height:4px;border-radius:99px;background:#D1D5DB"></div>
       </div>
-      <div style="padding:14px 20px 16px;border-bottom:1px solid var(--n100)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-          <div style="width:46px;height:46px;border-radius:12px;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${risk.icon || '⚡'}</div>
-          <div>
-            <div style="font-size:11px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px">${cv.verb}</div>
-            <div style="font-size:16px;font-weight:700;color:var(--n900)">${risk.label || riskId}</div>
-            <div style="font-size:12px;color:var(--n500);margin-top:1px">${cv.phrase}</div>
-          </div>
-          <button onclick="document.getElementById('cat-modal-bd').remove()" style="margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--n100);border:none;font-size:16px;cursor:pointer;flex-shrink:0">✕</button>
+      <!-- Header -->
+      <div style="padding:14px 20px 16px;background:white;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;gap:12px">
+        <div style="width:46px;height:46px;border-radius:12px;background:var(--axa-xlight);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${risk.icon || '⚡'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:var(--axa);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${cv.verb}</div>
+          <div style="font-size:16px;font-weight:700;color:#111118">${risk.label || riskId}</div>
+          <div style="font-size:11px;color:#6B7280;margin-top:1px">${cv.phrase}</div>
         </div>
-        ${todo.length > 0 ? `<div style="font-size:11px;color:var(--n500)">${todo.length} action${todo.length>1?'s':''} à réaliser</div>` : ''}
+        <button onclick="document.getElementById('cat-modal-bd').remove()" style="width:30px;height:30px;border-radius:50%;background:#F3F4F6;border:none;font-size:15px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
-      <div style="padding:0 20px">${emptyState}</div>
+      ${todo.length > 0 ? `
+      <!-- Légende niveaux -->
+      <div style="padding:12px 20px 0;display:flex;gap:6px;flex-wrap:wrap">
+        ${LEVELS.filter(lv => todo.some(a => a.effort === lv.key)).map(lv =>
+          `<span style="font-size:10px;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:2px 8px;border-radius:99px;font-weight:600">N${lv.num} ${lv.label}</span>`
+        ).join('')}
+      </div>` : ''}
+      <div style="padding:0 20px">${contentHtml}</div>
     </div>`;
 
   bd.addEventListener('click', e => { if (e.target === bd) bd.remove(); });
@@ -4777,69 +4822,84 @@ function openDefiModal(id) {
 
   const el = document.createElement('div');
   el.id = 'defi-modal-overlay';
-  el.style.cssText = 'position:absolute;inset:0;z-index:700;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  el.style.cssText = 'position:absolute;inset:0;z-index:700;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#F5F7FA';
   el.innerHTML = `
-    <div style="background:linear-gradient(135deg,#00008F,#1a1aaa);padding:20px var(--sp5) 24px;position:relative;overflow:hidden">
-      <div style="position:absolute;right:-16px;top:-16px;font-size:100px;opacity:.06">${d.icon}</div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+    <!-- Header gradient -->
+    <div style="background:linear-gradient(135deg,#00008F 0%,#1a1aaa 100%);padding:20px 20px 26px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;font-size:110px;opacity:.06;line-height:1">${d.icon}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;position:relative">
         <button onclick="document.getElementById('defi-modal-overlay').remove()"
-                style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:white">←</button>
-        <div style="font-size:11px;color:rgba(255,255,255,.6)">Défi du moment</div>
+                style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:white;line-height:1">←</button>
+        <span style="font-size:11px;color:rgba(255,255,255,.55);font-weight:500">Défi du moment · ${d.period}</span>
       </div>
-      <div style="font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🔥 ${d.period}</div>
-      <div style="font-size:20px;font-weight:700;color:white;line-height:1.3;margin-bottom:6px">${d.icon} ${d.title}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:16px">${d.subtitle}</div>
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(251,191,36,.15);border:1px solid rgba(212,160,23,.4);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:12px">
-        <span style="font-size:22px">${d.lotIcon}</span>
-        <div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:1px">Récompense</div>
-          <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
+      <div style="position:relative">
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+          🔥 Défi actif
         </div>
-      </div>
-      <div style="font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:6px">
-        ⏰ Plus que <strong style="color:white;margin:0 2px">${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> pour relever ce défi
+        <div style="font-size:22px;font-weight:800;color:white;line-height:1.3;margin-bottom:8px">${d.icon} ${d.title}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.72);line-height:1.55;margin-bottom:18px">${d.subtitle}</div>
+        <!-- Lot cliquable -->
+        <a href="${d.lotLink || '#'}" target="_blank" style="display:flex;align-items:center;gap:10px;background:rgba(251,191,36,.14);border:1.5px solid rgba(251,191,36,.4);border-radius:12px;padding:11px 13px;text-decoration:none;margin-bottom:14px">
+          <span style="font-size:24px">${d.lotIcon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:2px">Récompense</div>
+            <div style="font-size:13px;font-weight:700;color:#fbbf24">${d.lot}</div>
+          </div>
+          <span style="font-size:13px;color:rgba(251,191,36,.7)">›</span>
+        </a>
+        <!-- Countdown -->
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6)">
+          <span>⏰</span>
+          <span>Plus que <strong style="color:white">${daysLeft} jour${daysLeft > 1 ? 's' : ''}</strong> pour relever ce défi</span>
+        </div>
       </div>
     </div>
 
-    <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
+    <!-- Body -->
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
 
-      <div style="background:var(--white);border:1px solid var(--n150);border-radius:var(--r-md);padding:14px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="font-size:12px;font-weight:700;color:var(--n700)">Votre progression</div>
-          <div style="font-size:12px;font-weight:700;color:var(--axa)">${completedCount} / ${actionIds.length} actions</div>
+      <!-- Progression -->
+      <div style="background:#FFFFFF;border:1px solid #E8EAF0;border-radius:14px;padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:#374151">Votre progression</div>
+          <div style="font-size:12px;font-weight:700;color:#00008F">${completedCount} / ${actionIds.length} actions</div>
         </div>
-        <div style="height:6px;background:var(--n100);border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${Math.round(completedCount / Math.max(actionIds.length, 1) * 100)}%;background:var(--axa);border-radius:99px"></div>
+        <div style="height:7px;background:#EEF0F6;border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(completedCount / Math.max(actionIds.length, 1) * 100)}%;background:linear-gradient(90deg,#00008F,#4040C0);border-radius:99px;transition:width .4s"></div>
         </div>
+        ${completedCount > 0 && !allDone ? `<div style="font-size:10px;color:#6B7280;margin-top:6px">${actionIds.length - completedCount} action${actionIds.length - completedCount > 1 ? 's' : ''} restante${actionIds.length - completedCount > 1 ? 's' : ''}</div>` : ''}
       </div>
 
+      <!-- Actions -->
       <div>
-        <div style="font-size:11px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">${actionIds.length} actions pour compléter ce défi</div>
+        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Les ${actionIds.length} actions du défi</div>
         <div style="display:flex;flex-direction:column;gap:8px">${actionsHtml}</div>
       </div>
 
+      <!-- Preuve -->
       ${d.proof ? `
-      <div style="background:var(--n50);border:1px dashed var(--n300);border-radius:var(--r-md);padding:14px">
-        <div style="font-size:12px;font-weight:700;color:var(--n700);margin-bottom:4px">Justificatif requis</div>
-        <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${d.proof}</div>
+      <div style="background:#FFFFFF;border:1.5px dashed #D1D5DB;border-radius:14px;padding:14px 16px">
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:4px">📎 Justificatif requis</div>
+        <div style="font-size:12px;color:#6B7280;line-height:1.5;margin-bottom:10px">${d.proof}</div>
         <button onclick="showToast('Upload disponible bientôt','info')"
-                style="padding:9px 16px;background:var(--n700);color:white;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">
-          📎 Ajouter la preuve
+                style="padding:9px 16px;background:#374151;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">
+          Ajouter la preuve
         </button>
       </div>` : ''}
 
+      <!-- CTA -->
       ${allDone
-        ? `<div style="background:var(--success-bg);border:1.5px solid var(--success-light);border-radius:var(--r-md);padding:18px;text-align:center">
+        ? `<div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:14px;padding:18px;text-align:center">
              <div style="font-size:28px;margin-bottom:8px">🏆</div>
-             <div style="font-size:15px;font-weight:700;color:var(--success)">Défi complété !</div>
-             <div style="font-size:12px;color:var(--n600);margin-top:4px">Toutes les actions ont été réalisées</div>
+             <div style="font-size:15px;font-weight:700;color:#166534">Défi complété !</div>
+             <div style="font-size:12px;color:#4B7A60;margin-top:4px">Toutes les actions ont été réalisées</div>
            </div>`
         : `<button onclick="document.getElementById('defi-modal-overlay').remove();openAction('${defiActions.find(a => !done.includes(a.id))?.id || defiActions[0]?.id}')"
-                  style="width:100%;padding:14px;background:linear-gradient(135deg,#00008F,#1a1aaa);color:white;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
-             Commencer — ${d.icon} ${d.title}
+                  style="width:100%;padding:14px;background:linear-gradient(135deg,#00008F,#1a1aaa);color:white;border:none;border-radius:14px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:.2px">
+             Commencer la première action →
            </button>`}
 
-      <div style="height:12px"></div>
+      <div style="height:16px"></div>
     </div>`;
   device.appendChild(el);
 }

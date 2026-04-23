@@ -896,8 +896,9 @@ const DEFIS_DU_MOMENT = [
     riskId: 'degat-eaux',
     icon: '💧',
     pts: 120,
-    lot: 'Détecteur Netatmo offert',
+    lot: 'Lots à gagner',
     lotIcon: '🎁',
+    lotLink: 'https://www.axa.fr/conseils-prevention.html',
     period: 'Avril 2026',
     expiresAt: '2026-05-31',
     steps: [
