@@ -4051,13 +4051,14 @@ function screenSelection() {
 ════════════════════════════════════════════ */
 function screenHub() {
   const p          = getProfile(window._ST.profileId);
-  const diagDone   = window._ST.diagCompleted;
-  const tab        = (window._ST.hubTab === 'actions' && diagDone) ? 'actions' : 'risques';
-  const done       = window._ST.completedActions || [];
-  const unlockedBadges = window._ST.unlockedBadges || [];
-  const badgeCount = unlockedBadges.length;
-  const allActions = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : [];
-  const todoCount  = allActions.filter(a => !done.includes(a.id)).length;
+  const diagDone        = window._ST.diagCompleted;
+  const tab             = (window._ST.hubTab === 'actions' && diagDone) ? 'actions' : 'risques';
+  const done            = window._ST.completedActions || [];
+  const unlockedBadges  = window._ST.unlockedBadges || [];
+  const activatedRewards = window._ST.activatedRewards || [];
+  const badgeCount      = unlockedBadges.length;
+  const allActions      = diagDone ? getActionsForProfile(p, window._ST.diagAnswers) : [];
+  const todoCount       = allActions.filter(a => !done.includes(a.id)).length;
 
   /* ── HEADER ── */
   const header = `
@@ -4077,8 +4078,8 @@ function screenHub() {
           </div>
         </div>
         <button onclick="${diagDone?`goTo(8)`:`showToast('🔒 Terminez d\\'abord votre diagnostic','warn')`}" aria-label="Mes récompenses" style="position:relative;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:${diagDone?'pointer':'not-allowed'};opacity:${diagDone?1:.5};flex-shrink:0;margin-top:2px">
-          ${sv(IC.gift,'width:18px;height:18px;fill:white')}
-          ${badgeCount > 0 ? `<span style="position:absolute;top:-3px;right:-3px;background:#D97706;color:white;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;font-family:var(--font);min-width:16px;text-align:center;line-height:1.4">${badgeCount}</span>` : ''}
+          <span style="font-size:20px;line-height:1">🏆</span>
+          ${activatedRewards && activatedRewards.length > 0 ? `<span style="position:absolute;top:-3px;right:-3px;background:#D97706;color:white;border-radius:99px;padding:1px 5px;font-size:10px;font-weight:700;font-family:var(--font);min-width:16px;text-align:center;line-height:1.4">${activatedRewards.length}</span>` : ''}
         </button>
       </div>
 
@@ -4095,7 +4096,6 @@ function screenHub() {
             ? `${sv(IC.check,'width:11px;height:11px;fill:var(--success-mid)')}<span style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">Diagnostic complété · Vue personnalisée</span>`
             : `${sv(IC.info,'width:11px;height:11px;fill:rgba(255,255,255,.55)')}<span style="font-size:11px;color:rgba(255,255,255,.7)">Vue de zone · Diagnostic recommandé</span>`}
         </div>
-        ${badgeCount > 0 ? `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(217,119,6,.25);border:1px solid rgba(251,191,36,.35);border-radius:99px;padding:4px 10px"><span style="font-size:12px">🏅</span><span style="font-size:11px;font-weight:700;color:#fbbf24">${badgeCount} badge${badgeCount>1?'s':''}</span></div>` : ''}
       </div>
     </div>`;
 
@@ -5425,63 +5425,28 @@ function screenRewards() {
   const rewards = getRewardsForProfile(profile, unlockedBadgeIds);
   const badgeCount  = unlockedBadgeIds.length;
   const actionCount = (st.completedActions || []).length;
-
-  /* Contract & renewal */
-  const contract      = profile.contract || {};
-  const renewalDate   = contract.renewalDate || '2026-12-31';
+  const contract    = profile.contract || {};
+  const renewalDate = contract.renewalDate || '2026-12-31';
   const renewalDateFmt = new Date(renewalDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const renewalMonth  = parseInt(renewalDate.slice(5, 7), 10);
-  const today         = new Date();
-  const currentMonth  = today.getMonth() + 1;
-  const currentYear   = today.getFullYear();
-  const renewalYear   = parseInt(renewalDate.slice(0, 4), 10);
 
-  /* Timeline 12 mois */
-  const MONTH_ABBR = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-  let monthsHtml = '';
-  for (let m = 1; m <= 12; m++) {
-    const isPast    = currentYear < renewalYear ? m < currentMonth : m < currentMonth;
-    const isCurrent = m === currentMonth;
-    const isRenewal = m === renewalMonth;
-    if (isRenewal) {
-      monthsHtml += `<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <div style="width:14px;height:14px;display:flex;align-items:center;justify-content:center;font-size:12px">⭐</div>
-        <div style="font-size:9px;font-weight:700;color:#FCD34D">${MONTH_ABBR[m-1]}</div>
-      </div>`;
-    } else {
-      const dotBg     = isCurrent ? 'rgba(255,255,255,.9)' : isPast ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.15)';
-      const dotBorder = isCurrent ? '2px solid white' : 'none';
-      const dotShadow = isCurrent ? ';box-shadow:0 0 0 3px rgba(255,255,255,.25)' : '';
-      const lblColor  = (isCurrent || isPast) ? 'rgba(255,255,255,.75)' : 'rgba(255,255,255,.3)';
-      monthsHtml += `<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <div style="width:10px;height:10px;border-radius:50%;background:${dotBg};border:${dotBorder}${dotShadow}"></div>
-        <div style="font-size:9px;color:${lblColor}">${MONTH_ABBR[m-1]}</div>
-      </div>`;
-    }
-  }
-
-  /* Annual score & coverage */
+  /* Score prévention */
   const rawScore    = (profile.preparationScore || 40) + actionCount * 5 + badgeCount * 8;
   const annualScore = Math.min(100, rawScore);
-  const completedIds = st.completedActions || [];
-  const coveredRisks = new Set((typeof ALL_ACTIONS !== 'undefined' ? ALL_ACTIONS : []).filter(a => completedIds.includes(a.id)).map(a => a.riskId));
-  const totalRisks   = profile.mainRisks ? profile.mainRisks.length : 6;
-  const coveredCount = Math.min(coveredRisks.size, totalRisks);
 
-  /* Reward lists */
+  /* Seuil de déblocage */
   const REWARD_THRESHOLD  = 3;
   const hasEnoughProgress = actionCount >= REWARD_THRESHOLD || badgeCount >= REWARD_THRESHOLD;
   const progressValue     = Math.min(REWARD_THRESHOLD, Math.max(actionCount, badgeCount));
   const progressPct       = Math.round(progressValue / REWARD_THRESHOLD * 100);
-  const maxReservations   = 2;
-  const reservedCount     = activatedRewards.length;
-  const canReserveMore    = reservedCount < maxReservations;
-  const neededActions     = Math.max(0, REWARD_THRESHOLD - actionCount);
-  const neededBadges      = Math.max(0, REWARD_THRESHOLD - badgeCount);
+  const neededMore        = Math.min(
+    Math.max(0, REWARD_THRESHOLD - actionCount),
+    Math.max(0, REWARD_THRESHOLD - badgeCount)
+  );
 
-  const reservedList  = rewards.filter(r => activatedRewards.includes(r.id));
+  /* Listes récompenses */
+  const activatedList = rewards.filter(r => activatedRewards.includes(r.id));
   const availableList = rewards.filter(r => r.badgeUnlocked && !activatedRewards.includes(r.id));
-  const lockedList    = rewards.filter(r => !r.badgeUnlocked && !activatedRewards.includes(r.id));
+  const lockedBadge   = rewards.filter(r => !r.badgeUnlocked && !activatedRewards.includes(r.id));
 
   /* Badge carousel item */
   function badgeCarouselItem(badge) {
@@ -5499,31 +5464,22 @@ function screenRewards() {
     </div>`;
   }
 
-  /* Reward type labels */
+  /* Carte récompense immédiate */
   const REWARD_TYPE_LABELS = { 'remise': '🏷️ Remise', 'bon-achat': '🎁 Bon d\'achat', 'service': '🛠️ Service', 'equipement': '⚙️ Équipement', 'avantage': '⭐ Avantage' };
-
-  /* Reward card */
-  function rewardCard(r, state) {
-    const isReserved  = state === 'reserved';
-    const isAvailable = state === 'available';
-    const isLocked    = state === 'locked';
-    const badge       = r.requiredBadge;
-    const typeLabel   = REWARD_TYPE_LABELS[r.rewardType] || '';
-    const borderColor = isReserved ? '#6EE7B7' : (isAvailable && canReserveMore && hasEnoughProgress) ? '#FCD34D' : '#E5E7EB';
-    const cardBg      = isReserved ? 'linear-gradient(135deg,#ECFDF5,#F0FDF4)' : 'var(--white)';
-
-    let actionBtn = '';
-    if (isAvailable && hasEnoughProgress) {
-      if (canReserveMore) {
-        actionBtn = `<button onclick="activateReward('${r.id}')" style="width:100%;padding:11px;background:linear-gradient(135deg,#00008F,#1a1466);color:white;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;margin-top:10px">🔖 Réserver cet avantage</button>`;
+  function rewardCard(r, isActivated) {
+    const badge     = r.requiredBadge;
+    const typeLabel = REWARD_TYPE_LABELS[r.rewardType] || '';
+    const border    = isActivated ? '#6EE7B7' : (hasEnoughProgress ? '#FCD34D' : '#E5E7EB');
+    const cardBg    = isActivated ? 'linear-gradient(135deg,#ECFDF5,#F0FDF4)' : 'var(--white)';
+    let btn = '';
+    if (!isActivated) {
+      if (hasEnoughProgress) {
+        btn = `<button onclick="activateReward('${r.id}')" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--axa),#1a1466);color:white;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;margin-top:10px">🎁 Activer &amp; obtenir mon code</button>`;
       } else {
-        actionBtn = `<div style="width:100%;padding:10px;background:var(--n100);border-radius:var(--r-sm);font-size:12px;color:var(--n500);text-align:center;margin-top:10px">Limite de ${maxReservations} réservations atteinte</div>`;
+        btn = `<div style="margin-top:10px;padding:9px 12px;background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--r-sm);font-size:11px;color:#92400E;display:flex;align-items:center;gap:6px">🔒 Encore ${neededMore} action${neededMore > 1 ? 's' : ''} ou badge${neededMore > 1 ? 's' : ''} pour activer</div>`;
       }
-    } else if (isAvailable && !hasEnoughProgress) {
-      actionBtn = `<div style="width:100%;padding:10px;background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--r-sm);font-size:12px;color:#92400E;text-align:center;margin-top:10px">🔒 Encore ${neededActions <= neededBadges ? neededActions + ' action' + (neededActions !== 1 ? 's' : '') : neededBadges + ' badge' + (neededBadges !== 1 ? 's' : '')} pour réserver</div>`;
     }
-
-    return `<div style="background:${cardBg};border:1.5px solid ${borderColor};border-radius:var(--r-md);padding:14px;${isLocked ? 'opacity:.62' : ''}">
+    return `<div style="background:${cardBg};border:1.5px solid ${border};border-radius:var(--r-md);padding:14px">
       <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
         <div style="width:44px;height:44px;border-radius:var(--r-sm);background:${r.iconBg};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${r.icon}</div>
         <div style="flex:1;min-width:0">
@@ -5533,115 +5489,90 @@ function screenRewards() {
           </div>
           <div style="font-size:14px;font-weight:700;color:var(--n900);line-height:1.3">${r.title}</div>
         </div>
-        ${isReserved ? `<span style="font-size:10px;font-weight:700;color:#059669;background:#D1FAE5;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">✓ Réservé</span>` : ''}
-        ${isLocked ? `<span style="font-size:10px;color:var(--n400);background:var(--n100);padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">🔒</span>` : ''}
+        ${isActivated ? `<span style="font-size:10px;font-weight:700;color:#059669;background:#D1FAE5;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0">✓ Actif</span>` : ''}
       </div>
-      <div style="background:${isReserved ? '#F0FDF4' : '#FFFBEB'};border-radius:var(--r-sm);padding:9px 12px">
-        <div style="font-size:13px;font-weight:700;color:${isReserved ? '#065F46' : '#B45309'}">${r.offer}</div>
-        ${isReserved ? `<div style="font-size:11px;color:#6B7280;margin-top:4px">⏰ Se débloque le <strong>${renewalDateFmt}</strong></div>` : ''}
-        ${isReserved && r.code ? `<div style="font-size:11px;color:var(--n600);margin-top:3px">Code : <strong style="font-family:monospace;background:var(--n100);padding:2px 6px;border-radius:4px;font-size:12px;letter-spacing:.5px">${r.code}</strong></div>` : ''}
+      <div style="background:${isActivated ? '#F0FDF4' : '#FFFBEB'};border-radius:var(--r-sm);padding:9px 12px">
+        <div style="font-size:13px;font-weight:700;color:${isActivated ? '#065F46' : '#B45309'}">${r.offer}</div>
+        ${isActivated && r.code ? `<div style="font-size:11px;color:var(--n600);margin-top:5px">Code : <strong style="font-family:monospace;background:white;padding:3px 8px;border-radius:5px;font-size:13px;letter-spacing:1px;border:1px solid #D1FAE5">${r.code}</strong></div>` : ''}
+        ${isActivated && !r.code ? `<div style="font-size:11px;color:#059669;margin-top:4px">Votre conseiller AXA vous contactera sous 48h.</div>` : ''}
       </div>
       ${badge ? `<div style="display:flex;align-items:center;gap:6px;margin-top:8px">
         <span style="font-size:14px">${badge.icon}</span>
         <span style="font-size:11px;color:var(--n600)">Badge requis : <strong>${badge.label}</strong></span>
-        ${(isReserved || isAvailable) ? `<span style="font-size:11px;color:var(--success);font-weight:700">✓</span>` : ''}
+        ${isActivated ? `<span style="font-size:11px;color:var(--success);font-weight:700">✓</span>` : ''}
       </div>` : ''}
-      ${actionBtn}
+      ${btn}
     </div>`;
   }
 
-  /* Progress banner */
-  const progressBannerHtml = !hasEnoughProgress ? `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:var(--r-md);padding:14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="font-size:22px">🔒</div>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:2px">Avantages à débloquer</div>
-          <div style="font-size:11px;color:#B45309;line-height:1.4">Encore ${neededActions <= neededBadges ? neededActions + ' action' + (neededActions !== 1 ? 's' : '') : neededBadges + ' badge' + (neededBadges !== 1 ? 's' : '')} pour réserver vos avantages au renouvellement</div>
-        </div>
-        <div style="font-size:12px;font-weight:700;color:#92400E;flex-shrink:0">${progressValue}/${REWARD_THRESHOLD}</div>
-      </div>
-      <div style="background:rgba(180,83,9,.12);border-radius:99px;height:6px;overflow:hidden">
-        <div style="height:100%;width:${progressPct}%;background:linear-gradient(90deg,#D97706,#fbbf24);border-radius:99px;transition:width .4s"></div>
-      </div>
-    </div>` : '';
-
-  /* Reservation counter */
-  const reservationCounterHtml = reservedCount > 0 ? `<div style="display:flex;align-items:center;gap:8px;background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:var(--r-sm);padding:10px 14px">
-      <span style="font-size:16px">🔖</span>
-      <div style="flex:1;font-size:12px;color:#065F46;font-weight:600">${reservedCount} avantage${reservedCount > 1 ? 's' : ''} réservé${reservedCount > 1 ? 's' : ''} pour votre renouvellement</div>
-      <div style="font-size:11px;color:#6B7280;white-space:nowrap">${reservedCount}/${maxReservations}</div>
-    </div>` : '';
-
-  /* Annual check-up items */
-  const checkupItems = [
-    { icon: '🩺', label: 'Mettre à jour mon diagnostic', done: !!st.diagCompleted },
-    { icon: '⚠️', label: 'Revoir mes risques principaux', done: badgeCount >= 2 },
-    { icon: '🎯', label: 'Compléter de nouveaux défis', done: (st.completedDefis || []).length > 0 },
-    { icon: '📋', label: "Recalibrer mon plan d'action", done: actionCount >= 3 }
+  /* Boîtes mystère renouvellement */
+  const renewalHints = [
+    { icon: '🏠', label: 'Lié à votre sécurisation logement', hint: 'Réservé aux assurés ayant complété leur plan d\'action prévention' },
+    { icon: '💰', label: 'Avantage fidélité exclusif', hint: 'Proportionnel à votre score prévention à la date de renouvellement' },
+    { icon: '🤝', label: 'Service partenaire premium', hint: 'Réservé aux assurés les plus engagés dans la prévention' }
   ];
-  let checkupItemsHtml = '';
-  checkupItems.forEach(function(item) {
-    checkupItemsHtml += `<div style="display:flex;align-items:center;gap:10px">
-      <div style="width:22px;height:22px;border-radius:50%;background:${item.done ? '#10B981' : '#E5E7EB'};display:flex;align-items:center;justify-content:center;font-size:${item.done ? '12' : '11'}px;flex-shrink:0;color:${item.done ? 'white' : '#6B7280'}">${item.done ? '✓' : item.icon}</div>
-      <div style="font-size:12px;color:${item.done ? '#065F46' : '#374151'};font-weight:${item.done ? '600' : '400'};flex:1">${item.label}</div>
-      ${item.done ? '<span style="font-size:10px;color:#10B981;font-weight:600">fait</span>' : ''}
+  let mysteryHtml = '';
+  renewalHints.forEach(function(m) {
+    mysteryHtml += `<div style="background:var(--n50);border:1.5px dashed var(--n250,#D1D5DB);border-radius:var(--r-md);padding:14px;display:flex;align-items:center;gap:12px">
+      <div style="width:44px;height:44px;border-radius:var(--r-sm);background:var(--n150);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;filter:blur(0)">${m.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:700;color:var(--n500)">${m.label}</div>
+        <div style="font-size:11px;color:var(--n400);margin-top:2px;line-height:1.4">${m.hint}</div>
+      </div>
+      <div style="font-size:20px;opacity:.35;flex-shrink:0">🔒</div>
     </div>`;
   });
-  const checkupDoneCount = checkupItems.filter(function(i) { return i.done; }).length;
+
+  /* Barre progression débloquage */
+  const progressHtml = !hasEnoughProgress ? `<div style="background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:var(--r-md);padding:14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="font-size:22px">🎯</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#92400E">Récompenses à débloquer</div>
+        <div style="font-size:11px;color:#B45309;margin-top:1px">Encore ${neededMore} action${neededMore > 1 ? 's' : ''} ou badge${neededMore > 1 ? 's' : ''} pour accéder à vos premiers avantages</div>
+      </div>
+      <div style="font-size:13px;font-weight:800;color:#92400E">${progressValue}/${REWARD_THRESHOLD}</div>
+    </div>
+    <div style="background:rgba(180,83,9,.12);border-radius:99px;height:7px;overflow:hidden">
+      <div style="height:100%;width:${progressPct}%;background:linear-gradient(90deg,#D97706,#fbbf24);border-radius:99px;transition:width .4s"></div>
+    </div>
+    <button onclick="window._ST.hubTab='actions';goTo(1)" style="margin-top:12px;width:100%;padding:10px;background:var(--axa);color:white;border:none;border-radius:var(--r-sm);font-size:12.5px;font-weight:700;font-family:var(--font);cursor:pointer">Voir mes actions →</button>
+  </div>` : '';
 
   return `<div class="screen-header" style="background:linear-gradient(135deg,var(--axa) 0%,#1a1466 100%);padding:18px var(--sp5) 20px;color:white">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <button onclick="window._ST.hubTab='actions';goTo(1)" aria-label="Retour" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">
         ${sv(IC.back,'width:18px;height:18px;fill:white')}
       </button>
       <div>
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7">Programme fidélité annuel</div>
-        <div style="font-size:20px;font-weight:700">Avantages & Renouvellement</div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.7">Prévention · ${profile.firstName}</div>
+        <div style="font-size:20px;font-weight:700">Mes Récompenses</div>
       </div>
     </div>
-
-    <div style="background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <div style="font-size:11px;opacity:.65">${contract.name || 'MRH AXA'}</div>
-          <div style="font-size:13px;font-weight:700">Renouvellement le ${renewalDateFmt}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:10px;opacity:.6">Avantages réservés</div>
-          <div style="font-size:20px;font-weight:800;line-height:1.1">${reservedCount}/${maxReservations}</div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 2px">${monthsHtml}</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
-      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:9px 6px;text-align:center">
-        <div style="font-size:20px;font-weight:800">${actionCount}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:24px;font-weight:800">${actionCount}</div>
         <div style="font-size:9px;opacity:.65;margin-top:1px">actions</div>
       </div>
-      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:9px 6px;text-align:center">
-        <div style="font-size:20px;font-weight:800">${badgeCount}</div>
+      <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:24px;font-weight:800">${badgeCount}</div>
         <div style="font-size:9px;opacity:.65;margin-top:1px">badges</div>
       </div>
-      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:9px 6px;text-align:center">
-        <div style="font-size:20px;font-weight:800">${annualScore}%</div>
+      <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:24px;font-weight:800">${annualScore}%</div>
         <div style="font-size:9px;opacity:.65;margin-top:1px">score</div>
-      </div>
-      <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:9px 6px;text-align:center">
-        <div style="font-size:20px;font-weight:800">${coveredCount}</div>
-        <div style="font-size:9px;opacity:.65;margin-top:1px">risques</div>
       </div>
     </div>
   </div>
 
-  <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:16px">
+  <div style="padding:16px var(--sp5);display:flex;flex-direction:column;gap:18px">
 
-    <!-- Badge carousel -->
+    <!-- Badges -->
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
-          <div style="font-size:13px;font-weight:700;color:var(--n900)">🏅 Mes Badges</div>
-          <div style="font-size:11px;color:var(--n500);margin-top:1px">${unlockedBadgeIds.length} débloqué${unlockedBadgeIds.length !== 1 ? 's' : ''} sur ${typeof BADGES !== 'undefined' ? BADGES.length : 0}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--n900)">🏅 Mes Achievements</div>
+          <div style="font-size:11px;color:var(--n500);margin-top:1px">${badgeCount} badge${badgeCount !== 1 ? 's' : ''} débloqué${badgeCount !== 1 ? 's' : ''} sur ${typeof BADGES !== 'undefined' ? BADGES.length : 0}</div>
         </div>
         <button onclick="openBadgesModal()" style="font-size:12px;font-weight:600;color:var(--axa);background:none;border:none;cursor:pointer;font-family:var(--font);padding:4px 0;white-space:nowrap">Voir tout →</button>
       </div>
@@ -5650,38 +5581,34 @@ function screenRewards() {
       </div>
     </div>
 
-    ${progressBannerHtml}
-    ${reservationCounterHtml}
-
-    <!-- Avantages au renouvellement -->
+    <!-- Récompenses immédiates -->
     <div>
-      <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:2px">🎁 Vos avantages au renouvellement</div>
-      <div style="font-size:11px;color:var(--n500);margin-bottom:12px">Réservez jusqu'à ${maxReservations} avantages — ils se débloquent à votre renouvellement le ${renewalDateFmt}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:2px">🎁 Récompenses disponibles</div>
+      <div style="font-size:11px;color:var(--n500);margin-bottom:12px">Activables dès 3 actions ou badges — code utilisable immédiatement</div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        ${reservedList.map(function(r) { return rewardCard(r, 'reserved'); }).join('')}
-        ${availableList.map(function(r) { return rewardCard(r, 'available'); }).join('')}
-        ${lockedList.map(function(r) { return rewardCard(r, 'locked'); }).join('')}
-        ${reservedList.length === 0 && availableList.length === 0 && lockedList.length === 0 ? `<div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:28px 20px;text-align:center">
-          <div style="font-size:36px;margin-bottom:10px">🏅</div>
-          <div style="font-size:15px;font-weight:700;color:var(--n700);margin-bottom:6px">Complétez des actions pour débloquer vos avantages</div>
-          <button onclick="window._ST.hubTab='actions';goTo(1)" style="padding:10px 20px;background:var(--axa);color:white;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer">Voir mes actions</button>
-        </div>` : ''}
+        ${progressHtml}
+        ${activatedList.map(function(r) { return rewardCard(r, true); }).join('')}
+        ${availableList.map(function(r) { return rewardCard(r, false); }).join('')}
+        ${lockedBadge.map(function(r) { return rewardCard(r, false); }).join('')}
+        ${activatedList.length === 0 && availableList.length === 0 && lockedBadge.length === 0 && hasEnoughProgress ? `
+          <div style="background:var(--n50);border:1.5px dashed var(--n200);border-radius:var(--r-md);padding:24px 20px;text-align:center">
+            <div style="font-size:32px;margin-bottom:8px">🔓</div>
+            <div style="font-size:13px;font-weight:700;color:var(--n700)">Continuez pour débloquer vos avantages</div>
+          </div>` : ''}
       </div>
     </div>
 
-    <!-- Check-up annuel (#9) -->
-    <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #BFDBFE;border-radius:var(--r-md);padding:16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:40px;height:40px;border-radius:50%;background:#1D4ED8;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📋</div>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:700;color:#1E3A8A">Check-up annuel prévention</div>
-          <div style="font-size:11px;color:#3B82F6;margin-top:1px">${checkupDoneCount}/4 étapes réalisées · renouvellement ${renewalDateFmt}</div>
-        </div>
+    <!-- Surprises renouvellement -->
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--n900);margin-bottom:2px">🎉 Surprises au renouvellement</div>
+      <div style="font-size:11px;color:var(--n500);margin-bottom:12px">En fonction de votre progression en prévention, des récompenses exclusives se débloquent à votre renouvellement du ${renewalDateFmt}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${mysteryHtml}
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">${checkupItemsHtml}</div>
-      <button onclick="goTo(2)" style="width:100%;padding:11px;background:#1D4ED8;color:white;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer">
-        ${st.diagCompleted ? '🔄 Refaire mon diagnostic annuel' : '🩺 Démarrer le check-up annuel'} →
-      </button>
+      <div style="margin-top:12px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1.5px solid #DDD6FE;border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">✨</span>
+        <span style="font-size:11.5px;color:#5B21B6;line-height:1.45">Plus votre score de prévention est élevé, plus les surprises sont grandes. Continuez vos actions !</span>
+      </div>
     </div>
 
     <div style="height:12px"></div>
