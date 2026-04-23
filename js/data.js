@@ -32,7 +32,7 @@ const PROFILES = {
       'incendie':   { zoneLevel:'faible',     canImprove:true  },
       'rga':        { zoneLevel:'tres_faible',canImprove:false }
     },
-    contract: { name: 'MRH AXA Confort', ref: 'MRH-2024-78432' },
+    contract: { name: 'MRH AXA Confort', ref: 'MRH-2024-78432', renewalDate: '2026-12-15' },
     localContext: {
       georisquesZone: 'Zone orange inondation (PPRI Loire-Atlantique)',
       pcs: true,
@@ -83,7 +83,7 @@ const PROFILES = {
       'tempete':    { zoneLevel:'tres_faible',canImprove:false },
       'rga':        { zoneLevel:'tres_faible',canImprove:false }
     },
-    contract: { name: 'MRH AXA Essentiel', ref: 'MRH-2025-12089' },
+    contract: { name: 'MRH AXA Essentiel', ref: 'MRH-2025-12089', renewalDate: '2026-09-01' },
     localContext: {
       georisquesZone: 'Zone urbaine dense — risque vol et DDE',
       pcs: false,
@@ -134,7 +134,7 @@ const PROFILES = {
       'tempete':    { zoneLevel:'faible',     canImprove:false },
       'inondation': { zoneLevel:'tres_faible',canImprove:false }
     },
-    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2023-55214' },
+    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2023-55214', renewalDate: '2026-11-01' },
     localContext: {
       georisquesZone: 'Zone argileuse (aléa fort à très fort) — secteur Lyon 3e',
       pcs: false,
@@ -185,7 +185,7 @@ const PROFILES = {
       'inondation': { zoneLevel:'faible',     canImprove:false },
       'rga':        { zoneLevel:'tres_faible',canImprove:false }
     },
-    contract: { name: 'MRH AXA Confort', ref: 'MRH-2025-33871' },
+    contract: { name: 'MRH AXA Confort', ref: 'MRH-2025-33871', renewalDate: '2027-02-01' },
     localContext: {
       georisquesZone: 'Zone urbaine — copropriété ancienne · faible risque naturel',
       pcs: false,
@@ -236,7 +236,7 @@ const PROFILES = {
       'vol':        { zoneLevel:'faible',     canImprove:false },
       'inondation': { zoneLevel:'faible',     canImprove:false }
     },
-    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2024-90123' },
+    contract: { name: 'MRH AXA Confort Plus', ref: 'MRH-2024-90123', renewalDate: '2026-08-01' },
     localContext: {
       georisquesZone: 'Zone incendie PACA — feux de forêt · sol argileux (aléa fort)',
       pcs: true,
@@ -744,6 +744,7 @@ const BADGES = [
 const ALL_REWARDS = [
   {
     id: 'netatmo-detecteur',
+    rewardType: 'equipement',
     partner: 'Netatmo',
     partnerLogo: '💧',
     partnerColor: '#0EA5E9',
@@ -759,6 +760,7 @@ const ALL_REWARDS = [
   },
   {
     id: 'leroy-merlin-15',
+    rewardType: 'remise',
     partner: 'Leroy Merlin',
     partnerLogo: '🏗️',
     partnerColor: '#22C55E',
@@ -774,6 +776,7 @@ const ALL_REWARDS = [
   },
   {
     id: 'verisure-alarme',
+    rewardType: 'service',
     partner: 'Verisure',
     partnerLogo: '🔐',
     partnerColor: '#6366F1',
@@ -789,6 +792,7 @@ const ALL_REWARDS = [
   },
   {
     id: 'somfy-domotique',
+    rewardType: 'equipement',
     partner: 'Somfy',
     partnerLogo: '🏠',
     partnerColor: '#F59E0B',
@@ -804,6 +808,7 @@ const ALL_REWARDS = [
   },
   {
     id: 'capeb-artisan',
+    rewardType: 'avantage',
     partner: 'CAPEB',
     partnerLogo: '🔧',
     partnerColor: '#DC2626',
@@ -819,6 +824,7 @@ const ALL_REWARDS = [
   },
   {
     id: 'axa-expert-diagnostic',
+    rewardType: 'service',
     partner: 'AXA Prévention',
     partnerLogo: '🎓',
     partnerColor: '#00008F',

@@ -357,9 +357,14 @@ function showBadgeUnlock(badge) {
 
 function activateReward(rewardId) {
   if (!window._ST.activatedRewards) window._ST.activatedRewards = [];
+  if (window._ST.activatedRewards.length >= 2) {
+    showToast('Maximum 2 avantages réservables par renouvellement', 'warn');
+    return;
+  }
   if (!window._ST.activatedRewards.includes(rewardId)) {
     window._ST.activatedRewards.push(rewardId);
   }
+  showToast('🔖 Avantage réservé pour votre renouvellement', 'success');
   render(8); updateNav(8); updateTabBar(8);
 }
 
