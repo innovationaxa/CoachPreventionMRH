@@ -168,6 +168,54 @@ function screenHub() {
   return header + tabs + body + `<div style="height:24px"></div>`;
 }
 
+/* ── Phrase d'analyse par risque (post-diagnostic) ── */
+function getDiagInsight(rId, lv, li) {
+  if (!lv) return '';
+  if (lv.improved) {
+    var improved = {
+      inondation: 'Vos protections réduisent votre exposition aux crues.',
+      vol:        'Vos équipements de sécurité dissuadent les intrusions.',
+      incendie:   'Votre détecteur de fumée réduit le risque.',
+      'degat-eaux':'Votre vigilance limite le risque de fuite invisible.',
+      tempete:    'Vos ouvertures sont mieux sécurisées que la moyenne.',
+      rga:        'Votre surveillance réduit l\'impact du retrait-gonflement.'
+    };
+    return improved[rId] || 'Votre situation réduit le risque de zone.';
+  }
+  if (lv.degraded) {
+    var degraded = {
+      inondation: 'Votre situation aggrave le risque de crue — des actions sont recommandées.',
+      vol:        'Des vulnérabilités détectées — renforcez vos accès.',
+      incendie:   'Absence de dispositifs — risque accru, agissez en priorité.',
+      'degat-eaux':'Aucun détecteur de fuite installé — risque élevé.',
+      tempete:    'Toiture ou volets à sécuriser.',
+      rga:        'Fissures ou sol argileux — surveillance renforcée conseillée.'
+    };
+    return degraded[rId] || 'Votre situation aggrave le risque de zone.';
+  }
+  var step = li ? li.step || 0 : 0;
+  if (step >= 4) {
+    var high = {
+      inondation: 'Zone à risque élevé — préparez vos protections avant les crues.',
+      vol:        'Secteur exposé — renforcez serrures et alarme.',
+      incendie:   'Vigilance requise — équipez et formez votre foyer.',
+      'degat-eaux':'Risque significatif — installez un détecteur de fuite.',
+      tempete:    'Zone exposée aux vents — sécurisez toiture et volets.',
+      rga:        'Aléa fort — surveillez vos fondations et l\'humidité du sol.'
+    };
+    return high[rId] || 'Risque élevé dans votre zone — des actions sont conseillées.';
+  }
+  var neutral = {
+    inondation: 'Risque confirmé — anticipez les périodes de crue.',
+    vol:        'Quelques gestes préventifs suffisent dans votre secteur.',
+    incendie:   'Un détecteur de fumée fonctionnel reste essentiel.',
+    'degat-eaux':'Vérifiez régulièrement vos canalisations.',
+    tempete:    'Vérifiez l\'état de votre toiture avant l\'hiver.',
+    rga:        'Surveillez les variations d\'humidité du sol.'
+  };
+  return neutral[rId] || 'Exposition confirmée par votre diagnostic.';
+}
+
 /* ── HUB · Tab Risques ── */
 function hubRisquesTab(p, diagDone) {
   const levels     = getRiskLevels(p, diagDone ? window._ST.diagAnswers : {});
@@ -257,16 +305,10 @@ function hubRisquesTab(p, diagDone) {
             ${diagDone && lv.degraded ? `<span style="font-size:10px;color:var(--danger);font-weight:700">↑ Aggravé</span>` : ''}
           </div>
         </div>
-        ${diagDone && evolved ? `
-          <div style="margin-top:10px;padding:8px 10px;background:${lv.improved?'var(--success-bg)':'var(--danger-bg)'};border-radius:var(--r-sm);display:flex;align-items:center;gap:8px">
-            <span style="font-size:11px;color:var(--n500);text-decoration:line-through">${zoneLi.label}</span>
-            <span style="font-size:11px;color:var(--n400)">→</span>
-            <span style="font-size:11px;font-weight:700;color:${li.hex}">${li.label}</span>
-            <span style="font-size:10px;color:var(--n500);margin-left:2px">· personnalisé</span>
-          </div>` : ''}
-        ${diagDone && !evolved ? `
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--n100);font-size:11px;color:var(--n500);display:flex;align-items:center;gap:5px">
-            ${sv(IC.check,'width:10px;height:10px;fill:var(--n400)')} Confirmé par votre diagnostic
+        ${diagDone ? `
+          <div style="margin-top:9px;padding-top:9px;border-top:1px solid ${lv.improved?'rgba(34,197,94,.2)':lv.degraded?'rgba(239,68,68,.15)':'var(--n100)'};display:flex;align-items:flex-start;gap:6px">
+            <span style="font-size:13px;flex-shrink:0">${lv.improved ? '✅' : lv.degraded ? '⚠️' : 'ℹ️'}</span>
+            <span style="font-size:11.5px;color:${lv.improved?'var(--success)':lv.degraded?'var(--danger)':'var(--n600)'};line-height:1.45">${getDiagInsight(rId, lv, li)}</span>
           </div>` : ''}
       </div>`;
   }).join('');
@@ -306,50 +348,11 @@ function hubRisquesTab(p, diagDone) {
       </div>
     </div>` : '';
 
-  /* ─ Bloc "Ce que votre diagnostic révèle" (post-diag uniquement) ─ */
-  const diagImpactBlock = diagDone ? (() => {
-    const rows = mainRisks.slice(0, 3).map(rId => {
-      const lv  = levels[rId] || {};
-      const r   = RISKS[rId];
-      const li  = lv.levelInfo || getRiskLevelInfo('modere');
-      if (lv.improved) {
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(34,197,94,.15)">
-          <span style="font-size:14px">${r.icon}</span>
-          <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
-          <span style="font-size:11px;font-weight:700;color:var(--success);background:var(--success-bg);padding:2px 8px;border-radius:99px">↓ Réduit</span>
-        </div>`;
-      }
-      if (lv.degraded) {
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(239,68,68,.12)">
-          <span style="font-size:14px">${r.icon}</span>
-          <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
-          <span style="font-size:11px;font-weight:700;color:var(--danger);background:#FEF2F2;padding:2px 8px;border-radius:99px">↑ Point d'attention</span>
-        </div>`;
-      }
-      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--n100)">
-        <span style="font-size:14px">${r.icon}</span>
-        <span style="font-size:12px;color:var(--n700);flex:1">${r.label}</span>
-        <span style="font-size:11px;color:var(--n400);background:var(--n50);padding:2px 8px;border-radius:99px">${levelChip(li.id,'sm')}</span>
-      </div>`;
-    }).join('');
-
-    const headline = improvedList.length > 0
-      ? `${improvedList.length} risque${improvedList.length > 1 ? 's réduits' : ' réduit'} grâce à vos équipements`
-      : degradedList.length > 0
-        ? `${degradedList.length} point${degradedList.length > 1 ? 's' : ''} d'attention identifié${degradedList.length > 1 ? 's' : ''}`
-        : 'Exposition de zone confirmée par votre déclaration';
-
-    return `<div style="background:var(--white);border:1.5px solid var(--n200);border-radius:var(--r-md);padding:13px 14px">
-      <div style="font-size:11px;font-weight:700;color:var(--n600);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">🔍 Ce que votre diagnostic révèle</div>
-      <div style="font-size:12px;color:var(--n500);margin-bottom:10px">${headline}</div>
-      ${rows}
-    </div>`;
-  })() : '';
+  /* diagImpactBlock removed — insight text is now inline on each risk card */
 
   return `
     <div style="padding:14px var(--sp5) 8px;display:flex;flex-direction:column;gap:14px">
       ${diagCard}
-      ${diagImpactBlock}
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
           <div style="font-size:13px;font-weight:700;color:var(--n900)">Vos risques principaux</div>
@@ -599,11 +602,13 @@ function screenDiagnostic() {
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:20px">${risk.icon || '?'}</span>
           ${levelChip(li.id,'sm')}
+          <button onclick="pauseDiag()" title="Enregistrer et quitter" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">✕</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.15);border-radius:99px;height:4px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:var(--success-mid);border-radius:99px;transition:width .3s ease"></div>
       </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.45);text-align:right;margin-top:5px">Appuyez sur ✕ pour sauvegarder et reprendre plus tard</div>
     </div>
 
     <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
@@ -860,13 +865,16 @@ function openCategoryModal(riskId) {
 
   function modalActionRow(a) {
     const lv = levelOf(a.effort);
+    const tagHtml = a.effort === 'low'
+      ? `<span style="font-size:10px;font-weight:700;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:2px 8px;border-radius:99px">⚡ Geste simple</span>`
+      : '';
     return `
       <div onclick="document.getElementById('cat-modal-bd').remove();openAction('${a.id}')"
            style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:white;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer;margin-bottom:8px">
         <div style="flex:1;min-width:0">
           <div style="font-size:13px;font-weight:600;color:#111118;line-height:1.35;margin-bottom:5px">${a.title}</div>
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span style="font-size:10px;font-weight:700;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:2px 7px;border-radius:99px">N${lv.num} · ${lv.label}</span>
+            ${tagHtml}
             <span style="font-size:10px;color:#9CA3AF">${a.duration}</span>
           </div>
         </div>
@@ -887,7 +895,6 @@ function openCategoryModal(riskId) {
       return `
         <div style="margin-top:16px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="font-size:11px;font-weight:700;background:${lv.tagBg};color:${lv.tagColor};border:1px solid ${lv.borderColor};padding:3px 9px;border-radius:99px">Niveau ${lv.num}</span>
             <span style="font-size:12px;font-weight:600;color:#374151">${lv.label}</span>
             <div style="flex:1;height:1px;background:#F3F4F6"></div>
             <span style="font-size:10px;color:#9CA3AF">${lvActions.length} action${lvActions.length > 1 ? 's' : ''}</span>
@@ -1909,7 +1916,7 @@ function screenLockNotif() {
 
       <!-- Carte notification AXA (cliquable) -->
       <div style="padding:28px 18px 0;flex:1">
-        <div onclick="goTo(1)"
+        <div onclick="launchFromNotif()"
              style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:14px 16px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">
 
           <!-- En-tête notification -->

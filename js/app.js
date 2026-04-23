@@ -100,14 +100,18 @@ const TAB_MAP = {
 function updateTabBar(idx) {
   const bar    = document.getElementById('tabBar');
   const device = document.querySelector('.device');
+  const sbar   = device ? device.querySelector('.status-bar') : null;
   if (!bar) return;
   if (idx === 0 || idx === 10) {
     bar.style.display = 'none';
     device && device.classList.remove('has-tabbar');
+    /* S10 lockscreen has its own status bar — hide the device wrapper one */
+    if (sbar) sbar.style.visibility = idx === 10 ? 'hidden' : 'visible';
     return;
   }
   bar.style.display = 'flex';
   device && device.classList.add('has-tabbar');
+  if (sbar) sbar.style.visibility = 'visible';
   const activeTab = TAB_MAP[idx] || null;
   bar.querySelectorAll('.tab-item').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === activeTab);
@@ -279,8 +283,15 @@ function diagBack() {
     window._ST.diagStep--;
     render(2);
   } else {
-    goTo(1); /* back to Hub */
+    pauseDiag();
   }
+}
+
+function pauseDiag() {
+  /* Save progress: diagInProgress stays true so "Continuer" appears on Hub */
+  window._ST.diagInProgress = true;
+  showToast('💾 Progression sauvegardée — reprenez quand vous le souhaitez', 'info');
+  goTo(1);
 }
 
 /* ── DEEP DIVE ── */
@@ -562,6 +573,78 @@ function showDiagModal() {
   sheet.querySelector('#diag-modal-later').addEventListener('click', closeModal);
 }
 
+/* ── LAUNCH FROM NOTIFICATION (splash animation) ── */
+function launchFromNotif() {
+  const device = document.querySelector('.device') || document.body;
+
+  const splash = document.createElement('div');
+  splash.id = 'notif-splash';
+  splash.style.cssText = [
+    'position:absolute;inset:0;z-index:900',
+    'background:linear-gradient(160deg,#00008F 0%,#1a1466 60%,#0a0a40 100%)',
+    'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0',
+    'opacity:0;transition:opacity .25s ease'
+  ].join(';');
+
+  splash.innerHTML = `
+    <div id="splash-logo" style="
+      width:100px;height:100px;
+      background:white;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      transform:scale(.7);opacity:0;
+      transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
+    ">
+      <svg viewBox="0 0 120 80" width="68" height="45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M38 64L58 16h8l20 48h-10l-4-10H52l-4 10H38zm17-18h12l-6-16-6 16z" fill="#00008F"/>
+        <line x1="78" y1="16" x2="100" y2="64" stroke="#FF1721" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div id="splash-label" style="
+      margin-top:20px;
+      font-size:13px;font-weight:600;color:rgba(255,255,255,.55);
+      letter-spacing:.8px;text-transform:uppercase;font-family:var(--font);
+      opacity:0;transform:translateY(8px);
+      transition:opacity .4s ease .3s,transform .4s ease .3s;
+    ">Coach Prévention</div>
+    <div id="splash-dots" style="
+      margin-top:32px;display:flex;gap:6px;
+      opacity:0;transition:opacity .3s ease .5s;
+    ">
+      <div class="splash-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);animation:sdot .9s .1s infinite alternate"></div>
+      <div class="splash-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);animation:sdot .9s .3s infinite alternate"></div>
+      <div class="splash-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);animation:sdot .9s .5s infinite alternate"></div>
+    </div>`;
+
+  /* Inject keyframe if needed */
+  if (!document.getElementById('sdot-style')) {
+    const s = document.createElement('style');
+    s.id = 'sdot-style';
+    s.textContent = '@keyframes sdot{from{opacity:.25;transform:scaleY(.6)}to{opacity:1;transform:scaleY(1)}}';
+    document.head.appendChild(s);
+  }
+
+  device.appendChild(splash);
+
+  /* Step 1 — fade in overlay */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    splash.style.opacity = '1';
+    const logo  = splash.querySelector('#splash-logo');
+    const label = splash.querySelector('#splash-label');
+    const dots  = splash.querySelector('#splash-dots');
+    setTimeout(() => { logo.style.transform = 'scale(1)'; logo.style.opacity = '1'; }, 80);
+    setTimeout(() => { label.style.opacity = '1'; label.style.transform = 'translateY(0)'; }, 300);
+    setTimeout(() => { dots.style.opacity = '1'; }, 500);
+  }));
+
+  /* Step 2 — after 950ms → navigate to Hub, fade out splash */
+  setTimeout(() => {
+    goTo(1);
+    splash.style.transition = 'opacity .4s ease';
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 420);
+  }, 950);
+}
+
 /* ── EXPOSE GLOBALS V4 ── */
 window.checkAndUnlockBadges = checkAndUnlockBadges;
 window.showBadgeUnlock      = showBadgeUnlock;
@@ -572,6 +655,7 @@ window.openQuizModal        = openQuizModal;
 window.renderQuizStep       = renderQuizStep;
 window.selectQuizAnswer     = selectQuizAnswer;
 window.nextQuizStep         = nextQuizStep;
+window.launchFromNotif      = launchFromNotif;
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
