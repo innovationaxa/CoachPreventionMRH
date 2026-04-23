@@ -602,7 +602,7 @@ function screenDiagnostic() {
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:20px">${risk.icon || '?'}</span>
           ${levelChip(li.id,'sm')}
-          <button onclick="pauseDiag()" title="Enregistrer et quitter" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">✕</button>
+          <button onclick="pauseDiag()" title="Sauvegarder et quitter" style="width:32px;height:32px;border-radius:50%;background:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:700;color:var(--axa);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.18)">✕</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.15);border-radius:99px;height:4px;overflow:hidden">
