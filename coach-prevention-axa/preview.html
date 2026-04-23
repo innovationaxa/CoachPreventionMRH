@@ -4537,7 +4537,7 @@ function screenDiagnostic() {
     : '<div style="width:7px;height:7px;border-radius:50%;background:#a78bfa;flex-shrink:0"></div>';
 
   return `
-    <div style="background:var(--axa);padding:16px var(--sp5) 20px">
+    <div style="background:var(--axa);padding:16px var(--sp5) 16px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <button onclick="diagBack()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.14);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;flex-shrink:0">
           ${sv(IC.back,'width:18px;height:18px;fill:white')}
@@ -4545,25 +4545,28 @@ function screenDiagnostic() {
         <div style="flex:1">
           <div style="font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:5px">
             ${levelDot}
-            Niveau ${qLevel} — ${levelLabel}
+            ${levelLabel}
           </div>
           <div style="font-size:14px;font-weight:600;color:white">Question ${step+1} sur ${qs.length}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span style="font-size:20px">${risk.icon || '?'}</span>
           ${levelChip(li.id,'sm')}
-          <button onclick="pauseDiag()" title="Sauvegarder et quitter" style="width:32px;height:32px;border-radius:50%;background:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:700;color:var(--axa);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.18)">✕</button>
         </div>
       </div>
       <div style="background:rgba(255,255,255,.15);border-radius:99px;height:4px;overflow:hidden">
         <div style="height:100%;width:${pct}%;background:var(--success-mid);border-radius:99px;transition:width .3s ease"></div>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.45);text-align:right;margin-top:5px">Appuyez sur ✕ pour sauvegarder et reprendre plus tard</div>
     </div>
 
     <div style="padding:20px var(--sp5);display:flex;flex-direction:column;gap:16px">
       <div>
-        <div style="font-size:11px;font-weight:700;color:${li.hex};text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${risk.label}</div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:${li.hex};text-transform:uppercase;letter-spacing:.5px">${risk.label}</div>
+          <button onclick="pauseDiag()" title="Sauvegarder et quitter" style="display:flex;align-items:center;gap:5px;background:var(--n100);border:1px solid var(--n200);border-radius:99px;padding:4px 10px 4px 8px;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;color:var(--n600);flex-shrink:0;white-space:nowrap">
+            <span style="font-size:13px;line-height:1">✕</span> Sauvegarder &amp; quitter
+          </button>
+        </div>
         <div style="font-size:16px;font-weight:700;color:var(--n900);line-height:1.4">${q.text}</div>
       </div>
 
