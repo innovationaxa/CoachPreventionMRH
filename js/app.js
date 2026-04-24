@@ -25,8 +25,8 @@ window._ST = {
 };
 
 function switchHubTab(tab) {
-  if (tab === 'actions' && !window._ST.diagCompleted) {
-    showToast('🔒 Terminez d\'abord votre diagnostic', 'warn');
+  if (tab === 'actions') {
+    goTo(6);
     return;
   }
   window._ST.hubTab = tab;
@@ -318,7 +318,7 @@ function completeAction(id) {
     setTimeout(() => showBadgeUnlock(newBadges[0]), 400);
   } else {
     showToast('✓ Action réalisée !', 'success');
-    setTimeout(() => { window._ST.hubTab = 'actions'; goTo(1); }, 600);
+    setTimeout(() => { goTo(6); }, 600);
   }
 }
 
