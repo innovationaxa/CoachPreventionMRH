@@ -4697,11 +4697,18 @@ function screenRisques() {
    S4 — V3-04 DEEP DIVE RISQUE
 ════════════════════════════════════════════ */
 function screenDeepDive() {
-  const p      = getProfile(window._ST.profileId);
-  const riskId = window._ST.selectedRisk || p.mainRisks[0];
-  const r      = RISKS[riskId] || {};
-  const levels = getRiskLevels(p, window._ST.diagCompleted ? window._ST.diagAnswers : {});
-  const lv     = levels[riskId] || {};
+  const p        = getProfile(window._ST.profileId);
+  const riskId   = window._ST.selectedRisk || p.mainRisks[0];
+  const r        = RISKS[riskId] || {};
+  const diagDone = !!window._ST.diagCompleted;
+  const levels   = getRiskLevels(p, diagDone ? window._ST.diagAnswers : {});
+  const lv       = levels[riskId] || {};
+  const ctaBg    = diagDone ? 'var(--axa)' : 'var(--n200)';
+  const ctaColor = diagDone ? 'white' : 'var(--n400)';
+  const ctaCursor= diagDone ? 'pointer' : 'not-allowed';
+  const ctaIcon  = diagDone ? sv(IC.bolt,'width:15px;height:15px;fill:white') : '<span style="font-size:14px">🔒</span>';
+  const ctaLabel = diagDone ? 'Voir mes actions pour ce risque' : 'Diagnostic requis pour accéder aux actions';
+  const ctaClick = diagDone ? "openCategoryModal('" + riskId + "')" : "showToast('🔒 Terminez d\\'abord votre diagnostic','warn')";
   const li     = lv.levelInfo || getRiskLevelInfo('modere');
   const cov    = (p.coverage||{})[riskId] || {};
   const lc     = p.localContext || {};
@@ -4777,8 +4784,8 @@ function screenDeepDive() {
           </div>
         </div>` : ''}
 
-      <button onclick="openCategoryModal('${riskId}')" style="width:100%;padding:13px;background:var(--axa);color:white;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${sv(IC.bolt,'width:15px;height:15px;fill:white')} Voir mes actions pour ce risque
+      <button onclick="${ctaClick}" style="width:100%;padding:13px;background:${ctaBg};color:${ctaColor};border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--font);cursor:${ctaCursor};display:flex;align-items:center;justify-content:center;gap:6px">
+        ${ctaIcon} ${ctaLabel}
       </button>
     </div>
     <div style="height:24px"></div>`;
