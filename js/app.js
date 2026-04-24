@@ -592,16 +592,7 @@ function launchFromNotif() {
       transform:scale(.7);opacity:0;
       transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
     ">
-      <svg viewBox="0 0 220 100" width="176" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Left A -->
-        <path d="M6 90L36 10h16L66 90H50L44 68H24L18 90H6zm22-30h18l-9-28-9 28z" fill="white"/>
-        <!-- X -->
-        <path d="M72 10h18l14 26 14-26h18L112 52l26 38H120l-16-26-16 26H70L96 52 72 10z" fill="white"/>
-        <!-- Right A (left leg only — right leg is the red slash) -->
-        <path d="M142 90l30-80h16l-16 44h-14l-6 16h14l-8 20h-16zm22-30h18l-9-28-9 28z" fill="white"/>
-        <!-- Red slash (top-right to mid-right-A, cutting through) -->
-        <line x1="196" y1="4" x2="214" y2="90" stroke="#FF1721" stroke-width="11" stroke-linecap="round"/>
-      </svg>
+      <img src="assets/axa_logo_openw_rgb.svg" width="160" height="160" style="display:block"/>
     </div>
     <div id="splash-label" style="
       margin-top:20px;
