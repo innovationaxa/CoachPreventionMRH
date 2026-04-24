@@ -340,30 +340,34 @@ function showBadgeUnlock(badge) {
   const tierBg     = { bronze: '#FDF3E3', silver: '#F3F4F6', gold: '#FFFBEB' };
   const color = tierColors[badge.tier] || '#00008F';
   const bg    = tierBg[badge.tier]    || '#F8F8F8';
-  const el = document.createElement('div');
-  el.id = 'badge-unlock-overlay';
-  el.style.cssText = `position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:24px`;
-  el.innerHTML = `
-    <div style="background:white;border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.3);width:100%;animation:badgePop .35s cubic-bezier(0.34,1.56,0.64,1)">
-      <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:${color};margin-bottom:16px">🎉 Félicitations !</div>
-      <div style="background:${bg};border:2px solid ${color};width:80px;height:80px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px">
-        ${badge.icon}
-      </div>
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:6px">Badge débloqué !</div>
-      <div style="font-size:17px;font-weight:700;color:#111118;margin-bottom:8px">${badge.label}</div>
-      <div style="font-size:12px;color:#6B6B85;line-height:1.55;margin-bottom:22px">${badge.desc}</div>
-      <button onclick="document.getElementById('badge-unlock-overlay').remove();goTo(1);"
-              style="width:100%;padding:13px;background:${color};color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
-        Super ! 🎊
-      </button>
-    </div>`;
-  if (!document.getElementById('badge-anim-style')) {
-    const s = document.createElement('style');
-    s.id = 'badge-anim-style';
-    s.textContent = '@keyframes badgePop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}';
-    document.head.appendChild(s);
-  }
-  device.appendChild(el);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'badge-unlock-overlay';
+  overlay.style.cssText = 'position:absolute;inset:0;z-index:600;background:rgba(0,0,0,.45);display:flex;align-items:flex-end';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'width:100%;background:white;border-radius:16px 16px 0 0;padding:20px 20px 28px;transform:translateY(100%);transition:transform .38s cubic-bezier(.22,.61,.36,1);text-align:center';
+  sheet.innerHTML = `
+    <div style="width:36px;height:4px;border-radius:99px;background:var(--n200);margin:0 auto 18px"></div>
+    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:${color};margin-bottom:16px">🎉 Félicitations !</div>
+    <div style="background:${bg};border:2px solid ${color};width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 16px">
+      ${badge.icon}
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:${color};margin-bottom:6px">Badge débloqué !</div>
+    <div style="font-size:17px;font-weight:700;color:#111118;margin-bottom:8px">${badge.label}</div>
+    <div style="font-size:12px;color:#6B6B85;line-height:1.55;margin-bottom:22px">${badge.desc}</div>
+    <button id="badge-unlock-btn" style="width:100%;padding:13px;background:${color};color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer">
+      Super ! 🎊
+    </button>`;
+
+  overlay.appendChild(sheet);
+  device.appendChild(overlay);
+
+  requestAnimationFrame(() => requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; }));
+
+  function closeBadgeSheet() { sheet.style.transform = 'translateY(100%)'; setTimeout(() => overlay.remove(), 380); }
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeBadgeSheet(); });
+  sheet.querySelector('#badge-unlock-btn').addEventListener('click', closeBadgeSheet);
 }
 
 function activateReward(rewardId) {
