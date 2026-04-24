@@ -596,7 +596,7 @@ function launchFromNotif() {
       transform:scale(.7);opacity:0;
       transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
     ">
-      <img src="assets/axa_logo_openw_rgb.svg" width="160" height="160" style="display:block"/>
+      <img src="assets/axa_logo_openw_rgb.svg" width="128" height="128" style="display:block"/>
     </div>
     <div id="splash-label" style="
       margin-top:20px;
