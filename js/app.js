@@ -106,7 +106,7 @@ function updateTabBar(idx) {
     bar.style.display = 'none';
     device && device.classList.remove('has-tabbar');
     /* S10 lockscreen has its own status bar — hide the device wrapper one */
-    if (sbar) sbar.style.visibility = idx === 10 ? 'hidden' : 'visible';
+    if (sbar) sbar.style.display = idx === 10 ? 'none' : '';
     return;
   }
   bar.style.display = 'flex';

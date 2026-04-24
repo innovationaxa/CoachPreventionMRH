@@ -76,9 +76,6 @@ function screenSelection() {
   return `
     <div style="background:var(--axa);padding:28px var(--sp5) 24px;position:relative;overflow:hidden">
       <div style="position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
-      <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-        ${sv(IC.shield,'width:22px;height:22px;fill:white')}
-      </div>
       <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Avant de démarrer</div>
       <div style="font-size:21px;font-weight:700;color:white;line-height:1.2;margin-bottom:6px">Choisissez un profil qui vous ressemble</div>
       <p style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.5">Chaque profil correspond à une situation différente — logement, localisation, exposition aux risques.</p>
@@ -1805,11 +1802,12 @@ function screenLockNotif() {
   ).join('');
 
   return `
-    <div style="background:linear-gradient(160deg,#1a2a50 0%,#0e1a36 55%,#0a1222 100%);min-height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;user-select:none">
+    <div style="background:radial-gradient(ellipse at 60% 0%,#3b2d6e 0%,#1a1040 35%,#0d0820 65%,#080410 100%);min-height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;user-select:none">
 
-      <!-- Décoration fond -->
-      <div style="position:absolute;top:10%;left:-25%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(100,149,237,.10) 0%,transparent 70%);pointer-events:none"></div>
-      <div style="position:absolute;bottom:15%;right:-20%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.07) 0%,transparent 70%);pointer-events:none"></div>
+      <!-- Décoration fond style iOS wallpaper -->
+      <div style="position:absolute;top:-10%;left:-15%;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(120,80,220,.28) 0%,transparent 65%);pointer-events:none"></div>
+      <div style="position:absolute;top:5%;right:-10%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(60,120,255,.18) 0%,transparent 65%);pointer-events:none"></div>
+      <div style="position:absolute;bottom:20%;left:10%;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(80,40,180,.15) 0%,transparent 65%);pointer-events:none"></div>
 
       <!-- Status bar iOS -->
       <div style="padding:14px 20px 0;display:flex;justify-content:space-between;align-items:center">
@@ -1841,7 +1839,7 @@ function screenLockNotif() {
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
             <img src="assets/axa_logo_solid_rgb.svg" width="32" height="32" style="border-radius:8px;display:block;flex-shrink:0"/>
             <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:700;color:white;font-family:var(--font)">AXA Coach Prévention</div>
+              <div style="font-size:12px;font-weight:700;color:white;font-family:var(--font)">Mon AXA</div>
               <div style="font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font)">Maintenant</div>
             </div>
             <div style="width:7px;height:7px;border-radius:50%;background:#3b82f6;flex-shrink:0"></div>
