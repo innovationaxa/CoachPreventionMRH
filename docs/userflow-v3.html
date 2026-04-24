@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Flow — Coach Prévention MRH V3</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif; background: #F1F5F9; min-height: 100vh; }
+
+  /* ── Header ── */
+  .page-header {
+    background: #00008F;
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .page-header h1 { font-size: 17px; font-weight: 700; color: white; }
+  .page-header p  { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 2px; }
+  .header-badge   { background: rgba(255,255,255,.15); color: white; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 99px; }
+
+  /* ── Canvas ── */
+  .canvas-scroll { overflow: auto; padding: 32px; }
+  .canvas { position: relative; width: 1560px; height: 820px; }
+
+  /* ── Node base ── */
+  .node {
+    position: absolute;
+    border-radius: 10px;
+    padding: 11px 13px;
+    line-height: 1.35;
+    user-select: none;
+  }
+  .node .n-tag  { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; opacity: .65; margin-bottom: 3px; }
+  .node .n-name { font-size: 13px; font-weight: 700; }
+  .node .n-desc { font-size: 10.5px; opacity: .72; margin-top: 3px; line-height: 1.4; }
+  .node-screen  { border: 2px solid; }
+  .node-modal   { border: 2px dashed; }
+
+  /* Node colors */
+  .c-entry  { background: #EDE9FE; border-color: #7C3AED; color: #3B0764; }
+  .c-lock   { background: #1E1B4B; border-color: #6366F1; color: white; }
+  .c-hub    { background: #DBEAFE; border-color: #00008F; color: #1E3A8A; }
+  .c-diag   { background: #FFF7ED; border-color: #EA580C; color: #7C2D12; }
+  .c-risk   { background: #F0FDF4; border-color: #16A34A; color: #14532D; }
+  .c-action { background: #EFF6FF; border-color: #2563EB; color: #1E40AF; }
+  .c-reward { background: #FFFBEB; border-color: #D97706; color: #78350F; }
+  .c-modal  { background: #F8FAFC; border-color: #94A3B8; color: #475569; }
+
+  /* ── Zone labels ── */
+  .zone-label {
+    position: absolute;
+    font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    color: #94A3B8; padding: 0 4px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    padding: 16px 32px;
+    background: white;
+    border-top: 1px solid #E2E8F0;
+    font-size: 11px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; color: #475569; }
+  .legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-line { display: flex; align-items: center; gap: 7px; color: #475569; }
+  .legend-line svg { flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <h1>User Flow — Coach Prévention MRH</h1>
+    <p>Prototype V3 · Avril 2026 · 11 écrans + 7 modales</p>
+  </div>
+  <span class="header-badge">AXA Innovation</span>
+</div>
+
+<div class="canvas-scroll">
+<div class="canvas" id="canvas">
+
+  <!-- SVG arrows layer (drawn by JS) -->
+  <svg id="arrows" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"></svg>
+
+  <!-- ── ZONE LABELS ── -->
+  <div class="zone-label" style="left:20px;top:10px">Entrée</div>
+  <div class="zone-label" style="left:260px;top:10px">Hub central</div>
+  <div class="zone-label" style="left:540px;top:10px">Parcours Diagnostic</div>
+  <div class="zone-label" style="left:810px;top:10px">Parcours Risques &amp; Contenu</div>
+  <div class="zone-label" style="left:1070px;top:10px">Actions &amp; Détails</div>
+  <div class="zone-label" style="left:1330px;top:10px">Modales &amp; Feedback</div>
+
+  <!-- ══ NODES ══
+       Each node: id, position, size set via data-* and JS, or just inline style
+  -->
+
+  <!-- S0 — Profile selection -->
+  <div class="node node-screen c-entry" id="S0"
+       style="left:20px;top:40px;width:165px;height:78px">
+    <div class="n-tag">S0</div>
+    <div class="n-name">Sélection profil</div>
+    <div class="n-desc">5 personas · Identification testeur</div>
+  </div>
+
+  <!-- S10 — Lockscreen -->
+  <div class="node node-screen c-lock" id="S10"
+       style="left:20px;top:195px;width:165px;height:88px">
+    <div class="n-tag">S10</div>
+    <div class="n-name">Push Notification</div>
+    <div class="n-desc">Lockscreen · Mon AXA · Wallpaper iPhone · Animation slide-down</div>
+  </div>
+
+  <!-- S1 — Hub -->
+  <div class="node node-screen c-hub" id="S1"
+       style="left:255px;top:355px;width:215px;height:95px">
+    <div class="n-tag">S1 — Écran principal</div>
+    <div class="n-name">Hub Prévention</div>
+    <div class="n-desc">Onglets Risques / Actions · Barre progression · Score · Trophée 🏆</div>
+  </div>
+
+  <!-- S2 — Diagnostic -->
+  <div class="node node-screen c-diag" id="S2"
+       style="left:540px;top:125px;width:165px;height:90px">
+    <div class="n-tag">S2</div>
+    <div class="n-name">Diagnostic</div>
+    <div class="n-desc">8–25 questions · Adaptatif · Pause/reprise · Auto-avance 320ms</div>
+  </div>
+
+  <!-- S3 — Vue enrichie -->
+  <div class="node node-screen c-diag" id="S3"
+       style="left:540px;top:290px;width:165px;height:90px">
+    <div class="n-tag">S3</div>
+    <div class="n-name">Vue enrichie</div>
+    <div class="n-desc">Résultats · Niveaux ajustés ↓↑ · Animation chargement 4 phases</div>
+  </div>
+
+  <!-- DiagModal -->
+  <div class="node node-modal c-modal" id="DiagModal"
+       style="left:540px;top:490px;width:165px;height:72px">
+    <div class="n-tag">Modale</div>
+    <div class="n-name">Modale diagnostic</div>
+    <div class="n-desc">Déclenchée +2.5s · 1ère visite Hub</div>
+  </div>
+
+  <!-- Défi modal -->
+  <div class="node node-modal c-modal" id="DefiModal"
+       style="left:540px;top:617px;width:165px;height:72px">
+    <div class="n-tag">Modale</div>
+    <div class="n-name">Défi du moment</div>
+    <div class="n-desc">Countdown · Lot · Étapes · Preuve</div>
+  </div>
+
+  <!-- Quiz modal -->
+  <div class="node node-modal c-modal" id="QuizModal"
+       style="left:810px;top:30px;width:165px;height:72px">
+    <div class="n-tag">Modale</div>
+    <div class="n-name">Quiz de la semaine</div>
+    <div class="n-desc">5 questions · Score · Explication</div>
+  </div>
+
+  <!-- S4 — Deep Dive -->
+  <div class="node node-screen c-risk" id="S4"
+       style="left:810px;top:165px;width:165px;height:90px">
+    <div class="n-tag">S4</div>
+    <div class="n-name">Deep Dive risque</div>
+    <div class="n-desc">Niveau · Couverture contrat · Stats · CTA verrouillé si no diag</div>
+  </div>
+
+  <!-- S8 — Rewards -->
+  <div class="node node-screen c-reward" id="S8"
+       style="left:810px;top:450px;width:165px;height:90px">
+    <div class="n-tag">S8</div>
+    <div class="n-name">Récompenses</div>
+    <div class="n-desc">Mes badges · Codes immédiats · Surprises renouvellement</div>
+  </div>
+
+  <!-- AllBadges modal -->
+  <div class="node node-modal c-modal" id="AllBadges"
+       style="left:810px;top:617px;width:165px;height:72px">
+    <div class="n-tag">Modale</div>
+    <div class="n-name">Tous les badges</div>
+    <div class="n-desc">Grid 4 colonnes · Cercles · Lock/unlock</div>
+  </div>
+
+  <!-- S6 — Category modal -->
+  <div class="node node-screen c-action" id="S6"
+       style="left:1070px;top:165px;width:165px;height:90px">
+    <div class="n-tag">S6 — Bottom sheet</div>
+    <div class="n-name">Catégorie actions</div>
+    <div class="n-desc">Filtrée par risque · Groupée effort · ⚡ Geste simple</div>
+  </div>
+
+  <!-- S7 — Action detail -->
+  <div class="node node-screen c-action" id="S7"
+       style="left:1070px;top:355px;width:165px;height:90px">
+    <div class="n-tag">S7</div>
+    <div class="n-name">Détail action</div>
+    <div class="n-desc">Étapes · Tuto vidéo · Preuve upload · Marquer réalisée</div>
+  </div>
+
+  <!-- S7 Défi variant -->
+  <div class="node node-screen c-reward" id="S7Defi"
+       style="left:1070px;top:540px;width:165px;height:90px">
+    <div class="n-tag">S7 ★ Variante défi</div>
+    <div class="n-name">Détail défi</div>
+    <div class="n-desc">Header doré · Lot · Countdown · Relever le défi</div>
+  </div>
+
+  <!-- Badge unlock modal -->
+  <div class="node node-modal c-modal" id="BadgeModal"
+       style="left:1330px;top:240px;width:165px;height:90px">
+    <div class="n-tag">Modale · Bottom sheet</div>
+    <div class="n-name">🎉 Badge débloqué !</div>
+    <div class="n-desc">Slide-up spring · Icône cercle · Coloré par tier bronze/or</div>
+  </div>
+
+  <!-- S9 — Historique -->
+  <div class="node node-screen c-modal" id="S9"
+       style="left:1330px;top:450px;width:165px;height:75px">
+    <div class="n-tag">S9</div>
+    <div class="n-name">Historique</div>
+    <div class="n-desc">Bilan export · Tableau comparatif</div>
+  </div>
+
+</div><!-- /canvas -->
+</div><!-- /canvas-scroll -->
+
+<!-- Legend -->
+<div class="legend">
+  <div style="font-size:11px;font-weight:700;color:#374151;margin-right:8px">Légende :</div>
+
+  <div class="legend-item"><div class="legend-dot" style="background:#EDE9FE;border:2px solid #7C3AED"></div>Onboarding</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1E1B4B;border:2px solid #6366F1"></div>Lockscreen</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#DBEAFE;border:2px solid #00008F"></div>Hub (écran principal)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFF7ED;border:2px solid #EA580C"></div>Diagnostic</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F0FDF4;border:2px solid #16A34A"></div>Risques</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#EFF6FF;border:2px solid #2563EB"></div>Actions</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFFBEB;border:2px solid #D97706"></div>Récompenses</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F8FAFC;border:2px dashed #94A3B8"></div>Modale / overlay</div>
+
+  <div style="width:1px;background:#E2E8F0;margin:0 4px"></div>
+
+  <div class="legend-line">
+    <svg width="40" height="12"><line x1="0" y1="6" x2="34" y2="6" stroke="#00008F" stroke-width="2"/><polygon points="30,3 40,6 30,9" fill="#00008F"/></svg>
+    Flux principal
+  </div>
+  <div class="legend-line">
+    <svg width="40" height="12"><line x1="0" y1="6" x2="34" y2="6" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4,3"/><polygon points="30,3 40,6 30,9" fill="#94A3B8"/></svg>
+    Flux secondaire / conditionnel
+  </div>
+  <div class="legend-line">
+    <svg width="40" height="12"><line x1="0" y1="6" x2="34" y2="6" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4,3"/><polygon points="30,3 40,6 30,9" fill="#EF4444"/></svg>
+    Retour arrière
+  </div>
+</div>
+
+<script>
+/* ── Arrow definitions ──
+   Each edge: { from, to, label, type, fromSide, toSide, bend }
+   fromSide / toSide: 'right'|'left'|'bottom'|'top'
+   bend: curve intensity (positive = curve up/right, negative = down/left)
+*/
+const edges = [
+  // Onboarding
+  { from:'S0',        to:'S10',       label:'Démarrer',            type:'primary',   fromSide:'bottom', toSide:'top'   },
+  { from:'S10',       to:'S1',        label:'Tap → Splash → Hub',  type:'primary',   fromSide:'right',  toSide:'left', bend:-60 },
+
+  // Hub ↔ Diagnostic
+  { from:'S1',        to:'S2',        label:'Démarrer diagnostic', type:'primary',   fromSide:'top',    toSide:'left', bend:80 },
+  { from:'S1',        to:'DiagModal', label:'+2.5s · 1ère visite', type:'secondary', fromSide:'right',  toSide:'left', bend:30 },
+  { from:'DiagModal', to:'S2',        label:'Démarrer',            type:'secondary', fromSide:'top',    toSide:'bottom' },
+  { from:'S2',        to:'S3',        label:'Dernière question',   type:'primary',   fromSide:'bottom', toSide:'top'   },
+  { from:'S3',        to:'S1',        label:'Retour Hub',          type:'back',      fromSide:'left',   toSide:'top',  bend:-80 },
+  { from:'S2',        to:'S1',        label:'Sauvegarder & quitter',type:'back',     fromSide:'left',   toSide:'top',  bend:-120 },
+
+  // Hub → Quiz
+  { from:'S1',        to:'QuizModal', label:'Quiz de la semaine',  type:'secondary', fromSide:'top',    toSide:'left', bend:120 },
+
+  // Hub → Risk
+  { from:'S1',        to:'S4',        label:'Tap carte risque',    type:'primary',   fromSide:'right',  toSide:'left', bend:-30 },
+  { from:'S4',        to:'S6',        label:'Voir mes actions',    type:'primary',   fromSide:'right',  toSide:'left' },
+  { from:'S6',        to:'S7',        label:'Tap action',          type:'primary',   fromSide:'bottom', toSide:'top'  },
+  { from:'S7',        to:'S1',        label:'Retour',              type:'back',      fromSide:'bottom', toSide:'right', bend:120 },
+  { from:'S7',        to:'BadgeModal',label:'Action complétée',    type:'secondary', fromSide:'right',  toSide:'left' },
+
+  // Hub → Rewards
+  { from:'S1',        to:'S8',        label:'Trophée 🏆',          type:'primary',   fromSide:'right',  toSide:'left', bend:60  },
+  { from:'S8',        to:'AllBadges', label:'Voir tout →',         type:'secondary', fromSide:'bottom', toSide:'top'  },
+
+  // Hub → Défi
+  { from:'S1',        to:'DefiModal', label:'Défi du moment',      type:'secondary', fromSide:'bottom', toSide:'left', bend:40 },
+  { from:'DefiModal', to:'S7Defi',    label:'Commencer',           type:'secondary', fromSide:'right',  toSide:'left' },
+];
+
+/* ── Helpers ── */
+function getNodeRect(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return {
+    x: parseInt(el.style.left),
+    y: parseInt(el.style.top),
+    w: parseInt(el.style.width),
+    h: parseInt(el.style.height)
+  };
+}
+
+function getEdgePoint(rect, side) {
+  switch(side) {
+    case 'right':  return [rect.x + rect.w, rect.y + rect.h / 2];
+    case 'left':   return [rect.x,          rect.y + rect.h / 2];
+    case 'top':    return [rect.x + rect.w / 2, rect.y];
+    case 'bottom': return [rect.x + rect.w / 2, rect.y + rect.h];
+  }
+}
+
+function cubicBezier(x1,y1, cx1,cy1, cx2,cy2, x2,y2) {
+  return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+}
+
+const colors = { primary: '#00008F', secondary: '#94A3B8', back: '#EF4444' };
+const widths  = { primary: 2,        secondary: 1.5,       back: 1.5 };
+const dashes  = { primary: 'none',   secondary: '5,3',     back: '5,3' };
+
+function drawEdges() {
+  const svg = document.getElementById('arrows');
+  svg.innerHTML = '';
+
+  // Arrowhead defs
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  ['primary','secondary','back'].forEach(t => {
+    const m = document.createElementNS('http://www.w3.org/2000/svg','marker');
+    m.setAttribute('id', 'arr-' + t);
+    m.setAttribute('markerWidth','8'); m.setAttribute('markerHeight','6');
+    m.setAttribute('refX','7'); m.setAttribute('refY','3');
+    m.setAttribute('orient','auto');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points','0 0, 8 3, 0 6');
+    poly.setAttribute('fill', colors[t]);
+    m.appendChild(poly); defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  edges.forEach(edge => {
+    const fromR = getNodeRect(edge.from);
+    const toR   = getNodeRect(edge.to);
+    if (!fromR || !toR) return;
+
+    const [x1, y1] = getEdgePoint(fromR, edge.fromSide || 'right');
+    const [x2, y2] = getEdgePoint(toR,   edge.toSide   || 'left');
+    const bend = edge.bend || 0;
+
+    // Control points: smart based on direction
+    let cx1, cy1, cx2, cy2;
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+
+    if ((edge.fromSide === 'right' || edge.fromSide === 'left') &&
+        (edge.toSide   === 'right' || edge.toSide   === 'left')) {
+      // Horizontal connection
+      const offset = Math.max(60, dx * 0.4);
+      cx1 = x1 + (edge.fromSide === 'right' ? offset : -offset) + bend;
+      cy1 = y1;
+      cx2 = x2 + (edge.toSide   === 'left'  ? -offset : offset) + bend;
+      cy2 = y2;
+    } else if ((edge.fromSide === 'top' || edge.fromSide === 'bottom') &&
+               (edge.toSide   === 'top' || edge.toSide   === 'bottom')) {
+      // Vertical connection
+      const offset = Math.max(50, dy * 0.4);
+      cx1 = x1 + bend;
+      cy1 = y1 + (edge.fromSide === 'bottom' ? offset : -offset);
+      cx2 = x2 + bend;
+      cy2 = y2 + (edge.toSide   === 'top'    ? -offset : offset);
+    } else {
+      // Mixed direction
+      cx1 = x1 + (edge.fromSide === 'right' ? 60 : edge.fromSide === 'left' ? -60 : bend);
+      cy1 = y1 + (edge.fromSide === 'bottom' ? 60 : edge.fromSide === 'top' ? -60 : 0);
+      cx2 = x2 + (edge.toSide   === 'left'  ? -60 : edge.toSide === 'right' ? 60 : bend);
+      cy2 = y2 + (edge.toSide   === 'top'   ? -60 : edge.toSide === 'bottom' ? 60 : 0);
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', cubicBezier(x1,y1, cx1,cy1, cx2,cy2, x2,y2));
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', colors[edge.type]);
+    path.setAttribute('stroke-width', widths[edge.type]);
+    if (dashes[edge.type] !== 'none')
+      path.setAttribute('stroke-dasharray', dashes[edge.type]);
+    path.setAttribute('marker-end', 'url(#arr-' + edge.type + ')');
+    svg.appendChild(path);
+
+    // Label at midpoint
+    if (edge.label) {
+      // Compute t=0.5 on bezier
+      const t = 0.5;
+      const lx = Math.pow(1-t,3)*x1 + 3*Math.pow(1-t,2)*t*cx1 + 3*(1-t)*t*t*cx2 + Math.pow(t,3)*x2;
+      const ly = Math.pow(1-t,3)*y1 + 3*Math.pow(1-t,2)*t*cy1 + 3*(1-t)*t*t*cy2 + Math.pow(t,3)*y2;
+
+      // Label background
+      const rect2 = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      const tw = edge.label.length * 5.5 + 10;
+      rect2.setAttribute('x', lx - tw/2); rect2.setAttribute('y', ly - 9);
+      rect2.setAttribute('width', tw); rect2.setAttribute('height', 16);
+      rect2.setAttribute('rx','4'); rect2.setAttribute('fill','white');
+      rect2.setAttribute('stroke', colors[edge.type]); rect2.setAttribute('stroke-width','0.8');
+      svg.appendChild(rect2);
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x', lx); text.setAttribute('y', ly + 3);
+      text.setAttribute('text-anchor','middle');
+      text.setAttribute('font-size','9');
+      text.setAttribute('font-family','-apple-system,BlinkMacSystemFont,sans-serif');
+      text.setAttribute('font-weight','600');
+      text.setAttribute('fill', colors[edge.type]);
+      text.textContent = edge.label;
+      svg.appendChild(text);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', drawEdges);
+window.addEventListener('resize', drawEdges);
+</script>
+</body>
+</html>
