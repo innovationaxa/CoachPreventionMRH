@@ -1851,7 +1851,12 @@ function screenLockNotif() {
 
           <!-- En-tête notification -->
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:#00008F;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🛡️</div>
+            <div style="width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#00008F">
+              <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+                <text x="2" y="24" font-family="Arial Black,Arial,sans-serif" font-size="20" font-weight="900" fill="white" font-style="italic" letter-spacing="-1">AXA</text>
+                <line x1="24" y1="1" x2="32" y2="22" stroke="#FF1721" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:700;color:white;font-family:var(--font)">AXA Coach Prévention</div>
               <div style="font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font)">Maintenant</div>

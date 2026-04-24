@@ -5801,7 +5801,12 @@ function screenLockNotif() {
 
           <!-- En-tête notification -->
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
-            <div style="width:32px;height:32px;border-radius:8px;background:#00008F;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🛡️</div>
+            <div style="width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#00008F">
+              <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+                <text x="2" y="24" font-family="Arial Black,Arial,sans-serif" font-size="20" font-weight="900" fill="white" font-style="italic" letter-spacing="-1">AXA</text>
+                <line x1="24" y1="1" x2="32" y2="22" stroke="#FF1721" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:12px;font-weight:700;color:white;font-family:var(--font)">AXA Coach Prévention</div>
               <div style="font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font)">Maintenant</div>
@@ -6431,15 +6436,19 @@ function launchFromNotif() {
 
   splash.innerHTML = `
     <div id="splash-logo" style="
-      width:100px;height:100px;
-      background:white;border-radius:16px;
       display:flex;align-items:center;justify-content:center;
       transform:scale(.7);opacity:0;
       transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s ease;
     ">
-      <svg viewBox="0 0 120 80" width="68" height="45" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M38 64L58 16h8l20 48h-10l-4-10H52l-4 10H38zm17-18h12l-6-16-6 16z" fill="#00008F"/>
-        <line x1="78" y1="16" x2="100" y2="64" stroke="#FF1721" stroke-width="5" stroke-linecap="round"/>
+      <svg viewBox="0 0 220 100" width="176" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Left A -->
+        <path d="M6 90L36 10h16L66 90H50L44 68H24L18 90H6zm22-30h18l-9-28-9 28z" fill="white"/>
+        <!-- X -->
+        <path d="M72 10h18l14 26 14-26h18L112 52l26 38H120l-16-26-16 26H70L96 52 72 10z" fill="white"/>
+        <!-- Right A (left leg only — right leg is the red slash) -->
+        <path d="M142 90l30-80h16l-16 44h-14l-6 16h14l-8 20h-16zm22-30h18l-9-28-9 28z" fill="white"/>
+        <!-- Red slash (top-right to mid-right-A, cutting through) -->
+        <line x1="196" y1="4" x2="214" y2="90" stroke="#FF1721" stroke-width="11" stroke-linecap="round"/>
       </svg>
     </div>
     <div id="splash-label" style="
