@@ -4029,17 +4029,17 @@ function screenSelection() {
       <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
         ${sv(IC.shield,'width:22px;height:22px;fill:white')}
       </div>
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Prototype V3</div>
-      <div style="font-size:21px;font-weight:700;color:white;line-height:1.2;margin-bottom:6px">Coach Prévention MRH</div>
-      <p style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.5">Sélectionnez un profil pour démarrer la démonstration V3</p>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Avant de démarrer</div>
+      <div style="font-size:21px;font-weight:700;color:white;line-height:1.2;margin-bottom:6px">Choisissez un profil qui vous ressemble</div>
+      <p style="font-size:12px;color:rgba(255,255,255,.65);line-height:1.5">Chaque profil correspond à une situation différente — logement, localisation, exposition aux risques.</p>
     </div>
     <div style="padding:20px var(--sp5) 0">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--n400);margin-bottom:12px">Profil de démonstration</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--n400);margin-bottom:12px">Sélectionnez un profil</div>
       <div style="display:flex;flex-direction:column;gap:10px">${cards}</div>
     </div>
     <div style="padding:20px var(--sp5)">
       <button style="width:100%;padding:14px;background:${cur?'var(--axa)':'var(--n200)'};color:${cur?'white':'var(--n400)'};border:none;border-radius:var(--r-md);font-size:15px;font-weight:600;font-family:var(--font);cursor:${cur?'pointer':'not-allowed'};display:flex;align-items:center;justify-content:center;gap:8px" onclick="startFromSelection()" ${cur?'':'disabled'}>
-        Commencer le parcours
+        Démarrer
         ${sv(IC.arrow,'width:18px;height:18px;fill:currentColor')}
       </button>
     </div>
